@@ -1,5 +1,7 @@
 package com.emailtohl.hjk.crm.controller;
 
+import java.util.Set;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.emailtohl.hjk.crm.entities.GroupId;
 import com.emailtohl.hjk.crm.entities.User;
 import com.emailtohl.hjk.crm.user.UserService;
 import com.github.emailtohl.lib.jpa.BaseEntity;
@@ -30,6 +33,15 @@ import com.github.emailtohl.lib.jpa.Paging;
 public class UserCtl {
 	@Autowired
 	private UserService userService;
+	/**
+	 * 用户名是否存在
+	 * @param name
+	 * @return
+	 */
+	@GetMapping("exist/{name}")
+	public boolean exist(@PathVariable("name") String name) {
+		return userService.exist(name);
+	}
 
 	/**
 	 * 创建用户信息
@@ -99,6 +111,26 @@ public class UserCtl {
 	@PostMapping("approve")
 	public void enable(@RequestBody Form form) {
 		userService.enable(form.id, form.enabled);
+	}
+
+	/**
+	 * 设置用户的组id
+	 * @param id
+	 * @param groupIds
+	 */
+	@PostMapping("{id}/groups")
+	public void setGroupIds(@PathVariable("id") Long id, @RequestBody GroupId[] groupIds) {
+		userService.setGroupIds(id, groupIds);
+	}
+
+	/**
+	 * 获取用户的组id
+	 * @param id
+	 * @return
+	 */
+	@GetMapping("{id}/groups")
+	public Set<GroupId> getGroupIds(@PathVariable("id") Long id) {
+		return userService.getGroupIds(id);
 	}
 
 	public static class Form {

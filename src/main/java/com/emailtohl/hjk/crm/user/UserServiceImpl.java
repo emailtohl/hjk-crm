@@ -1,12 +1,15 @@
 package com.emailtohl.hjk.crm.user;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 
 import org.activiti.engine.IdentityService;
+import org.activiti.engine.identity.Group;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -14,23 +17,31 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.emailtohl.hjk.crm.entities.GroupId;
 import com.emailtohl.hjk.crm.entities.User;
 import com.github.emailtohl.lib.StandardService;
 import com.github.emailtohl.lib.jpa.Paging;
+
 /**
  * 用户信息管理接口的实现
+ * 
  * @author HeLei
  */
 @Service
 @Transactional
-public class UserServiceImpl extends StandardService<User, Long, Long> implements UserService {
+public class UserServiceImpl extends StandardService<User, Long> implements UserService {
 	@Autowired
 	private PasswordEncoder passwordEncoder;
 	@Autowired
 	private UserRepo userRepo;
 	@Autowired
 	private IdentityService identityService;
-	
+
+	@Override
+	public boolean exist(String name) {
+		return userRepo.exist(name);
+	}
+
 	@Override
 	public User create(@Valid User user) {
 		validate(user);
@@ -129,7 +140,22 @@ public class UserServiceImpl extends StandardService<User, Long, Long> implement
 		User user = userRepo.findById(id).get();
 		user.setEnabled(enabled);
 	}
-	
+
+	@Override
+	public void setGroupIds(Long id, GroupId... groupIds) {
+		String name = userRepo.findById(id).get().getName();
+		identityService.createGroupQuery().groupMember(name).list().stream().map(Group::getId)
+				.forEach(groupId -> identityService.deleteMembership(name, groupId));
+		Arrays.stream(groupIds).filter(groupId -> GroupId.ADMIN != groupId).forEach(groupId -> identityService.createMembership(name, groupId.name()));
+	}
+
+	@Override
+	public Set<GroupId> getGroupIds(Long id) {
+		String name = userRepo.findById(id).get().getName();
+		return identityService.createGroupQuery().groupMember(name).list().stream().map(Group::getId)
+				.map(GroupId::valueOf).collect(Collectors.toSet());
+	}
+
 	@Override
 	protected User toTransient(User source) {
 		if (source == null) {
@@ -145,5 +171,5 @@ public class UserServiceImpl extends StandardService<User, Long, Long> implement
 	protected User transientDetail(@Valid User source) {
 		return toTransient(source);
 	}
-	
+
 }

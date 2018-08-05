@@ -23,7 +23,7 @@ import com.github.emailtohl.lib.jpa.Paging;
  */
 @Service
 @Transactional
-public class InvoiceServiceImpl extends StandardService<Invoice, Long, Long> implements InvoiceService {
+public class InvoiceServiceImpl extends StandardService<Invoice, Long> implements InvoiceService {
 	@Autowired
 	private InvoiceRepo invoiceRepo;
 	

@@ -2,9 +2,6 @@ package com.emailtohl.hjk.crm.config;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.Date;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -24,6 +21,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.StreamUtils;
 
+import com.emailtohl.hjk.crm.entities.GroupId;
 import com.emailtohl.hjk.crm.entities.User;
 import com.emailtohl.hjk.crm.entities.UserType;
 
@@ -41,13 +39,72 @@ public class InitConfig {
 	private EntityManagerFactory factory;
 	@Autowired
 	private PasswordEncoder passwordEncoder;
+	
+	@Bean
+	public Group admin() {
+		Group g = identityService.createGroupQuery().groupId(GroupId.ADMIN.name()).singleResult();
+		if (g == null) {
+			g = identityService.newGroup(GroupId.ADMIN.name());
+			g.setName("系统管理员");
+			g.setType(UserType.EMPLOYEE.name());
+			identityService.saveGroup(g);
+		}
+		return g;
+	}
+	
+	@Bean
+	public Group finance() {
+		Group g = identityService.createGroupQuery().groupId(GroupId.FINANCE.name()).singleResult();
+		if (g == null) {
+			g = identityService.newGroup(GroupId.FINANCE.name());
+			g.setName("财务");
+			g.setType(UserType.EMPLOYEE.name());
+			identityService.saveGroup(g);
+		}
+		return g;
+	}
+	
+	@Bean
+	public Group administration() {
+		Group g = identityService.createGroupQuery().groupId(GroupId.ADMINISTRATION.name()).singleResult();
+		if (g == null) {
+			g = identityService.newGroup(GroupId.ADMINISTRATION.name());
+			g.setName("行政");
+			g.setType(UserType.EMPLOYEE.name());
+			identityService.saveGroup(g);
+		}
+		return g;
+	}
+	
+	@Bean
+	public Group market() {
+		Group g = identityService.createGroupQuery().groupId(GroupId.MARKET.name()).singleResult();
+		if (g == null) {
+			g = identityService.newGroup(GroupId.MARKET.name());
+			g.setName("市场");
+			g.setType(UserType.EMPLOYEE.name());
+			identityService.saveGroup(g);
+		}
+		return g;
+	}
+	
+	@Bean
+	public Group customer() {
+		Group g = identityService.createGroupQuery().groupId(GroupId.CUSTOMER.name()).singleResult();
+		if (g == null) {
+			g = identityService.newGroup(GroupId.CUSTOMER.name());
+			g.setName("客户");
+			g.setType(UserType.CUSTOMER.name());
+			identityService.saveGroup(g);
+		}
+		return g;
+	}
 
 	@Bean
 	public User userAdmin() throws IOException {
 		String name = "admin";
 		String password = passwordEncoder.encode("admin");
-		String groupId = "ADMIN";
-		String actuator = "ACTUATOR";
+		String groupId = GroupId.ADMIN.name();
 		User user = null;
 		
 		EntityManager em = factory.createEntityManager();
@@ -83,23 +140,8 @@ public class InitConfig {
 				identityService.setUserPicture(name, p);
 			}
 
-			Group g = identityService.createGroupQuery().groupId(groupId).singleResult();
-			if (g == null) {
-				g = identityService.newGroup(groupId);
-				g.setName("administrator");
-				identityService.saveGroup(g);
-			}
 			identityService.createMembership(name, groupId);
 
-			g = identityService.createGroupQuery().groupId(actuator).singleResult();
-			if (g == null) {
-				g = identityService.newGroup(actuator);
-				g.setName("ACTUATOR");
-				identityService.saveGroup(g);
-			}
-			identityService.createMembership(name, actuator);
-
-			Date.from(LocalDate.now().minusYears(16).atStartOfDay(ZoneId.systemDefault()).toInstant());
 		}
 		em.getTransaction().commit();
 		em.close();

@@ -4,12 +4,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.activiti.engine.IdentityService;
+import org.activiti.engine.identity.Group;
 import org.activiti.engine.identity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -19,7 +19,10 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.access.intercept.FilterSecurityInterceptor;
 import org.springframework.web.cors.CorsUtils;
+
+import com.emailtohl.hjk.crm.filter.UsernameFilter;
 /**
  * 安全层配置
  * @author HeLei
@@ -36,26 +39,23 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Override
 	public void configure(WebSecurity security) {
 		String[] ignoring = {"/favicon.ico", "/resources/**"};
-		// 告诉Spring Security需要忽略的路径
 		security
 		.ignoring().antMatchers(ignoring)
-		// CorsUtils::isCorsRequest开启后，将不对访问做身份校验
-		.requestMatchers(CorsUtils::isPreFlightRequest/* , CorsUtils::isCorsRequest */);
+		.requestMatchers(CorsUtils::isPreFlightRequest);
 	}
 
 	@Override
 	protected void configure(HttpSecurity security) throws Exception {
 		security
 		.authorizeRequests()
-		.antMatchers("/csrf").permitAll()
-		.antMatchers("/afterLogin").authenticated()
-		.antMatchers(HttpMethod.GET).permitAll()
+		.antMatchers("/csrf", "/principal", "/swagger-resources/**", "/api-docs/**").permitAll()
 		.anyRequest().authenticated()
 		.and().formLogin()
 		.and().logout().logoutSuccessUrl("/login")
 		.and().csrf().ignoringAntMatchers("/topic", "/queue", "/socket")
         // allow same origin to frame our site to support iframe SockJS
         .and().headers().frameOptions().sameOrigin()
+        .and().addFilterAfter(new UsernameFilter(), FilterSecurityInterceptor.class);
 		;
 	}
 
@@ -66,10 +66,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			if (user == null) {
 				throw new UsernameNotFoundException(username);
 			}
-			List<String> roles = identityService.createGroupQuery().groupMember(username).list().stream()
-					.map(group -> group.getId()).collect(Collectors.toList());
+			List<String> groupIds = identityService.createGroupQuery().groupMember(username).list().stream()
+					.map(Group::getId).collect(Collectors.toList());
 			return new org.springframework.security.core.userdetails.User(user.getId(), user.getPassword(),
-					AuthorityUtils.createAuthorityList(roles.toArray(new String[roles.size()])));
+					AuthorityUtils.createAuthorityList(groupIds.toArray(new String[groupIds.size()])));
 		}).passwordEncoder(passwordEncoder);
 	}
 	
