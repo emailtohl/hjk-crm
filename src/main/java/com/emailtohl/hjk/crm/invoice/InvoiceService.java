@@ -16,18 +16,16 @@ public interface InvoiceService {
 	/**
 	 * 创建发票资料
 	 * @param invoice
-	 * @param userId
 	 * @return
 	 */
-	Invoice create(Invoice invoice, Long userId);
+	Invoice create(Invoice invoice);
 	
 	/**
 	 * 是否审核通过
 	 * @param id
 	 * @param approve
-	 * @param userId
 	 */
-	void approve(long id, boolean approve, Long userId);
+	void approve(long id, boolean approve);
 
 	/**
 	 * 读取发票资料
@@ -55,15 +53,14 @@ public interface InvoiceService {
 	 * 修改发票资料
 	 * @param id
 	 * @param invoice
-	 * @param userId
 	 * @return
 	 */
-	Invoice update(Long id, Invoice invoice, Long userId);
+	Invoice update(Long id, Invoice invoice);
 	
 	/**
 	 * 删除发票资料
 	 * @param id
-	 * @param userId
 	 */
-	void delete(Long id, Long userId);
+	void delete(Long id);
+	
 }

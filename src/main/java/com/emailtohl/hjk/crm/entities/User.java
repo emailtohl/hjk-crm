@@ -16,6 +16,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Past;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
@@ -45,7 +46,8 @@ public class User extends BaseEntity {
 	private UserType userType;
 	private IdentityType identityType;
 	private String idNumber;
-	private String name;
+	@NotNull
+	private String name;// 唯一识别、不可变、不能为空
 	private String nickname;// 可存储第三方昵称
 	@Pattern(// 校验
 			regexp = ConstantPattern.EMAIL, flags = { Pattern.Flag.CASE_INSENSITIVE })
@@ -56,10 +58,10 @@ public class User extends BaseEntity {
 	@Size(min = 5, message = "{password.length}")
 	@Pattern(regexp = "^[\\x21-\\x7e]*$", message = "{special.symbols}")
 	private transient String password;
-	private Boolean enabled = true;
-	private Boolean accountNonExpired = true;
-	private Boolean credentialsNonExpired = true;
-	private Boolean accountNonLocked = true;
+	private Boolean enabled;
+	private Boolean accountNonExpired;
+	private Boolean credentialsNonExpired;
+	private Boolean accountNonLocked;
 	private Date lastLogin; // 最后一次登录时间
 	private Date lastChangeCredentials; // 最后更改密码时间
 	private String address;
@@ -103,6 +105,7 @@ public class User extends BaseEntity {
 	}
 
 	@Field
+	@Column(nullable = false, unique = true, updatable = false)
 	public String getName() {
 		return name;
 	}
@@ -278,7 +281,7 @@ public class User extends BaseEntity {
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		return result;
 	}
 
@@ -288,13 +291,13 @@ public class User extends BaseEntity {
 			return true;
 		if (!super.equals(obj))
 			return false;
-		if (!(obj instanceof User))
+		if (getClass() != obj.getClass())
 			return false;
 		User other = (User) obj;
-		if (id == null) {
-			if (other.getId() != null)
+		if (name == null) {
+			if (other.getName() != null)
 				return false;
-		} else if (!id.equals(other.getId()))
+		} else if (!name.equals(other.getName()))
 			return false;
 		return true;
 	}

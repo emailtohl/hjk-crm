@@ -6,12 +6,16 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
 
+import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.NoResultException;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 
 import org.activiti.engine.IdentityService;
 import org.activiti.engine.identity.Group;
 import org.activiti.engine.identity.Picture;
-import org.activiti.engine.identity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,6 +23,9 @@ import org.springframework.context.annotation.Import;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.StreamUtils;
+
+import com.emailtohl.hjk.crm.entities.User;
+import com.emailtohl.hjk.crm.entities.UserType;
 
 /**
  * 初始化内置数据
@@ -37,56 +44,67 @@ public class InitConfig {
 
 	@Bean
 	public User userAdmin() throws IOException {
-		String userId = "admin";
-		String password = "admin";
+		String name = "admin";
+		String password = passwordEncoder.encode("admin");
 		String groupId = "ADMIN";
 		String actuator = "ACTUATOR";
-		User u = null;
-		u = identityService.createUserQuery().userId(userId).singleResult();
-		if (u != null) {
-			return u;
+		User user = null;
+		
+		EntityManager em = factory.createEntityManager();
+		em.getTransaction().begin();
+		
+		CriteriaBuilder b = em.getCriteriaBuilder();
+		CriteriaQuery<User> q = b.createQuery(User.class);
+		Root<User> r = q.from(User.class);
+		q = q.select(r).where(b.equal(r.get("name"), name));
+		try {
+			user = em.createQuery(q).getSingleResult();
+		} catch (NoResultException e) {}
+		if (user == null) {
+			user = new User();
+			user.setUserType(UserType.EMPLOYEE);
+			user.setName(name);
+			user.setNickname(name);
+			user.setPassword(password);
+			em.persist(user);
+			
+			org.activiti.engine.identity.User u = identityService.createUserQuery().userId(name).singleResult();
+			u = identityService.newUser(name);
+			u.setPassword(password);
+			u.setEmail(name + "@localhost");
+			u.setFirstName(name);
+			identityService.saveUser(u);
+			identityService.setUserInfo(name, "userType", user.getUserType().toString());
+			
+			ClassPathResource resource = new ClassPathResource("image/icon-head-admin.png");
+			try (InputStream in = resource.getInputStream()) {
+				byte[] bytes = StreamUtils.copyToByteArray(in);
+				Picture p = new Picture(bytes, "application/x-png");
+				identityService.setUserPicture(name, p);
+			}
+
+			Group g = identityService.createGroupQuery().groupId(groupId).singleResult();
+			if (g == null) {
+				g = identityService.newGroup(groupId);
+				g.setName("administrator");
+				identityService.saveGroup(g);
+			}
+			identityService.createMembership(name, groupId);
+
+			g = identityService.createGroupQuery().groupId(actuator).singleResult();
+			if (g == null) {
+				g = identityService.newGroup(actuator);
+				g.setName("ACTUATOR");
+				identityService.saveGroup(g);
+			}
+			identityService.createMembership(name, actuator);
+
+			Date.from(LocalDate.now().minusYears(16).atStartOfDay(ZoneId.systemDefault()).toInstant());
 		}
-		u = identityService.newUser(userId);
-		u.setPassword(hashpw(password));
-		u.setEmail(userId + "@localhost");
-		u.setFirstName(userId);
-		u.setLastName(userId);
-		identityService.saveUser(u);
-
-//		identityService.setUserInfo(userId, UserInfo.key_name, userId);
-//		identityService.setUserInfo(userId, UserInfo.key_cellPhone, "18712345678");
-
-		ClassPathResource r = new ClassPathResource("image/icon-head-admin.png");
-		try (InputStream in = r.getInputStream()) {
-			byte[] bytes = StreamUtils.copyToByteArray(in);
-			Picture p = new Picture(bytes, "application/x-png");
-			identityService.setUserPicture(userId, p);
-		}
-
-		Group g = identityService.createGroupQuery().groupId(groupId).singleResult();
-		if (g == null) {
-			g = identityService.newGroup(groupId);
-			g.setName("administrator");
-			identityService.saveGroup(g);
-		}
-		identityService.createMembership(userId, groupId);
-
-		g = identityService.createGroupQuery().groupId(actuator).singleResult();
-		if (g == null) {
-			g = identityService.newGroup(actuator);
-			g.setName("ACTUATOR");
-			identityService.saveGroup(g);
-		}
-		identityService.createMembership(userId, actuator);
-
-		Date.from(LocalDate.now().minusYears(16).atStartOfDay(ZoneId.systemDefault()).toInstant());
-
-		return u;
+		em.getTransaction().commit();
+		em.close();
+		
+		return user;
 	}
 
-	private String hashpw(String password) {
-		// String salt = BCrypt.gensalt(10, new SecureRandom());
-		// return BCrypt.hashpw(password, salt);
-		return passwordEncoder.encode(password);
-	}
 }
