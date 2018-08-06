@@ -7,8 +7,7 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.search.annotations.Field;
@@ -26,30 +25,42 @@ import com.github.emailtohl.lib.jpa.EnumBridgeCust;
 @Entity
 public class Invoice extends BaseEntity {
 	private static final long serialVersionUID = -2949903806197415296L;
+	// 普票还是专票
 	@NotNull
 	private InvoiceType type;
+	// 公司名
 	@NotNull
 	private String organization;
-	// 财务负责人
-	@NotNull
-	private String principal;
-	@NotNull
-	private String telephone;
+	// 税号
 	@NotNull
 	private String taxNumber;
-	// 收票地址
+	// 公司注册地址
 	@NotNull
-	private String address;
+	private String organizationAddress;
+	// 公司电话
+	@NotNull
+	private String telephone;
 	// 开户行
 	@NotNull
 	private String depositBank;
 	// 开户行账号
 	@NotNull
 	private String account;
+	// 联系人，财务负责人
+	@NotNull
+	private String principal;
+	// 联系人，财务负责人联系电话
+	@NotNull
+	private String principalPhone;
+	// 收票地址，若不填写，则取公司所在地址
+	private String deliveryAddress;
 	// 上传的凭证
 	private Set<Image> credentials = new HashSet<Image>();
-	// 是否审核通过
-	private Boolean approved; 
+	// 备注
+	private String remark;
+	
+	// 与流程相关的信息
+	private Flow flow;
 	
 	@Field(bridge = @FieldBridge(impl = EnumBridgeCust.class))
 	@Column(nullable = false)
@@ -70,24 +81,6 @@ public class Invoice extends BaseEntity {
 	}
 	
 	@Field
-	@Column(nullable = false)
-	public String getPrincipal() {
-		return principal;
-	}
-	public void setPrincipal(String principal) {
-		this.principal = principal;
-	}
-	
-	@Field
-	@Column(nullable = false)
-	public String getTelephone() {
-		return telephone;
-	}
-	public void setTelephone(String telephone) {
-		this.telephone = telephone;
-	}
-	
-	@Field
 	@Column(nullable = false, unique = true)
 	public String getTaxNumber() {
 		return taxNumber;
@@ -98,11 +91,20 @@ public class Invoice extends BaseEntity {
 	
 	@Field
 	@Column(nullable = false)
-	public String getAddress() {
-		return address;
+	public String getOrganizationAddress() {
+		return organizationAddress;
 	}
-	public void setAddress(String address) {
-		this.address = address;
+	public void setOrganizationAddress(String organizationAddress) {
+		this.organizationAddress = organizationAddress;
+	}
+	
+	@Field
+	@Column(nullable = false)
+	public String getTelephone() {
+		return telephone;
+	}
+	public void setTelephone(String telephone) {
+		this.telephone = telephone;
 	}
 	
 	@Field
@@ -123,10 +125,33 @@ public class Invoice extends BaseEntity {
 		this.account = account;
 	}
 	
-	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-	@JoinTable(name = "invoice_credentials",
-		joinColumns = { @JoinColumn(name = "invoice_id", referencedColumnName = "id") },
-		inverseJoinColumns = { @JoinColumn(name = "image_id", referencedColumnName = "id") })
+	@Field
+	@Column(nullable = false)
+	public String getPrincipal() {
+		return principal;
+	}
+	public void setPrincipal(String principal) {
+		this.principal = principal;
+	}
+	
+	@Field
+	@Column(nullable = false)
+	public String getPrincipalPhone() {
+		return principalPhone;
+	}
+	public void setPrincipalPhone(String principalPhone) {
+		this.principalPhone = principalPhone;
+	}
+	
+	@Field
+	@Column(nullable = false)
+	public String getDeliveryAddress() {
+		return deliveryAddress;
+	}
+	public void setDeliveryAddress(String deliveryAddress) {
+		this.deliveryAddress = deliveryAddress;
+	}
+	
 	public Set<Image> getCredentials() {
 		return credentials;
 	}
@@ -134,11 +159,21 @@ public class Invoice extends BaseEntity {
 		this.credentials = credentials;
 	}
 	
-	@Column(nullable = false)
-	public Boolean getApproved() {
-		return approved;
+	@Field
+	public String getRemark() {
+		return remark;
 	}
-	public void setApproved(Boolean approved) {
-		this.approved = approved;
+	public void setRemark(String remark) {
+		this.remark = remark;
 	}
+	
+	@OneToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name = "flow_id")
+	public Flow getFlow() {
+		return flow;
+	}
+	public void setFlow(Flow flow) {
+		this.flow = flow;
+	}
+	
 }

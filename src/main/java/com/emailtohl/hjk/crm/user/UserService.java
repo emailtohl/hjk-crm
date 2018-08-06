@@ -4,7 +4,7 @@ import java.util.Set;
 
 import org.springframework.data.domain.Pageable;
 
-import com.emailtohl.hjk.crm.entities.GroupId;
+import com.emailtohl.hjk.crm.entities.GroupEnum;
 import com.emailtohl.hjk.crm.entities.User;
 import com.github.emailtohl.lib.jpa.Paging;
 
@@ -67,15 +67,15 @@ public interface UserService {
 	/**
 	 * 设置用户的所属组，但不包括ADMIN
 	 * @param id 用户id
-	 * @param groupIds 组id
+	 * @param groups 组id
 	 */
-	void setGroupIds(Long id, GroupId... groupIds);
+	void setGroups(Long id, GroupEnum... groups);
 	
 	/**
 	 * 获取用的相关组名
 	 * @param id 用户id
 	 * @return
 	 */
-	Set<GroupId> getGroupIds(Long id);
+	Set<GroupEnum> getGroups(Long id);
 	
 }

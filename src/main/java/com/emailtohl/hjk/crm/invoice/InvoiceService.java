@@ -21,13 +21,6 @@ public interface InvoiceService {
 	Invoice create(Invoice invoice);
 	
 	/**
-	 * 是否审核通过
-	 * @param id
-	 * @param approve
-	 */
-	void approve(long id, boolean approve);
-
-	/**
 	 * 读取发票资料
 	 * @param id
 	 * @return

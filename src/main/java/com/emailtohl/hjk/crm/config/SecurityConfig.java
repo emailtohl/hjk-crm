@@ -19,10 +19,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.access.intercept.FilterSecurityInterceptor;
 import org.springframework.web.cors.CorsUtils;
-
-import com.emailtohl.hjk.crm.filter.UsernameFilter;
 /**
  * 安全层配置
  * @author HeLei
@@ -55,7 +52,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		.and().csrf().ignoringAntMatchers("/topic", "/queue", "/socket")
         // allow same origin to frame our site to support iframe SockJS
         .and().headers().frameOptions().sameOrigin()
-        .and().addFilterAfter(new UsernameFilter(), FilterSecurityInterceptor.class);
 		;
 	}
 

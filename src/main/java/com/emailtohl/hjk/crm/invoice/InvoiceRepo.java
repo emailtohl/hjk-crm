@@ -7,5 +7,5 @@ import com.emailtohl.hjk.crm.entities.Invoice;
 
 @Repository
 interface InvoiceRepo extends JpaRepository<Invoice, Long>, InvoiceRepoCust {
-
+	Invoice findBySerialNumber(String serialNumber);
 }

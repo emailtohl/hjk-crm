@@ -43,12 +43,12 @@ import com.github.emailtohl.lib.jpa.EnumBridgeCust;
 public class User extends BaseEntity {
 	private static final long serialVersionUID = 921742113764984928L;
 
-	private UserType userType;
 	private IdentityType identityType;
 	private String idNumber;
 	@NotNull
 	private String name;// 唯一识别、不可变、不能为空
 	private String nickname;// 可存储第三方昵称
+	private String serialNumber; // 编号
 	@Pattern(// 校验
 			regexp = ConstantPattern.EMAIL, flags = { Pattern.Flag.CASE_INSENSITIVE })
 	private String email;
@@ -74,16 +74,6 @@ public class User extends BaseEntity {
 	private Image image;
 	@Size(max = 300)
 	private String description;
-
-	@Field(bridge = @FieldBridge(impl = EnumBridgeCust.class))
-	@Enumerated(EnumType.STRING)
-	public UserType getUserType() {
-		return userType;
-	}
-
-	public void setUserType(UserType userType) {
-		this.userType = userType;
-	}
 
 	@Field(bridge = @FieldBridge(impl = EnumBridgeCust.class))
 	@Enumerated(EnumType.STRING)
@@ -121,6 +111,14 @@ public class User extends BaseEntity {
 
 	public void setNickname(String nickname) {
 		this.nickname = nickname;
+	}
+
+	@Field
+	public String getSerialNumber() {
+		return serialNumber;
+	}
+	public void setSerialNumber(String serialNumber) {
+		this.serialNumber = serialNumber;
 	}
 
 	@Field

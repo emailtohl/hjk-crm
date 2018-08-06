@@ -17,7 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.emailtohl.hjk.crm.entities.GroupId;
+import com.emailtohl.hjk.crm.entities.GroupEnum;
 import com.emailtohl.hjk.crm.entities.User;
 import com.github.emailtohl.lib.StandardService;
 import com.github.emailtohl.lib.jpa.Paging;
@@ -56,7 +56,6 @@ public class UserServiceImpl extends StandardService<User, Long> implements User
 		u.setEmail(user.getEmail());
 		u.setFirstName(user.getNickname());
 		u.setPassword(hashedPw);
-		identityService.setUserInfo(user.getName(), "userType", user.getUserType().toString());
 		identityService.saveUser(u);
 		return user;
 	}
@@ -83,10 +82,6 @@ public class UserServiceImpl extends StandardService<User, Long> implements User
 	public User update(Long id, User user) {
 		User source = userRepo.findById(id).get();
 		org.activiti.engine.identity.User u = identityService.createUserQuery().userId(id.toString()).singleResult();
-		if (user.getUserType() != null) {
-			source.setUserType(user.getUserType());
-			identityService.setUserInfo(id.toString(), "userType", user.getUserType().toString());
-		}
 		if (user.getIdentityType() != null) {
 			source.setIdentityType(user.getIdentityType());
 		}
@@ -125,6 +120,9 @@ public class UserServiceImpl extends StandardService<User, Long> implements User
 
 	@Override
 	public void delete(Long id) {
+		String name = userRepo.findById(id).get().getName();
+		identityService.createGroupQuery().groupMember(name).list().stream().map(Group::getId)
+				.forEach(groupId -> identityService.deleteMembership(name, groupId));
 		userRepo.deleteById(id);
 	}
 
@@ -142,18 +140,19 @@ public class UserServiceImpl extends StandardService<User, Long> implements User
 	}
 
 	@Override
-	public void setGroupIds(Long id, GroupId... groupIds) {
+	public void setGroups(Long id, GroupEnum... groups) {
 		String name = userRepo.findById(id).get().getName();
 		identityService.createGroupQuery().groupMember(name).list().stream().map(Group::getId)
 				.forEach(groupId -> identityService.deleteMembership(name, groupId));
-		Arrays.stream(groupIds).filter(groupId -> GroupId.ADMIN != groupId).forEach(groupId -> identityService.createMembership(name, groupId.name()));
+		Arrays.stream(groups).filter(groupId -> GroupEnum.ADMIN != groupId)
+				.forEach(groupId -> identityService.createMembership(name, groupId.name()));
 	}
 
 	@Override
-	public Set<GroupId> getGroupIds(Long id) {
+	public Set<GroupEnum> getGroups(Long id) {
 		String name = userRepo.findById(id).get().getName();
 		return identityService.createGroupQuery().groupMember(name).list().stream().map(Group::getId)
-				.map(GroupId::valueOf).collect(Collectors.toSet());
+				.map(GroupEnum::valueOf).collect(Collectors.toSet());
 	}
 
 	@Override

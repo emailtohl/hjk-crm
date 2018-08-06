@@ -2,7 +2,6 @@ package com.emailtohl.hjk.crm.controller;
 
 import java.security.Principal;
 import java.util.Arrays;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.http.MediaType;
@@ -11,7 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.emailtohl.hjk.crm.entities.GroupId;
+import com.emailtohl.hjk.crm.entities.GroupEnum;
 
 /**
  * 安全相关的接口
@@ -32,9 +31,10 @@ public class SecurityCtl {
 	public CsrfToken csrf(CsrfToken token) {
 		return token;
 	}
-	
+
 	/**
 	 * 获取用户身份
+	 * 
 	 * @param principal
 	 * @return
 	 */
@@ -42,17 +42,19 @@ public class SecurityCtl {
 	public Principal principal(Principal principal) {
 		return principal;
 	}
-	
-	private Set<GroupId> groupIds = Arrays.stream(GroupId.values()).filter(groupId -> {
-		return GroupId.ADMIN != groupId;
-	}).collect(Collectors.toSet());
+
+	private String groupsJson = Arrays.stream(GroupEnum.values()).filter(g -> {
+		return GroupEnum.ADMIN != g;
+	}).map(GroupEnum::toString).collect(Collectors.toList()).toString();
+
 	/**
 	 * 获取所有组
+	 * 
 	 * @return
 	 */
-	@GetMapping("groupIds")
-	public Set<GroupId> getGroupIds() {
-		return groupIds;
+	@GetMapping("groups")
+	public String getGroups() {
+		return groupsJson;
 	}
 
 }

@@ -1,7 +1,5 @@
 package com.emailtohl.hjk.crm.controller;
 
-import java.util.Set;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
@@ -17,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.emailtohl.hjk.crm.entities.GroupId;
+import com.emailtohl.hjk.crm.entities.GroupEnum;
 import com.emailtohl.hjk.crm.entities.User;
 import com.emailtohl.hjk.crm.user.UserService;
 import com.github.emailtohl.lib.jpa.BaseEntity;
@@ -116,11 +114,11 @@ public class UserCtl {
 	/**
 	 * 设置用户的组id
 	 * @param id
-	 * @param groupIds
+	 * @param groups
 	 */
 	@PostMapping("{id}/groups")
-	public void setGroupIds(@PathVariable("id") Long id, @RequestBody GroupId[] groupIds) {
-		userService.setGroupIds(id, groupIds);
+	public void setGroupIds(@PathVariable("id") Long id, @RequestBody GroupEnum[] groups) {
+		userService.setGroups(id, groups);
 	}
 
 	/**
@@ -129,8 +127,8 @@ public class UserCtl {
 	 * @return
 	 */
 	@GetMapping("{id}/groups")
-	public Set<GroupId> getGroupIds(@PathVariable("id") Long id) {
-		return userService.getGroupIds(id);
+	public String getGroupIds(@PathVariable("id") Long id) {
+		return userService.getGroups(id).toString();
 	}
 
 	public static class Form {
