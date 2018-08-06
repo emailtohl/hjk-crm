@@ -15,6 +15,13 @@ import com.github.emailtohl.lib.jpa.Paging;
  * @author HeLei
  */
 public interface InvoiceService {
+	
+	/**
+	 * 保存凭证信息
+	 * @param credentials
+	 * @return 所保存的id
+	 */
+	List<Long> saveCredentials(BinFile... credentials);
 	/**
 	 * 创建发票资料
 	 * @param invoice

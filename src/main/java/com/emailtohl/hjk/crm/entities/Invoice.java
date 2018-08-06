@@ -154,10 +154,10 @@ public class Invoice extends BaseEntity {
 		this.deliveryAddress = deliveryAddress;
 	}
 	
-	@OneToMany
+	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinTable(name = "invoice_credentials"
-	, joinColumns = { @JoinColumn(name = "role_id", referencedColumnName = "id") }
-	, inverseJoinColumns = { @JoinColumn(name = "authority_id", referencedColumnName = "id") })
+	, joinColumns = { @JoinColumn(name = "invoice_id", referencedColumnName = "id") }
+	, inverseJoinColumns = { @JoinColumn(name = "credentials_id", referencedColumnName = "id") })
 	public Set<BinFile> getCredentials() {
 		return credentials;
 	}

@@ -2,6 +2,7 @@ package com.emailtohl.hjk.crm.invoice;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -23,11 +24,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.emailtohl.hjk.crm.entities.BinFile;
 import com.emailtohl.hjk.crm.entities.Check;
 import com.emailtohl.hjk.crm.entities.Flow;
 import com.emailtohl.hjk.crm.entities.FlowType;
-import com.emailtohl.hjk.crm.entities.BinFile;
 import com.emailtohl.hjk.crm.entities.Invoice;
+import com.emailtohl.hjk.crm.file.BinFileRepo;
 import com.emailtohl.hjk.crm.flow.FlowRepo;
 import com.github.emailtohl.lib.StandardService;
 import com.github.emailtohl.lib.exception.ForbiddenException;
@@ -35,8 +37,10 @@ import com.github.emailtohl.lib.exception.InnerDataStateException;
 import com.github.emailtohl.lib.exception.NotAcceptableException;
 import com.github.emailtohl.lib.exception.NotFoundException;
 import com.github.emailtohl.lib.jpa.Paging;
+
 /**
  * 发票资料管理接口的实现
+ * 
  * @author HeLei
  */
 @Service
@@ -48,10 +52,22 @@ public class InvoiceServiceImpl extends StandardService<Invoice, Long> implement
 	@Autowired
 	private FlowRepo flowRepo;
 	@Autowired
+	private BinFileRepo binFileRepo;
+	@Autowired
 	private RuntimeService runtimeService;
 	@Autowired
 	private TaskService taskService;
-	
+
+	/**
+	 * 保存凭证
+	 * 
+	 * @return 保存的凭证ID
+	 */
+	@Override
+	public List<Long> saveCredentials(BinFile... credentials) {
+		return Arrays.stream(credentials).map(f -> binFileRepo.save(f).getId()).collect(Collectors.toList());
+	}
+
 	@Override
 	public Invoice create(@Valid Invoice invoice) {
 		// 校验提交的表单信息
@@ -60,9 +76,14 @@ public class InvoiceServiceImpl extends StandardService<Invoice, Long> implement
 		if (!hasText(invoice.getDeliveryAddress())) {
 			invoice.setDeliveryAddress(invoice.getOrganizationAddress());
 		}
+		// 保存凭证信息
+		Set<BinFile> pbf = invoice.getCredentials().stream().filter(c -> c.getId() != null).map(BinFile::getId)
+				.map(id -> binFileRepo.findById(id).get()).collect(Collectors.toSet());
+		invoice.getCredentials().clear();
+		invoice.getCredentials().addAll(pbf);
 		// 先保存发票信息，获取ID
 		invoiceRepo.persist(invoice);
-		
+
 		Flow fd = new Flow();
 		fd.setFlowType(FlowType.INVOICE);
 		String applyUserId = USERNAME.get();
@@ -91,7 +112,8 @@ public class InvoiceServiceImpl extends StandardService<Invoice, Long> implement
 		variables.put("applyUserId", applyUserId);
 		variables.put("flowNum", flowNum);
 		variables.put("businessKey", businessKey);
-		ProcessInstance processInstance = runtimeService.startProcessInstanceByKey(PROCESS_DEFINITION_KEY, businessKey, variables);
+		ProcessInstance processInstance = runtimeService.startProcessInstanceByKey(PROCESS_DEFINITION_KEY, businessKey,
+				variables);
 		String processInstanceId = processInstance.getId();
 		fd.setProcessInstanceId(processInstanceId);
 		fd.setActivityId(processInstance.getActivityId());
@@ -102,7 +124,7 @@ public class InvoiceServiceImpl extends StandardService<Invoice, Long> implement
 		}
 		LOG.debug("start process of {key={}, bkey={}, pid={}}",
 				new Object[] { PROCESS_DEFINITION_KEY, businessKey, processInstanceId });
-		
+
 		flowRepo.save(fd);
 		invoice.setFlow(fd);
 		return invoice;
@@ -169,9 +191,10 @@ public class InvoiceServiceImpl extends StandardService<Invoice, Long> implement
 	public void delete(Long id) {
 		invoiceRepo.deleteById(id);
 	}
-	
+
 	/**
 	 * 查询当前用户的任务
+	 * 
 	 * @return
 	 */
 	public List<Flow> findTodoTasks() {
@@ -198,13 +221,12 @@ public class InvoiceServiceImpl extends StandardService<Invoice, Long> implement
 			flow.setTaskId(task.getId());
 			flow.setTaskName(task.getName());
 			return flow;
-		}).filter(flow -> {
-			return flow != null;
-		}).collect(Collectors.toList());
+		}).filter(flow -> flow != null).collect(Collectors.toList());
 	}
-	
+
 	/**
 	 * 签收任务
+	 * 
 	 * @param taskId
 	 * @return
 	 */
@@ -222,8 +244,10 @@ public class InvoiceServiceImpl extends StandardService<Invoice, Long> implement
 		String processInstanceId = task.getProcessInstanceId();
 		return transientDetail(invoiceRepo.findByFlowProcessInstanceId(processInstanceId));
 	}
+
 	/**
 	 * 审核任务
+	 * 
 	 * @param taskId
 	 * @param checkApproved
 	 * @param checkComment
@@ -242,7 +266,8 @@ public class InvoiceServiceImpl extends StandardService<Invoice, Long> implement
 			// 同时维护相关数据
 			Flow flow = flowRepo.findByProcessInstanceId(task.getProcessDefinitionId());
 			if (flow == null) {
-				throw new InnerDataStateException("not found flow entity by processDefinitionId: " + task.getProcessDefinitionId());
+				throw new InnerDataStateException(
+						"not found flow entity by processDefinitionId: " + task.getProcessDefinitionId());
 			}
 			flow.setCheckApproved(checkApproved);
 			flow.setCheckComment(checkComment);
@@ -267,6 +292,7 @@ public class InvoiceServiceImpl extends StandardService<Invoice, Long> implement
 
 	/**
 	 * 重新申请
+	 * 
 	 * @param taskId
 	 * @param reApply
 	 * @param invoice
@@ -327,5 +353,5 @@ public class InvoiceServiceImpl extends StandardService<Invoice, Long> implement
 	protected Invoice transientDetail(@Valid Invoice source) {
 		return source;
 	}
-	
+
 }

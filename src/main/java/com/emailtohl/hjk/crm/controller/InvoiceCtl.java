@@ -3,6 +3,8 @@ package com.emailtohl.hjk.crm.controller;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.web.PageableDefault;
@@ -15,8 +17,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.emailtohl.hjk.crm.entities.Flow;
 import com.emailtohl.hjk.crm.entities.BinFile;
+import com.emailtohl.hjk.crm.entities.Flow;
 import com.emailtohl.hjk.crm.entities.Invoice;
 import com.emailtohl.hjk.crm.invoice.InvoiceService;
 import com.github.emailtohl.lib.jpa.BaseEntity;
@@ -28,8 +30,57 @@ import com.github.emailtohl.lib.jpa.Paging;
 @RestController
 @RequestMapping(value = "invoices", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 public class InvoiceCtl {
+	private static final Logger LOG = LogManager.getLogger();
 	private InvoiceService invoiceService;
+/*
+	@PostMapping(value = "binFile")
+	public List<BinFile> addBinFile(HttpServletRequest request) {
+		List<BinFile> res = new ArrayList<>();
 
+		Collection<Part> fileParts = null;
+		Map<String, String[]> map = request.getParameterMap();
+		try {
+			fileParts = request.getParts();
+		} catch (IOException | ServletException e) {
+			LOG.error("不能获取文件part", e);
+			return res;
+		}
+		for (Iterator<Part> iterable = fileParts.iterator(); iterable.hasNext();) {
+			Part filePart = iterable.next();
+			String submittedFileName = filePart.getSubmittedFileName();
+			if (submittedFileName != null && !map.containsKey(submittedFileName)) {
+				try (InputStream in = filePart.getInputStream();
+						ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+					StreamUtils.copy(in, out);
+					BinFile BinFile = new BinFile(submittedFileName, FILE_NAME_MAP.getContentTypeFor(submittedFileName),
+							out.toByteArray());
+					BinFile = fileService.saveBinFile(BinFile);
+					res.add(BinFile);
+				} catch (IOException e) {
+					LOG.error(submittedFileName + " 文件读取失败", e);
+				}
+			}
+		}
+		return res;
+	}
+
+	@GetMapping(value = "binFile/{id}")
+	public void downloadBinFile(@PathVariable("id") Long id, HttpServletResponse response) {
+		BinFile BinFile = fileService.findById(id);
+		String filename;
+		try {
+			filename = URLEncoder.encode(BinFile.getFilename(), "UTF-8");
+			response.setHeader("content-disposition", "attachment;fileName=" + filename);
+		} catch (UnsupportedEncodingException e) {
+			LOG.error(BinFile.getFilename() + "编码为UTF-8失败");
+		}
+		response.setContentType(BinFile.getMimeType());
+		try (ServletOutputStream out = response.getOutputStream()) {
+			out.write(BinFile.getBin());
+		} catch (IOException e) {
+			LOG.error(BinFile.getFilename() + " 文件读取失败", e);
+		}
+	}*/
 	/**
 	 * 创建发票资料
 	 * 
