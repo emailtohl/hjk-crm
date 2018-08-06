@@ -10,8 +10,6 @@ import com.emailtohl.hjk.crm.entities.Flow;
  */
 public interface FlowRepo extends JpaRepository<Flow, Long> {
 	
-	Flow findByTaskId(String taskId);
-	
 	Flow findByProcessInstanceId(String processInstanceId);
 	
 	Flow findByFlowNum(String flowNum);

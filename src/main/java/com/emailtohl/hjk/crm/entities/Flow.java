@@ -17,6 +17,8 @@ import com.github.emailtohl.lib.jpa.BaseEntity;
 
 /**
  * 整个流程涉及的数据，既作为接收流程相关的表单数据，也作为显示层的数据承载对象
+ * 以下字段在业务流程中不断变化，所以不做存储：
+ * checkApproved、checkComment、taskId、taskName、taskAssignee、activityId、nextActivityId、nextActivityName
  * 
  * @author HeLei
  */

@@ -6,19 +6,13 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 
-import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.activiti.engine.ActivitiTaskAlreadyClaimedException;
-import org.activiti.engine.FormService;
-import org.activiti.engine.HistoryService;
-import org.activiti.engine.IdentityService;
-import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
 import org.activiti.engine.runtime.ProcessInstance;
@@ -28,7 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import com.emailtohl.hjk.crm.entities.Check;
 import com.emailtohl.hjk.crm.entities.Flow;
@@ -37,6 +30,7 @@ import com.emailtohl.hjk.crm.entities.Image;
 import com.emailtohl.hjk.crm.entities.Invoice;
 import com.emailtohl.hjk.crm.flow.FlowRepo;
 import com.github.emailtohl.lib.StandardService;
+import com.github.emailtohl.lib.exception.ForbiddenException;
 import com.github.emailtohl.lib.exception.InnerDataStateException;
 import com.github.emailtohl.lib.exception.NotAcceptableException;
 import com.github.emailtohl.lib.exception.NotFoundException;
@@ -52,19 +46,11 @@ public class InvoiceServiceImpl extends StandardService<Invoice, Long> implement
 	@Autowired
 	private InvoiceRepo invoiceRepo;
 	@Autowired
-	private RepositoryService repositoryService;
+	private FlowRepo flowRepo;
 	@Autowired
 	private RuntimeService runtimeService;
 	@Autowired
 	private TaskService taskService;
-	@Autowired
-	private HistoryService historyService;
-	@Autowired
-	private IdentityService identityService;
-	@Autowired
-	private FormService formService;
-	@Autowired
-	private FlowRepo flowRepo;
 	
 	@Override
 	public Invoice create(@Valid Invoice invoice) {
@@ -186,13 +172,10 @@ public class InvoiceServiceImpl extends StandardService<Invoice, Long> implement
 	
 	/**
 	 * 查询当前用户的任务
-	 * 需要参数：
-	 * 已登录，可以获取到用户id
 	 * @return
 	 */
 	public List<Flow> findTodoTasks() {
 		String userId = USERNAME.get();
-		List<Flow> results = new ArrayList<>();
 		List<Task> tasks = new ArrayList<>();
 		// 根据当前人的ID查询
 		List<Task> todoList = taskService.createTaskQuery().processDefinitionKey(PROCESS_DEFINITION_KEY)
@@ -204,51 +187,46 @@ public class InvoiceServiceImpl extends StandardService<Invoice, Long> implement
 		tasks.addAll(todoList);
 		tasks.addAll(unsignedTasks);
 		// 根据流程的业务ID查询实体并关联
-		for (Task task : tasks) {
+		return tasks.stream().map(task -> {
 			String processInstanceId = task.getProcessInstanceId();
-			ProcessInstance processInstance = runtimeService.createProcessInstanceQuery()
-					.processInstanceId(processInstanceId).singleResult();
-			String businessKey = processInstance.getBusinessKey();
-			Optional<Flow> FlowOpt = flowRepo.findById(Long.valueOf(businessKey));
-			if (!FlowOpt.isPresent()) {
-				continue;
+			Flow flow = flowRepo.findByProcessInstanceId(processInstanceId);
+			if (flow == null) {
+				return null;
 			}
-			Flow Flow = FlowOpt.get();
-			Flow.setTaskId(task.getId());
-			Flow.setTaskName(task.getName());
-			Flow.setTaskAssignee(task.getAssignee());
-			Flow.setActivityId(processInstance.getActivityId());
-			results.add(Flow);
-		}
-		return results;
+			flow.setActivityId(task.getTaskDefinitionKey());
+			flow.setTaskAssignee(task.getAssignee());
+			flow.setTaskId(task.getId());
+			flow.setTaskName(task.getName());
+			return flow;
+		}).filter(flow -> {
+			return flow != null;
+		}).collect(Collectors.toList());
 	}
 	
 	/**
 	 * 签收任务
-	 * 表单需要参数：
-	 * taskId：任务id
-	 * 已登录，可以获取到用户id
 	 * @param taskId
+	 * @return
 	 */
-	public void claim(String taskId) {
+	public Invoice claim(String taskId) {
+		Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
+		if (task == null) {
+			throw new NotFoundException("taskId: " + taskId + " not found");
+		}
 		String userId = USERNAME.get();
 		try {
 			taskService.claim(taskId, userId);
 		} catch (ActivitiTaskAlreadyClaimedException e) {
 			throw new NotAcceptableException("Activiti task already claimed exception", e);
 		}
+		String processInstanceId = task.getProcessInstanceId();
+		return transientDetail(invoiceRepo.findByFlowProcessInstanceId(processInstanceId));
 	}
-	
 	/**
 	 * 审核任务
-	 * 表单需要参数：
-	 * id：流程单的id或者是流程实例id（processInstanceId）
-	 * taskId： 任务id
-	 * 已登录，可以获取到用户id
-	 * assignee：任务签收人的id
-	 * checkApproved：审核是否通过
-	 * checkComment： 审核意见可选
-	 * @return 执行是否成功
+	 * @param taskId
+	 * @param checkApproved
+	 * @param checkComment
 	 */
 	public void check(String taskId, boolean checkApproved, String checkComment) {
 		Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
@@ -257,13 +235,14 @@ public class InvoiceServiceImpl extends StandardService<Invoice, Long> implement
 		}
 		switch (task.getTaskDefinitionKey()) {
 		case "administrationAudit":
+			// 将审核信息添加到流程参数上，并完成此任务
 			runtimeService.setVariable(task.getExecutionId(), "checkApproved", String.valueOf(checkApproved));
 			runtimeService.setVariable(task.getExecutionId(), "checkComment", checkComment);
 			taskService.complete(taskId);
-			// 维护相关数据
-			Flow flow = flowRepo.findByTaskId(taskId);
+			// 同时维护相关数据
+			Flow flow = flowRepo.findByProcessInstanceId(task.getProcessDefinitionId());
 			if (flow == null) {
-				throw new InnerDataStateException("not found flow entity by taskId: " + taskId);
+				throw new InnerDataStateException("not found flow entity by processDefinitionId: " + task.getProcessDefinitionId());
 			}
 			flow.setCheckApproved(checkApproved);
 			flow.setCheckComment(checkComment);
@@ -288,53 +267,38 @@ public class InvoiceServiceImpl extends StandardService<Invoice, Long> implement
 
 	/**
 	 * 重新申请
-	 * 表单reApply必填：若为true则重新申请，若为false则结束流程
-	 * content：若重新申请，则content需填写
-	 * @return 执行是否成功
-	 *//*
-	public void reApply(Flow form) {
-		Flow source = getFlow(form);
-		if (source == null) {
-			return new ExecResult(false, "未查找到流程数据", null);
+	 * @param taskId
+	 * @param reApply
+	 * @param invoice
+	 * @return
+	 */
+	public Invoice reApply(String taskId, boolean reApply, Invoice invoice) {
+		Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
+		if (task == null) {
+			throw new NotFoundException("taskId: " + taskId + "not found");
 		}
-		String userId = getCurrentUserId();
-		if (!source.getApplicantId().equals(Long.valueOf(userId))) {
-			return new ExecResult(false, "不是任务提交人", null);
+		String processInstanceId = task.getProcessInstanceId();
+		Invoice src = invoiceRepo.findByFlowProcessInstanceId(processInstanceId);
+		if (src == null) {
+			throw new InnerDataStateException("not found invoice entity by processInstanceId: " + processInstanceId);
 		}
-		String taskId = form.getTaskId();
-		if (!StringUtils.hasText(taskId)) {
-			return new ExecResult(false, "没有提交任务id", null);
+		String userId = USERNAME.get();
+		if (!invoice.getFlow().getApplyUserId().equals(userId)) {
+			throw new ForbiddenException("The user: " + userId + " is not the submitter of the task");
 		}
-		ProcessInstance processInstance = runtimeService.createProcessInstanceQuery()
-				.processInstanceId(source.getProcessInstanceId()).singleResult();
-		if (processInstance == null || !"modifyApply".equals(processInstance.getActivityId())) {
-			return new ExecResult(false, "modifyApply才能修改申请内容", null);
+		if (!"modifyApply".equals(task.getTaskDefinitionKey())) {
+			throw new NotAcceptableException("TaskDefinitionKey is not modifyApply");
 		}
-		Boolean reApply = form.getReApply();
-		if (reApply == null) {
-			return new ExecResult(false, "没有reApply字段", null);
-		}
-		Map<String, Object> variables = new HashMap<>();
+		Invoice result;
 		if (reApply) {
-			if (!StringUtils.hasText(form.getContent())) {
-				return new ExecResult(false, "更新内容不能为空", null);
-			}
-			source.setContent(form.getContent());
-			variables.put("content", form.getContent());
-			source.setReApply(reApply);
-			variables.put("reApply", reApply);
+			result = update(src.getId(), invoice);
 		} else {
-			source.setReApply(reApply);
-			variables.put("reApply", reApply);
-			variables.put("pass", false);
+			result = transientDetail(src);
 		}
-		try {
-			taskService.complete(taskId, variables);
-		} catch (ActivitiObjectNotFoundException e) {
-			return new ExecResult(false, "没查找到此id为“" + taskId +"”的任务", null);
-		}
-		return new ExecResult(true, "", null);
-	}*/
+		runtimeService.setVariable(task.getExecutionId(), "reApply", String.valueOf(reApply));
+		taskService.complete(taskId);
+		return result;
+	}
 
 	@Override
 	public Set<Image> getCredentials(Long invoiceId) {

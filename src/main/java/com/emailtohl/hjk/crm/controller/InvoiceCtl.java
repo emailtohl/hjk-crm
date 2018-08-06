@@ -1,21 +1,21 @@
 package com.emailtohl.hjk.crm.controller;
 
+import java.util.List;
 import java.util.Set;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.emailtohl.hjk.crm.entities.Flow;
 import com.emailtohl.hjk.crm.entities.Image;
 import com.emailtohl.hjk.crm.entities.Invoice;
 import com.emailtohl.hjk.crm.invoice.InvoiceService;
@@ -39,17 +39,6 @@ public class InvoiceCtl {
 	@PostMapping
 	public Invoice create(@RequestBody Invoice invoice) {
 		return invoiceService.create(invoice);
-	}
-
-	/**
-	 * 是否审核通过
-	 * 
-	 * @param id
-	 * @param approve
-	 */
-	@PostMapping("approve")
-	public void approve(@RequestBody Form form) {
-		invoiceService.approve(form.id, form.approve);
 	}
 
 	/**
@@ -89,29 +78,53 @@ public class InvoiceCtl {
 	}
 
 	/**
-	 * 修改发票资料
-	 * 
-	 * @param id
-	 * @param invoice
+	 * 查询当前用户的任务
 	 * @return
 	 */
-	@PutMapping("{id}")
-	public Invoice update(@PathVariable("id") Long id, @RequestBody Invoice invoice) {
-		return invoiceService.update(id, invoice);
+	@GetMapping("todoTasks")
+	public List<Flow> findTodoTasks() {
+		return invoiceService.findTodoTasks();
+	}
+	
+	/**
+	 * 签收任务
+	 * @param taskId
+	 * @return
+	 */
+	@PostMapping("claim")
+	public Invoice claim(@RequestBody Form f) {
+		return invoiceService.claim(f.taskId);
+	}
+	
+	/**
+	 * 审核任务
+	 * @param taskId
+	 * @param checkApproved
+	 * @param checkComment
+	 */
+	@PostMapping("check")
+	public void check(@RequestBody Form f) {
+		invoiceService.check(f.taskId, f.checkApproved, f.checkComment);
 	}
 
 	/**
-	 * 删除发票资料
-	 * 
-	 * @param id
+	 * 重新申请
+	 * @param taskId
+	 * @param reApply
+	 * @param invoice
+	 * @return
 	 */
-	@DeleteMapping("{id}")
-	public void delete(@PathVariable("id") Long id) {
-		invoiceService.delete(id);
+	@PostMapping("reApply")
+	public Invoice reApply(@RequestBody Form f) {
+		return invoiceService.reApply(f.taskId, f.reApply, f.invoice);
 	}
-
+	
 	public static class Form {
 		public Long id;
-		public Boolean approve;
+		public String taskId;
+		public Boolean reApply;
+		public Invoice invoice;
+		public Boolean checkApproved;
+		public String checkComment;
 	}
 }
