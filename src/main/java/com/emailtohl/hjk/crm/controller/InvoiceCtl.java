@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.emailtohl.hjk.crm.entities.Flow;
-import com.emailtohl.hjk.crm.entities.Image;
+import com.emailtohl.hjk.crm.entities.BinFile;
 import com.emailtohl.hjk.crm.entities.Invoice;
 import com.emailtohl.hjk.crm.invoice.InvoiceService;
 import com.github.emailtohl.lib.jpa.BaseEntity;
@@ -59,7 +59,7 @@ public class InvoiceCtl {
 	 * @return
 	 */
 	@GetMapping("{invoiceId}/credentials")
-	public Set<Image> getCredentials(@PathVariable("invoiceId") Long invoiceId) {
+	public Set<BinFile> getCredentials(@PathVariable("invoiceId") Long invoiceId) {
 		return invoiceService.getCredentials(invoiceId);
 	}
 

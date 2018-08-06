@@ -6,7 +6,7 @@ import java.util.Set;
 import org.springframework.data.domain.Pageable;
 
 import com.emailtohl.hjk.crm.entities.Flow;
-import com.emailtohl.hjk.crm.entities.Image;
+import com.emailtohl.hjk.crm.entities.BinFile;
 import com.emailtohl.hjk.crm.entities.Invoice;
 import com.github.emailtohl.lib.jpa.Paging;
 
@@ -34,7 +34,7 @@ public interface InvoiceService {
 	 * @param invoiceId
 	 * @return
 	 */
-	Set<Image> getCredentials(Long invoiceId);
+	Set<BinFile> getCredentials(Long invoiceId);
 	
 	/**
 	 * 查询发票资料

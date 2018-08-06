@@ -26,7 +26,7 @@ import org.springframework.stereotype.Service;
 import com.emailtohl.hjk.crm.entities.Check;
 import com.emailtohl.hjk.crm.entities.Flow;
 import com.emailtohl.hjk.crm.entities.FlowType;
-import com.emailtohl.hjk.crm.entities.Image;
+import com.emailtohl.hjk.crm.entities.BinFile;
 import com.emailtohl.hjk.crm.entities.Invoice;
 import com.emailtohl.hjk.crm.flow.FlowRepo;
 import com.github.emailtohl.lib.StandardService;
@@ -301,7 +301,7 @@ public class InvoiceServiceImpl extends StandardService<Invoice, Long> implement
 	}
 
 	@Override
-	public Set<Image> getCredentials(Long invoiceId) {
+	public Set<BinFile> getCredentials(Long invoiceId) {
 		Invoice source = invoiceRepo.findById(invoiceId).get();
 		return source.getCredentials();
 	}

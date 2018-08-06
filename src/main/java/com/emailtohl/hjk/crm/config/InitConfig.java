@@ -149,5 +149,90 @@ public class InitConfig {
 
 		return auser;
 	}
+	
+	@Bean
+	public User lisa() throws IOException {
+		String name = "lisa";
+		String password = passwordEncoder.encode("lisa");
+		User auser = null;
+
+		EntityManager em = factory.createEntityManager();
+		em.getTransaction().begin();
+
+		CriteriaBuilder b = em.getCriteriaBuilder();
+		CriteriaQuery<User> q = b.createQuery(User.class);
+		Root<User> r = q.from(User.class);
+		q = q.select(r).where(b.equal(r.get("name"), name));
+		try {
+			auser = em.createQuery(q).getSingleResult();
+		} catch (NoResultException e) {
+		}
+		if (auser == null) {
+			auser = new User();
+			auser.setName(name);
+			auser.setNickname(name);
+			auser.setPassword(password);
+			em.persist(auser);
+
+			org.activiti.engine.identity.User u = identityService.createUserQuery().userId(name).singleResult();
+			u = identityService.newUser(name);
+			u.setPassword(password);
+			u.setEmail(name + "@localhost");
+			u.setFirstName(name);
+			identityService.saveUser(u);
+
+			ClassPathResource resource = new ClassPathResource("image/icon-head-lisa.jpg");
+			try (InputStream in = resource.getInputStream()) {
+				byte[] bytes = StreamUtils.copyToByteArray(in);
+				Picture p = new Picture(bytes, "application/x-jpg");
+				identityService.setUserPicture(name, p);
+			}
+
+			identityService.createMembership(name, ADMINISTRATION.id);
+		}
+		em.getTransaction().commit();
+		em.close();
+
+		return auser;
+	}
+	
+	@Bean
+	public User foo() throws IOException {
+		String name = "foo";
+		String password = passwordEncoder.encode("foo");
+		User auser = null;
+		
+		EntityManager em = factory.createEntityManager();
+		em.getTransaction().begin();
+		
+		CriteriaBuilder b = em.getCriteriaBuilder();
+		CriteriaQuery<User> q = b.createQuery(User.class);
+		Root<User> r = q.from(User.class);
+		q = q.select(r).where(b.equal(r.get("name"), name));
+		try {
+			auser = em.createQuery(q).getSingleResult();
+		} catch (NoResultException e) {
+		}
+		if (auser == null) {
+			auser = new User();
+			auser.setName(name);
+			auser.setNickname(name);
+			auser.setPassword(password);
+			em.persist(auser);
+			
+			org.activiti.engine.identity.User u = identityService.createUserQuery().userId(name).singleResult();
+			u = identityService.newUser(name);
+			u.setPassword(password);
+			u.setEmail(name + "@localhost");
+			u.setFirstName(name);
+			identityService.saveUser(u);
+			
+			identityService.createMembership(name, CUSTOMER.id);
+		}
+		em.getTransaction().commit();
+		em.close();
+		
+		return auser;
+	}
 
 }

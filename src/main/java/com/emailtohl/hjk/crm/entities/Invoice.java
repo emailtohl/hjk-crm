@@ -7,6 +7,8 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.validation.constraints.NotNull;
 
@@ -55,7 +57,7 @@ public class Invoice extends BaseEntity {
 	// 收票地址，若不填写，则取公司所在地址
 	private String deliveryAddress;
 	// 上传的凭证
-	private Set<Image> credentials = new HashSet<Image>();
+	private Set<BinFile> credentials = new HashSet<BinFile>();
 	// 备注
 	private String remark;
 	
@@ -152,10 +154,14 @@ public class Invoice extends BaseEntity {
 		this.deliveryAddress = deliveryAddress;
 	}
 	
-	public Set<Image> getCredentials() {
+	@OneToMany
+	@JoinTable(name = "invoice_credentials"
+	, joinColumns = { @JoinColumn(name = "role_id", referencedColumnName = "id") }
+	, inverseJoinColumns = { @JoinColumn(name = "authority_id", referencedColumnName = "id") })
+	public Set<BinFile> getCredentials() {
 		return credentials;
 	}
-	public void setCredentials(Set<Image> credentials) {
+	public void setCredentials(Set<BinFile> credentials) {
 		this.credentials = credentials;
 	}
 	

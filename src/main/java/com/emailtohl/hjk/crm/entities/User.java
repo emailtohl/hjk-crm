@@ -71,7 +71,7 @@ public class User extends BaseEntity {
 	@Max(value = 120)
 	private Integer age;
 	private Gender gender;
-	private Image image;
+	private BinFile image;
 	@Size(max = 300)
 	private String description;
 
@@ -258,11 +258,11 @@ public class User extends BaseEntity {
 		this.gender = gender;
 	}
 
-	public Image getImage() {
+	public BinFile getImage() {
 		return image;
 	}
 
-	public void setImage(Image image) {
+	public void setImage(BinFile image) {
 		this.image = image;
 	}
 
