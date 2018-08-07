@@ -22,6 +22,7 @@ import com.emailtohl.hjk.crm.entities.BinFile;
 import com.emailtohl.hjk.crm.entities.Flow;
 import com.emailtohl.hjk.crm.entities.Invoice;
 import com.emailtohl.hjk.crm.invoice.InvoiceService;
+import com.github.emailtohl.lib.jpa.AuditedRepository.Tuple;
 import com.github.emailtohl.lib.jpa.BaseEntity;
 import com.github.emailtohl.lib.jpa.Paging;
 
@@ -36,37 +37,6 @@ public class InvoiceCtl {
 	private static final Logger LOG = LogManager.getLogger();
 	private InvoiceService invoiceService;
 
-	/*
-	 * @PostMapping(value = "binFile") public List<BinFile>
-	 * addBinFile(HttpServletRequest request) { List<BinFile> res = new
-	 * ArrayList<>();
-	 * 
-	 * Collection<Part> fileParts = null; Map<String, String[]> map =
-	 * request.getParameterMap(); try { fileParts = request.getParts(); } catch
-	 * (IOException | ServletException e) { LOG.error("不能获取文件part", e); return res;
-	 * } for (Iterator<Part> iterable = fileParts.iterator(); iterable.hasNext();) {
-	 * Part filePart = iterable.next(); String submittedFileName =
-	 * filePart.getSubmittedFileName(); if (submittedFileName != null &&
-	 * !map.containsKey(submittedFileName)) { try (InputStream in =
-	 * filePart.getInputStream(); ByteArrayOutputStream out = new
-	 * ByteArrayOutputStream()) { StreamUtils.copy(in, out); BinFile BinFile = new
-	 * BinFile(submittedFileName,
-	 * FILE_NAME_MAP.getContentTypeFor(submittedFileName), out.toByteArray());
-	 * BinFile = fileService.saveBinFile(BinFile); res.add(BinFile); } catch
-	 * (IOException e) { LOG.error(submittedFileName + " 文件读取失败", e); } } } return
-	 * res; }
-	 * 
-	 * @GetMapping(value = "binFile/{id}") public void
-	 * downloadBinFile(@PathVariable("id") Long id, HttpServletResponse response) {
-	 * BinFile BinFile = fileService.findById(id); String filename; try { filename =
-	 * URLEncoder.encode(BinFile.getFilename(), "UTF-8");
-	 * response.setHeader("content-disposition", "attachment;fileName=" + filename);
-	 * } catch (UnsupportedEncodingException e) { LOG.error(BinFile.getFilename() +
-	 * "编码为UTF-8失败"); } response.setContentType(BinFile.getMimeType()); try
-	 * (ServletOutputStream out = response.getOutputStream()) {
-	 * out.write(BinFile.getBin()); } catch (IOException e) {
-	 * LOG.error(BinFile.getFilename() + " 文件读取失败", e); } }
-	 */
 	/**
 	 * 创建发票资料
 	 * 
@@ -157,6 +127,27 @@ public class InvoiceCtl {
 	@PutMapping("{id}")
 	public Invoice update(@PathVariable("id") Long id, @RequestBody Invoice invoice) {
 		return invoiceService.update(id, invoice);
+	}
+	
+	/**
+	 * 获取历史版本列表
+	 * @param id
+	 * @return
+	 */
+	@GetMapping("history/{id}")
+	public List<Tuple<Invoice>> getRevisions(@PathVariable("id") Long id) {
+		return invoiceService.getRevisions(id);
+	}
+	
+	/**
+	 * 获取某修订版详情
+	 * @param id
+	 * @param revision
+	 * @return
+	 */
+	@GetMapping("history/{id}/revision/{revision}")
+	public Invoice getEntityAtRevision(@PathVariable("id") Long id, @PathVariable("revision") Number revision) {
+		return invoiceService.getEntityAtRevision(id, revision);
 	}
 
 	public static class Form {

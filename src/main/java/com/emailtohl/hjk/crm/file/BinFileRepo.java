@@ -4,6 +4,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.emailtohl.hjk.crm.entities.BinFile;
 
-public interface BinFileRepo  extends JpaRepository<BinFile, Long> {
+public interface BinFileRepo extends JpaRepository<BinFile, Long> {
 
 }

@@ -2,7 +2,6 @@ package com.emailtohl.hjk.crm.invoice;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +34,7 @@ import com.github.emailtohl.lib.exception.ForbiddenException;
 import com.github.emailtohl.lib.exception.InnerDataStateException;
 import com.github.emailtohl.lib.exception.NotAcceptableException;
 import com.github.emailtohl.lib.exception.NotFoundException;
+import com.github.emailtohl.lib.jpa.AuditedRepository.Tuple;
 import com.github.emailtohl.lib.jpa.Paging;
 
 /**
@@ -56,16 +56,6 @@ public class InvoiceServiceImpl extends StandardService<Invoice, Long> implement
 	private RuntimeService runtimeService;
 	@Autowired
 	private TaskService taskService;
-
-	/**
-	 * 保存凭证
-	 * 
-	 * @return 保存的凭证ID
-	 */
-	@Override
-	public List<Long> saveCredentials(BinFile... credentials) {
-		return Arrays.stream(credentials).map(f -> binFileRepo.save(f).getId()).collect(Collectors.toList());
-	}
 
 	@Override
 	public Invoice create(@Valid Invoice invoice) {
@@ -290,6 +280,18 @@ public class InvoiceServiceImpl extends StandardService<Invoice, Long> implement
 		Page<Invoice> page = invoiceRepo.search(query, pageable);
 		List<Invoice> ls = page.getContent().stream().map(this::toTransient).collect(Collectors.toList());
 		return new Paging<>(ls, pageable, page.getTotalElements());
+	}
+	
+	@Override
+	public List<Tuple<Invoice>> getRevisions(Long id) {
+		return invoiceRepo.getRevisions(id).stream().map(t -> {
+			return new Tuple<Invoice>(toTransient(t.entity), t.defaultRevisionEntity, t.revisionType);
+		}).collect(Collectors.toList());
+	}
+	
+	@Override
+	public Invoice getEntityAtRevision(Long id, Number revision) {
+		return transientDetail(invoiceRepo.getEntityAtRevision(id, revision));
 	}
 
 	@Override

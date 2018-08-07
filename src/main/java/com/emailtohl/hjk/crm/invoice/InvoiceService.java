@@ -9,19 +9,13 @@ import com.emailtohl.hjk.crm.entities.Flow;
 import com.emailtohl.hjk.crm.entities.BinFile;
 import com.emailtohl.hjk.crm.entities.Invoice;
 import com.github.emailtohl.lib.jpa.Paging;
+import com.github.emailtohl.lib.jpa.AuditedRepository.Tuple;
 
 /**
  * 发票资料管理接口
  * @author HeLei
  */
 public interface InvoiceService {
-	
-	/**
-	 * 保存凭证信息
-	 * @param credentials
-	 * @return 所保存的id
-	 */
-	List<Long> saveCredentials(BinFile... credentials);
 	/**
 	 * 创建发票资料
 	 * @param invoice
@@ -86,4 +80,18 @@ public interface InvoiceService {
 	 */
 	void check(String taskId, boolean checkApproved, String checkComment);
 
+	/**
+	 * 获取历史版本列表
+	 * @param id
+	 * @return
+	 */
+	List<Tuple<Invoice>> getRevisions(Long id);
+	
+	/**
+	 * 获取历史某版本的详情
+	 * @param id
+	 * @param revision
+	 * @return
+	 */
+	Invoice getEntityAtRevision(Long id, Number revision);
 }
