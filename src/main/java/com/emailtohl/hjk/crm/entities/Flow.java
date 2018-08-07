@@ -53,6 +53,7 @@ public class Flow extends BaseEntity {
 	private String nextActivityName;
 
 	public void taskInfo(Task task) {
+		this.processInstanceId = task.getProcessInstanceId();
 		this.taskId = task.getId();
 		this.taskName = task.getName();
 		this.taskAssignee = task.getAssignee();

@@ -54,7 +54,7 @@ public class ActivitiConfig {
 		cfg.setJpaCloseEntityManager(false);
 		cfg.setDatabaseSchemaUpdate(ProcessEngineConfiguration.DB_SCHEMA_UPDATE_TRUE);
 		cfg.setCustomFormTypes(Arrays.asList(new BigtextFormType(), new DoubleFormType(), new JavascriptFormType()));
-		cfg.setDeploymentResources(new Resource[] { new ClassPathResource("processes/leave.bpmn") });
+		cfg.setDeploymentResources(new Resource[] { new ClassPathResource("processes/invoice.bpmn"), new ClassPathResource("processes/leave.bpmn") });
 		cfg.setActivityFontName("宋体");
 		cfg.setLabelFontName("宋体");
 		return cfg;

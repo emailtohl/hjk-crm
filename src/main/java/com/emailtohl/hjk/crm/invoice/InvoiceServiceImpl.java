@@ -9,7 +9,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
-import javax.validation.Valid;
 
 import org.activiti.engine.ActivitiTaskAlreadyClaimedException;
 import org.activiti.engine.RuntimeService;
@@ -58,7 +57,7 @@ public class InvoiceServiceImpl extends StandardService<Invoice, Long> implement
 	private TaskService taskService;
 
 	@Override
-	public Invoice create(@Valid Invoice invoice) {
+	public Invoice create(Invoice invoice) {
 		// 校验提交的表单信息
 		validate(invoice);
 		invoice.setPass(false);
@@ -117,6 +116,12 @@ public class InvoiceServiceImpl extends StandardService<Invoice, Long> implement
 	@Override
 	public Invoice read(Long id) {
 		Invoice source = invoiceRepo.findById(id).get();
+		return transientDetail(source);
+	}
+
+	@Override
+	public Invoice findByFlowProcessInstanceId(String processInstanceId) {
+		Invoice source = invoiceRepo.findByFlowProcessInstanceId(processInstanceId);
 		return transientDetail(source);
 	}
 
@@ -238,7 +243,12 @@ public class InvoiceServiceImpl extends StandardService<Invoice, Long> implement
 		if (task == null) {
 			throw new NotFoundException("taskId: " + taskId + "not found");
 		}
-		if (!task.getAssignee().equals(USERNAME.get())) {
+		Flow flow = flowRepo.findByProcessInstanceId(task.getProcessDefinitionId());
+		if (flow == null) {
+			throw new InnerDataStateException(
+					"not found flow entity by processDefinitionId: " + task.getProcessDefinitionId());
+		}
+		if (!task.getAssignee().equals(USERNAME.get()) || !flow.getApplyUserId().equals(USERNAME.get())) {
 			throw new ForbiddenException(USERNAME.get() + " are not the executor of the task");
 		}
 		switch (task.getTaskDefinitionKey()) {
@@ -257,11 +267,6 @@ public class InvoiceServiceImpl extends StandardService<Invoice, Long> implement
 		}
 		taskService.complete(taskId);
 		// 同时维护相关数据
-		Flow flow = flowRepo.findByProcessInstanceId(task.getProcessDefinitionId());
-		if (flow == null) {
-			throw new InnerDataStateException(
-					"not found flow entity by processDefinitionId: " + task.getProcessDefinitionId());
-		}
 		flow.getChecks().add(new Check(task, checkApproved, checkComment));
 		if (hasText(checkComment)) {
 			// 将审批的评论添加进记录中
@@ -305,7 +310,7 @@ public class InvoiceServiceImpl extends StandardService<Invoice, Long> implement
 	}
 
 	@Override
-	protected Invoice transientDetail(@Valid Invoice source) {
+	protected Invoice transientDetail(Invoice source) {
 		Invoice target = toTransient(source);
 		Flow sourceFlow = source.getFlow();
 		Flow targetFlow = new Flow();

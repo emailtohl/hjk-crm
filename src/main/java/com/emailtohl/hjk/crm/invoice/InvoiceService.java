@@ -31,6 +31,13 @@ public interface InvoiceService {
 	Invoice read(Long id);
 	
 	/**
+	 * 通过流程实例id读取发票资料
+	 * @param processInstanceId
+	 * @return
+	 */
+	Invoice findByFlowProcessInstanceId(String processInstanceId);
+	
+	/**
 	 * 根据发票资料的id查询其凭证
 	 * @param invoiceId
 	 * @return

@@ -63,6 +63,8 @@ public class Invoice extends BaseEntity {
 	private Set<BinFile> credentials = new HashSet<BinFile>();
 	// 备注
 	private String remark;
+	// 对接市场人员
+	private String receiver;
 	// 是否通过审批
 	private Boolean pass;
 	
@@ -178,6 +180,14 @@ public class Invoice extends BaseEntity {
 	}
 	public void setRemark(String remark) {
 		this.remark = remark;
+	}
+	
+	@Field
+	public String getReceiver() {
+		return receiver;
+	}
+	public void setReceiver(String receiver) {
+		this.receiver = receiver;
 	}
 	
 	public Boolean getPass() {
