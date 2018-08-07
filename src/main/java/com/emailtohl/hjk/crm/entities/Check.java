@@ -3,31 +3,24 @@ package com.emailtohl.hjk.crm.entities;
 import java.io.Serializable;
 import java.util.Date;
 
-import javax.persistence.AttributeOverride;
-import javax.persistence.AttributeOverrides;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
+import org.activiti.engine.task.Task;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 /**
- * 保存每一次的审核信息
+ * 保存每一次的审核信息，包括提交人自己的重提或取消
  * 
  * @author HeLei
  */
 @Embeddable
-@AttributeOverrides({ @AttributeOverride(name = "activityId", column = @Column(name = "activity_id")),
-		@AttributeOverride(name = "checkerId", column = @Column(name = "checker_id")),
-		@AttributeOverride(name = "checkerNum", column = @Column(name = "checker_num")),
-		@AttributeOverride(name = "checkApproved", column = @Column(name = "check_approved")),
-		@AttributeOverride(name = "checkComment", column = @Column(name = "check_comment")),
-		@AttributeOverride(name = "checkTime", column = @Column(name = "check_time")) })
 public class Check implements Serializable {
 	private static final long serialVersionUID = 3468053227931998584L;
 	// 所处节点
-	private String activityId;
+	private String taskDefinitionKey;
 	// 所审核的任务名
 	private String taskName;
 	// 审核人id
@@ -39,13 +32,26 @@ public class Check implements Serializable {
 	// 审核时间
 	private Date checkTime;
 	
-	public String getActivityId() {
-		return activityId;
-	}
-	public void setActivityId(String activityId) {
-		this.activityId = activityId;
+	public Check() {}
+	
+	public Check(Task task, boolean checkApproved, String checkComment) {
+		this.taskDefinitionKey = task.getTaskDefinitionKey();
+		this.taskName = task.getName();
+		this.checkerId = task.getAssignee();
+		this.checkTime = new Date();
+		this.checkApproved = checkApproved;
+		this.checkComment = checkComment;
 	}
 
+	@Column(nullable = false, updatable = false)
+	public String getTaskDefinitionKey() {
+		return taskDefinitionKey;
+	}
+	public void setTaskDefinitionKey(String taskDefinitionKey) {
+		this.taskDefinitionKey = taskDefinitionKey;
+	}
+
+	@Column(name = "task_name", nullable = false, updatable = false)
 	public String getTaskName() {
 		return taskName;
 	}
@@ -53,6 +59,7 @@ public class Check implements Serializable {
 		this.taskName = taskName;
 	}
 
+	@Column(name = "checker_id", nullable = false, updatable = false)
 	public String getCheckerId() {
 		return checkerId;
 	}
@@ -60,6 +67,7 @@ public class Check implements Serializable {
 		this.checkerId = checkerId;
 	}
 
+	@Column(name = "check_approved", nullable = false, updatable = false)
 	public Boolean getCheckApproved() {
 		return checkApproved;
 	}
@@ -67,6 +75,7 @@ public class Check implements Serializable {
 		this.checkApproved = checkApproved;
 	}
 
+	@Column(name = "check_comment", nullable = false, updatable = false)
 	public String getCheckComment() {
 		return checkComment;
 	}
@@ -76,18 +85,12 @@ public class Check implements Serializable {
 
 	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+	@Column(name = "check_time", nullable = false, updatable = false)
 	public Date getCheckTime() {
 		return checkTime;
 	}
 	public void setCheckTime(Date checkTime) {
 		this.checkTime = checkTime;
-	}
-	
-	@Override
-	public String toString() {
-		return "Check [activityId=" + activityId + ", taskName=" + taskName + ", checkerId=" + checkerId
-				+ ", checkApproved=" + checkApproved + ", checkComment=" + checkComment + ", checkTime=" + checkTime
-				+ "]";
 	}
 	
 	@Override

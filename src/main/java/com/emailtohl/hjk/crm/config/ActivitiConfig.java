@@ -26,6 +26,9 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.transaction.PlatformTransactionManager;
 
+import com.emailtohl.hjk.crm.invoice.InvoiceRepo;
+import com.emailtohl.hjk.crm.invoice.CompleteListener;
+
 /**
  * 流程配置
  * 
@@ -33,6 +36,11 @@ import org.springframework.transaction.PlatformTransactionManager;
  */
 @Configuration
 public class ActivitiConfig {
+	
+	@Bean
+	public CompleteListener taskCompleteListener(InvoiceRepo invoiceRepo) {
+		return new CompleteListener(invoiceRepo);
+	}
 
 	@Bean
 	public SpringProcessEngineConfiguration processEngineConfiguration(DataSource dataSource,

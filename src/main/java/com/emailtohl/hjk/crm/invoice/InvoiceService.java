@@ -79,20 +79,11 @@ public interface InvoiceService {
 	Invoice claim(String taskId);
 	
 	/**
-	 * 审核任务
+	 * 审核任务，包括申请人重提申请或放弃申请
 	 * @param taskId
 	 * @param checkApproved
 	 * @param checkComment
 	 */
 	void check(String taskId, boolean checkApproved, String checkComment);
 
-	/**
-	 * 重新申请
-	 * @param taskId
-	 * @param reApply
-	 * @param invoice
-	 * @return
-	 */
-	Invoice reApply(String taskId, boolean reApply, Invoice invoice);
-	
 }

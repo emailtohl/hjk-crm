@@ -12,6 +12,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.validation.constraints.NotNull;
 
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 import org.hibernate.search.annotations.Field;
 import org.hibernate.search.annotations.FieldBridge;
 import org.hibernate.search.annotations.Indexed;
@@ -24,6 +26,7 @@ import com.github.emailtohl.lib.jpa.EnumBridgeCust;
  * @author HeLei
  */
 @Indexed
+@Audited
 @Entity
 public class Invoice extends BaseEntity {
 	private static final long serialVersionUID = -2949903806197415296L;
@@ -60,6 +63,8 @@ public class Invoice extends BaseEntity {
 	private Set<BinFile> credentials = new HashSet<BinFile>();
 	// 备注
 	private String remark;
+	// 是否通过审批
+	private Boolean pass;
 	
 	// 与流程相关的信息
 	private Flow flow;
@@ -154,6 +159,7 @@ public class Invoice extends BaseEntity {
 		this.deliveryAddress = deliveryAddress;
 	}
 	
+	@NotAudited
 	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinTable(name = "invoice_credentials"
 	, joinColumns = { @JoinColumn(name = "invoice_id", referencedColumnName = "id") }
@@ -165,6 +171,7 @@ public class Invoice extends BaseEntity {
 		this.credentials = credentials;
 	}
 	
+	@NotAudited
 	@Field
 	public String getRemark() {
 		return remark;
@@ -173,6 +180,14 @@ public class Invoice extends BaseEntity {
 		this.remark = remark;
 	}
 	
+	public Boolean getPass() {
+		return pass;
+	}
+	public void setPass(Boolean pass) {
+		this.pass = pass;
+	}
+	
+	@NotAudited
 	@OneToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "flow_id")
 	public Flow getFlow() {

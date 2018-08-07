@@ -3,7 +3,6 @@ package com.emailtohl.hjk.crm.invoice;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -72,6 +71,7 @@ public class InvoiceServiceImpl extends StandardService<Invoice, Long> implement
 	public Invoice create(@Valid Invoice invoice) {
 		// 校验提交的表单信息
 		validate(invoice);
+		invoice.setPass(false);
 		// 如果没有填写收票地址，那么就把公司地址设置为收票地址
 		if (!hasText(invoice.getDeliveryAddress())) {
 			invoice.setDeliveryAddress(invoice.getOrganizationAddress());
@@ -79,11 +79,12 @@ public class InvoiceServiceImpl extends StandardService<Invoice, Long> implement
 		// 保存凭证信息
 		Set<BinFile> pbf = invoice.getCredentials().stream().filter(c -> c.getId() != null).map(BinFile::getId)
 				.map(id -> binFileRepo.findById(id).get()).collect(Collectors.toSet());
-		invoice.getCredentials().clear();
-		invoice.getCredentials().addAll(pbf);
-		// 先保存发票信息，获取ID
+		invoice.getCredentials().clear();// 清空参数里面的凭证
+		invoice.getCredentials().addAll(pbf);// 再添加上持久化的凭证
+		// 先保存开票资料，获取ID
 		invoiceRepo.persist(invoice);
 
+		// 关联上流程
 		Flow fd = new Flow();
 		fd.setFlowType(FlowType.INVOICE);
 		String applyUserId = USERNAME.get();
@@ -115,16 +116,9 @@ public class InvoiceServiceImpl extends StandardService<Invoice, Long> implement
 		ProcessInstance processInstance = runtimeService.startProcessInstanceByKey(PROCESS_DEFINITION_KEY, businessKey,
 				variables);
 		String processInstanceId = processInstance.getId();
-		fd.setProcessInstanceId(processInstanceId);
-		fd.setActivityId(processInstance.getActivityId());
-		Task task = taskService.createTaskQuery().processInstanceId(processInstanceId).singleResult();
-		if (task != null) {
-			fd.setTaskId(task.getId());
-			fd.setTaskName(task.getName());
-		}
-		LOG.debug("start process of {key={}, bkey={}, pid={}}",
-				new Object[] { PROCESS_DEFINITION_KEY, businessKey, processInstanceId });
+		LOG.debug("start process of {key={}, bkey={}, pid={}}", PROCESS_DEFINITION_KEY, businessKey, processInstanceId);
 
+		fd.setProcessInstanceId(processInstanceId);
 		flowRepo.save(fd);
 		invoice.setFlow(fd);
 		return invoice;
@@ -151,9 +145,6 @@ public class InvoiceServiceImpl extends StandardService<Invoice, Long> implement
 	@Override
 	public Invoice update(Long id, Invoice invoice) {
 		Invoice source = invoiceRepo.findById(id).get();
-		if (!"modifyApply".equals(source.getFlow().getActivityId())) {
-			throw new NotAcceptableException("Changes cannot be submitted at this point");
-		}
 		if (invoice.getType() != null) {
 			source.setType(invoice.getType());
 		}
@@ -184,6 +175,12 @@ public class InvoiceServiceImpl extends StandardService<Invoice, Long> implement
 		if (hasText(invoice.getDeliveryAddress())) {
 			source.setDeliveryAddress(invoice.getDeliveryAddress());
 		}
+		if (invoice.getCredentials().size() > 0) {
+			Set<BinFile> pbf = invoice.getCredentials().stream().filter(c -> c.getId() != null).map(BinFile::getId)
+					.map(fid -> binFileRepo.findById(fid).get()).collect(Collectors.toSet());
+			source.getCredentials().clear();// 清空参数里面的凭证
+			source.getCredentials().addAll(pbf);// 再添加上持久化的凭证
+		}
 		return transientDetail(source);
 	}
 
@@ -211,17 +208,11 @@ public class InvoiceServiceImpl extends StandardService<Invoice, Long> implement
 		tasks.addAll(unsignedTasks);
 		// 根据流程的业务ID查询实体并关联
 		return tasks.stream().map(task -> {
-			String processInstanceId = task.getProcessInstanceId();
-			Flow flow = flowRepo.findByProcessInstanceId(processInstanceId);
-			if (flow == null) {
-				return null;
-			}
-			flow.setActivityId(task.getTaskDefinitionKey());
-			flow.setTaskAssignee(task.getAssignee());
-			flow.setTaskId(task.getId());
-			flow.setTaskName(task.getName());
+			Flow flow = new Flow();
+			flow.setFlowType(FlowType.INVOICE);
+			flow.taskInfo(task);
 			return flow;
-		}).filter(flow -> flow != null).collect(Collectors.toList());
+		}).collect(Collectors.toList());
 	}
 
 	/**
@@ -246,7 +237,7 @@ public class InvoiceServiceImpl extends StandardService<Invoice, Long> implement
 	}
 
 	/**
-	 * 审核任务
+	 * 审核任务，包括申请人重提申请或放弃申请
 	 * 
 	 * @param taskId
 	 * @param checkApproved
@@ -257,73 +248,35 @@ public class InvoiceServiceImpl extends StandardService<Invoice, Long> implement
 		if (task == null) {
 			throw new NotFoundException("taskId: " + taskId + "not found");
 		}
+		if (!task.getAssignee().equals(USERNAME.get())) {
+			throw new ForbiddenException(USERNAME.get() + " are not the executor of the task");
+		}
 		switch (task.getTaskDefinitionKey()) {
 		case "administrationAudit":
 			// 将审核信息添加到流程参数上，并完成此任务
 			runtimeService.setVariable(task.getExecutionId(), "checkApproved", String.valueOf(checkApproved));
 			runtimeService.setVariable(task.getExecutionId(), "checkComment", checkComment);
-			taskService.complete(taskId);
-			// 同时维护相关数据
-			Flow flow = flowRepo.findByProcessInstanceId(task.getProcessDefinitionId());
-			if (flow == null) {
-				throw new InnerDataStateException(
-						"not found flow entity by processDefinitionId: " + task.getProcessDefinitionId());
-			}
-			flow.setCheckApproved(checkApproved);
-			flow.setCheckComment(checkComment);
-			Check check = new Check();
-			check.setActivityId(task.getTaskDefinitionKey());
-			check.setCheckApproved(checkApproved);
-			check.setCheckComment(checkComment);
-			check.setCheckerId(USERNAME.get());
-			check.setCheckTime(new Date());
-			check.setTaskName(task.getName());
-			flow.getChecks().add(check);
 			break;
-		case "recheck":
+		case "modifyApply":
+			// 将审核信息添加到流程参数上，并完成此任务
+			runtimeService.setVariable(task.getExecutionId(), "reApply ", String.valueOf(checkApproved));
+			runtimeService.setVariable(task.getExecutionId(), "checkComment", checkComment);
 			break;
 		default:
+			return;
 		}
+		taskService.complete(taskId);
+		// 同时维护相关数据
+		Flow flow = flowRepo.findByProcessInstanceId(task.getProcessDefinitionId());
+		if (flow == null) {
+			throw new InnerDataStateException(
+					"not found flow entity by processDefinitionId: " + task.getProcessDefinitionId());
+		}
+		flow.getChecks().add(new Check(task, checkApproved, checkComment));
 		if (hasText(checkComment)) {
 			// 将审批的评论添加进记录中
 			taskService.addComment(taskId, task.getProcessInstanceId(), checkComment);
 		}
-	}
-
-	/**
-	 * 重新申请
-	 * 
-	 * @param taskId
-	 * @param reApply
-	 * @param invoice
-	 * @return
-	 */
-	public Invoice reApply(String taskId, boolean reApply, Invoice invoice) {
-		Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
-		if (task == null) {
-			throw new NotFoundException("taskId: " + taskId + "not found");
-		}
-		String processInstanceId = task.getProcessInstanceId();
-		Invoice src = invoiceRepo.findByFlowProcessInstanceId(processInstanceId);
-		if (src == null) {
-			throw new InnerDataStateException("not found invoice entity by processInstanceId: " + processInstanceId);
-		}
-		String userId = USERNAME.get();
-		if (!invoice.getFlow().getApplyUserId().equals(userId)) {
-			throw new ForbiddenException("The user: " + userId + " is not the submitter of the task");
-		}
-		if (!"modifyApply".equals(task.getTaskDefinitionKey())) {
-			throw new NotAcceptableException("TaskDefinitionKey is not modifyApply");
-		}
-		Invoice result;
-		if (reApply) {
-			result = update(src.getId(), invoice);
-		} else {
-			result = transientDetail(src);
-		}
-		runtimeService.setVariable(task.getExecutionId(), "reApply", String.valueOf(reApply));
-		taskService.complete(taskId);
-		return result;
 	}
 
 	@Override
@@ -345,13 +298,20 @@ public class InvoiceServiceImpl extends StandardService<Invoice, Long> implement
 			return source;
 		}
 		Invoice target = new Invoice();
-		BeanUtils.copyProperties(source, target, Invoice.getIgnoreProperties("credentials"));
+		BeanUtils.copyProperties(source, target, Invoice.getIgnoreProperties("credentials", "flow"));
 		return target;
 	}
 
 	@Override
 	protected Invoice transientDetail(@Valid Invoice source) {
-		return source;
+		Invoice target = toTransient(source);
+		Flow sourceFlow = source.getFlow();
+		Flow targetFlow = new Flow();
+		BeanUtils.copyProperties(sourceFlow, targetFlow, Invoice.getIgnoreProperties("checks"));
+		targetFlow.getChecks().addAll(sourceFlow.getChecks());// 懒加载所有的check信息
+		target.setFlow(targetFlow);
+		target.getCredentials().addAll(source.getCredentials());// 懒加载所有的凭证
+		return target;
 	}
 
 }
