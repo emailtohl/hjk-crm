@@ -129,20 +129,22 @@ public class InitConfig {
 			em.persist(auser);
 
 			org.activiti.engine.identity.User u = identityService.createUserQuery().userId(name).singleResult();
-			u = identityService.newUser(name);
-			u.setPassword(password);
-			u.setEmail(name + "@localhost");
-			u.setFirstName(name);
-			identityService.saveUser(u);
-
-			ClassPathResource resource = new ClassPathResource("image/icon-head-admin.png");
-			try (InputStream in = resource.getInputStream()) {
-				byte[] bytes = StreamUtils.copyToByteArray(in);
-				Picture p = new Picture(bytes, "application/x-png");
-				identityService.setUserPicture(name, p);
+			if (u == null) {
+				u = identityService.newUser(name);
+				u.setPassword(password);
+				u.setEmail(name + "@localhost");
+				u.setFirstName(name);
+				identityService.saveUser(u);
+				
+				ClassPathResource resource = new ClassPathResource("image/icon-head-admin.png");
+				try (InputStream in = resource.getInputStream()) {
+					byte[] bytes = StreamUtils.copyToByteArray(in);
+					Picture p = new Picture(bytes, "application/x-png");
+					identityService.setUserPicture(name, p);
+				}
+				
+				identityService.createMembership(name, ADMIN.id);
 			}
-
-			identityService.createMembership(name, ADMIN.id);
 		}
 		em.getTransaction().commit();
 		em.close();
@@ -175,20 +177,22 @@ public class InitConfig {
 			em.persist(auser);
 
 			org.activiti.engine.identity.User u = identityService.createUserQuery().userId(name).singleResult();
-			u = identityService.newUser(name);
-			u.setPassword(password);
-			u.setEmail(name + "@localhost");
-			u.setFirstName(name);
-			identityService.saveUser(u);
-
-			ClassPathResource resource = new ClassPathResource("image/icon-head-lisa.jpg");
-			try (InputStream in = resource.getInputStream()) {
-				byte[] bytes = StreamUtils.copyToByteArray(in);
-				Picture p = new Picture(bytes, "application/x-jpg");
-				identityService.setUserPicture(name, p);
+			if (u == null) {
+				u = identityService.newUser(name);
+				u.setPassword(password);
+				u.setEmail(name + "@localhost");
+				u.setFirstName(name);
+				identityService.saveUser(u);
+				
+				ClassPathResource resource = new ClassPathResource("image/icon-head-lisa.jpg");
+				try (InputStream in = resource.getInputStream()) {
+					byte[] bytes = StreamUtils.copyToByteArray(in);
+					Picture p = new Picture(bytes, "application/x-jpg");
+					identityService.setUserPicture(name, p);
+				}
+				
+				identityService.createMembership(name, ADMINISTRATION.id);
 			}
-
-			identityService.createMembership(name, ADMINISTRATION.id);
 		}
 		em.getTransaction().commit();
 		em.close();
@@ -221,13 +225,15 @@ public class InitConfig {
 			em.persist(auser);
 			
 			org.activiti.engine.identity.User u = identityService.createUserQuery().userId(name).singleResult();
-			u = identityService.newUser(name);
-			u.setPassword(password);
-			u.setEmail(name + "@localhost");
-			u.setFirstName(name);
-			identityService.saveUser(u);
-			
-			identityService.createMembership(name, CUSTOMER.id);
+			if (u == null) {
+				u = identityService.newUser(name);
+				u.setPassword(password);
+				u.setEmail(name + "@localhost");
+				u.setFirstName(name);
+				identityService.saveUser(u);
+				
+				identityService.createMembership(name, CUSTOMER.id);
+			}
 		}
 		em.getTransaction().commit();
 		em.close();

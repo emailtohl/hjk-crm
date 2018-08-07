@@ -6,6 +6,8 @@ import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.OneToMany;
@@ -72,6 +74,7 @@ public class Invoice extends BaseEntity {
 	private Flow flow;
 	
 	@Field(bridge = @FieldBridge(impl = EnumBridgeCust.class))
+	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
 	public InvoiceType getType() {
 		return type;
@@ -165,7 +168,7 @@ public class Invoice extends BaseEntity {
 	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinTable(name = "invoice_credentials"
 	, joinColumns = { @JoinColumn(name = "invoice_id", referencedColumnName = "id") }
-	, inverseJoinColumns = { @JoinColumn(name = "credentials_id", referencedColumnName = "id") })
+	, inverseJoinColumns = { @JoinColumn(name = "bin_file_id", referencedColumnName = "id") })
 	public Set<BinFile> getCredentials() {
 		return credentials;
 	}

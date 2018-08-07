@@ -6,6 +6,6 @@ import com.emailtohl.hjk.crm.entities.Invoice;
 
 public interface InvoiceRepo extends JpaRepository<Invoice, Long>, InvoiceRepoCust {
 	
-	Invoice findByFlowProcessInstanceId(String processInstanceId);
+	Invoice findByFlow_ProcessInstanceId(String processInstanceId);
 	
 }

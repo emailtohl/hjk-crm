@@ -13,28 +13,32 @@
     <userTask id="administrationAudit" name="行政人员审批" activiti:candidateGroups="ADMINISTRATION"></userTask>
     <exclusiveGateway id="exclusivegateway1" name="Exclusive Gateway"></exclusiveGateway>
     <userTask id="modifyApply" name="调整申请" activiti:assignee="${applyUserId}"></userTask>
-    <endEvent id="endevent1" name="End"></endEvent>
+    <endEvent id="endevent1" name="End">
+      <extensionElements>
+        <activiti:executionListener event="end" delegateExpression="${completeListener}"></activiti:executionListener>
+      </extensionElements>
+    </endEvent>
     <exclusiveGateway id="exclusivegateway2" name="Exclusive Gateway"></exclusiveGateway>
     <sequenceFlow id="flow1" sourceRef="startevent1" targetRef="administrationAudit"></sequenceFlow>
     <sequenceFlow id="flow2" sourceRef="administrationAudit" targetRef="exclusivegateway1"></sequenceFlow>
     <sequenceFlow id="flow4" name="拒绝" sourceRef="exclusivegateway1" targetRef="modifyApply">
-      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${checkApproved == 'false'}]]></conditionExpression>
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${checkApproved == false}]]></conditionExpression>
     </sequenceFlow>
     <sequenceFlow id="flow6" name="重新申请" sourceRef="exclusivegateway2" targetRef="administrationAudit">
-      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${reApply == 'true'}]]></conditionExpression>
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${reApply == true}]]></conditionExpression>
     </sequenceFlow>
     <sequenceFlow id="flow5" sourceRef="modifyApply" targetRef="exclusivegateway2"></sequenceFlow>
     <sequenceFlow id="flow7" name="结束流程" sourceRef="exclusivegateway2" targetRef="endevent1">
       <extensionElements>
         <activiti:executionListener event="take" expression="${execution.setVariable('result', false)}"></activiti:executionListener>
       </extensionElements>
-      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${reApply == 'false'}]]></conditionExpression>
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${reApply == false}]]></conditionExpression>
     </sequenceFlow>
     <sequenceFlow id="flow3" sourceRef="exclusivegateway1" targetRef="endevent1">
       <extensionElements>
         <activiti:executionListener event="take" expression="${execution.setVariable('result', true)}"></activiti:executionListener>
       </extensionElements>
-      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${checkApproved == 'true'}]]></conditionExpression>
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${checkApproved == true}]]></conditionExpression>
     </sequenceFlow>
     <textAnnotation id="textannotation1" textFormat="text/plain">
       <text>请求被驳回后可选择继续申请，或者取消本次申请</text>
@@ -76,7 +80,7 @@
         <omgdi:waypoint x="270.0" y="67.0"></omgdi:waypoint>
         <omgdi:waypoint x="270.0" y="108.0"></omgdi:waypoint>
         <bpmndi:BPMNLabel>
-          <omgdc:Bounds height="17.0" width="22.0" x="280.0" y="67.0"></omgdc:Bounds>
+          <omgdc:Bounds height="14.0" width="24.0" x="280.0" y="67.0"></omgdc:Bounds>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="flow6" id="BPMNEdge_flow6">
@@ -84,7 +88,7 @@
         <omgdi:waypoint x="142.0" y="239.0"></omgdi:waypoint>
         <omgdi:waypoint x="142.0" y="75.0"></omgdi:waypoint>
         <bpmndi:BPMNLabel>
-          <omgdc:Bounds height="17.0" width="44.0" x="152.0" y="221.0"></omgdc:Bounds>
+          <omgdc:Bounds height="14.0" width="48.0" x="152.0" y="221.0"></omgdc:Bounds>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="flow5" id="BPMNEdge_flow5">
@@ -96,7 +100,7 @@
         <omgdi:waypoint x="517.0" y="240.0"></omgdi:waypoint>
         <omgdi:waypoint x="517.0" y="153.0"></omgdi:waypoint>
         <bpmndi:BPMNLabel>
-          <omgdc:Bounds height="17.0" width="100.0" x="429.0" y="247.0"></omgdc:Bounds>
+          <omgdc:Bounds height="14.0" width="48.0" x="429.0" y="247.0"></omgdc:Bounds>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="flow3" id="BPMNEdge_flow3">

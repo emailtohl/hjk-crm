@@ -1,6 +1,8 @@
 package com.emailtohl.hjk.crm.config;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
@@ -18,7 +20,6 @@ import org.activiti.engine.form.AbstractFormType;
 import org.activiti.engine.impl.form.StringFormType;
 import org.activiti.spring.ProcessEngineFactoryBean;
 import org.activiti.spring.SpringProcessEngineConfiguration;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -26,8 +27,8 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import com.emailtohl.hjk.crm.invoice.InvoiceRepo;
 import com.emailtohl.hjk.crm.invoice.CompleteListener;
+import com.emailtohl.hjk.crm.invoice.InvoiceRepo;
 
 /**
  * 流程配置
@@ -45,18 +46,27 @@ public class ActivitiConfig {
 	@Bean
 	public SpringProcessEngineConfiguration processEngineConfiguration(DataSource dataSource,
 			PlatformTransactionManager platformTransactionManager, EntityManagerFactory jpaEntityManagerFactory,
-			Environment env, ApplicationEventPublisher publisher) {
+			Environment env, CompleteListener completeListener) {
 		SpringProcessEngineConfiguration cfg = new SpringProcessEngineConfiguration();
 		cfg.setDataSource(dataSource);
 		cfg.setTransactionManager(platformTransactionManager);
 		cfg.setJpaEntityManagerFactory(jpaEntityManagerFactory);
 		cfg.setJpaHandleTransaction(false);
 		cfg.setJpaCloseEntityManager(false);
-		cfg.setDatabaseSchemaUpdate(ProcessEngineConfiguration.DB_SCHEMA_UPDATE_TRUE);
 		cfg.setCustomFormTypes(Arrays.asList(new BigtextFormType(), new DoubleFormType(), new JavascriptFormType()));
 		cfg.setDeploymentResources(new Resource[] { new ClassPathResource("processes/invoice.bpmn"), new ClassPathResource("processes/leave.bpmn") });
 		cfg.setActivityFontName("宋体");
 		cfg.setLabelFontName("宋体");
+		
+		Map<Object, Object> beans = new HashMap<>();
+		beans.put("completeListener", completeListener);
+		cfg.setBeans(beans);
+		
+		cfg.setDatabaseSchemaUpdate(ProcessEngineConfiguration.DB_SCHEMA_UPDATE_TRUE);
+		String hbm2ddl_auto = env.getProperty("spring.jpa.properties.hibernate.hbm2ddl.auto", "update");
+		if (ProcessEngineConfiguration.DB_SCHEMA_UPDATE_CREATE_DROP.equalsIgnoreCase(hbm2ddl_auto)) {
+			cfg.setDatabaseSchemaUpdate(ProcessEngineConfiguration.DB_SCHEMA_UPDATE_CREATE_DROP);
+		}
 		return cfg;
 	}
 
@@ -143,7 +153,7 @@ public class ActivitiConfig {
 	public ManagementService managementService(ProcessEngine engine) {
 		return engine.getManagementService();
 	}
-
+	
 }
 
 class BigtextFormType extends StringFormType {

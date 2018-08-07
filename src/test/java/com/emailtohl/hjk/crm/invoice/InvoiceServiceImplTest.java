@@ -55,6 +55,7 @@ public class InvoiceServiceImplTest {
 		invoice.setReceiver("徐一峰");
 		invoice = invoiceService.create(invoice);
 		id = invoice.getId();
+		
 	}
 
 	@After
@@ -86,7 +87,10 @@ public class InvoiceServiceImplTest {
 		changeUser(lisa.getName());
 		flows = invoiceService.findTodoTasks();
 		assertFalse(flows.isEmpty());
-		invoiceService.check(flows.get(0).getTaskId(), true, "可以了");
+		flow = flows.get(0);
+		invoice = invoiceService.claim(flow.getTaskId());
+		System.out.println("再次阅读开票信息，然后进行审批：\n" + invoice);
+		invoiceService.check(flow.getTaskId(), true, "可以了");
 		
 		invoice = invoiceService.read(id);
 		assertTrue(invoice.getPass());
