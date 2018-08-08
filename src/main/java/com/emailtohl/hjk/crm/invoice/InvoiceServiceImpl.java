@@ -21,6 +21,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.emailtohl.hjk.crm.config.SecurityConfig;
 import com.emailtohl.hjk.crm.entities.BinFile;
 import com.emailtohl.hjk.crm.entities.Check;
 import com.emailtohl.hjk.crm.entities.Flow;
@@ -73,11 +74,12 @@ public class InvoiceServiceImpl extends StandardService<Invoice, Long> implement
 		// 先保存开票资料，获取ID
 		invoiceRepo.persist(invoice);
 
-		// 关联上流程
+		// 关联流程
 		Flow fd = new Flow();
 		fd.setFlowType(FlowType.INVOICE);
-		String applyUserId = USERNAME.get();
-		fd.setApplyUserId(applyUserId);
+		String[] username = USER_ID.get().split(SecurityConfig.SEPARATOR);
+		fd.setApplyUserId(username[0]);
+		fd.setApplyUserName(username[1]);
 		// 计算流程编号
 		LocalDate d = LocalDate.now();
 		int year = d.getYear(), month = d.getMonthValue(), day = d.getDayOfMonth();
@@ -99,7 +101,8 @@ public class InvoiceServiceImpl extends StandardService<Invoice, Long> implement
 		fd.setFlowNum(flowNum.toString());
 		// 填写点流程的传输信息
 		Map<String, Object> variables = new HashMap<>();
-		variables.put("applyUserId", applyUserId);
+		variables.put("applyUserId", username[0]);
+		variables.put("applyUserName", username[1]);
 		variables.put("flowNum", flowNum);
 		variables.put("businessKey", businessKey);
 		ProcessInstance processInstance = runtimeService.startProcessInstanceByKey(PROCESS_DEFINITION_KEY, businessKey,
@@ -190,7 +193,8 @@ public class InvoiceServiceImpl extends StandardService<Invoice, Long> implement
 	 * @return
 	 */
 	public List<Flow> findTodoTasks() {
-		String userId = USERNAME.get();
+		String[] username = USER_ID.get().split(SecurityConfig.SEPARATOR);
+		String userId = username[0];
 		List<Task> tasks = new ArrayList<>();
 		// 根据当前人的ID查询
 		List<Task> todoList = taskService.createTaskQuery().processDefinitionKey(PROCESS_DEFINITION_KEY)
@@ -221,7 +225,8 @@ public class InvoiceServiceImpl extends StandardService<Invoice, Long> implement
 		if (task == null) {
 			throw new NotFoundException("taskId: " + taskId + " not found");
 		}
-		String userId = USERNAME.get();
+		String[] username = USER_ID.get().split(SecurityConfig.SEPARATOR);
+		String userId = username[0];
 		try {
 			taskService.claim(taskId, userId);
 		} catch (ActivitiTaskAlreadyClaimedException e) {
@@ -248,8 +253,10 @@ public class InvoiceServiceImpl extends StandardService<Invoice, Long> implement
 			throw new InnerDataStateException(
 					"not found flow entity by processDefinitionId: " + task.getProcessDefinitionId());
 		}
-		if (!USERNAME.get().equals(task.getAssignee())) {
-			throw new ForbiddenException(USERNAME.get() + " are not the executor of the task");
+		String[] username = USER_ID.get().split(SecurityConfig.SEPARATOR);
+		String userId = username[0];
+		if (!userId.equals(task.getAssignee())) {
+			throw new ForbiddenException(username[1] + " are not the executor of the task");
 		}
 		switch (task.getTaskDefinitionKey()) {
 		case "administrationAudit":

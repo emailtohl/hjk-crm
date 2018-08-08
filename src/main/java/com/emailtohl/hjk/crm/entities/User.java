@@ -45,13 +45,13 @@ public class User extends BaseEntity {
 
 	private IdentityType identityType;
 	private String idNumber;
-	@NotNull
-	private String name;// 唯一识别、不可变、不能为空
+	private String name;
 	private String nickname;// 可存储第三方昵称
 	private String serialNumber; // 编号
 	@Pattern(// 校验
 			regexp = ConstantPattern.EMAIL, flags = { Pattern.Flag.CASE_INSENSITIVE })
-	private String email;
+	@NotNull
+	private String email;// 唯一识别、不能为空
 
 	@Pattern(regexp = ConstantPattern.CELL_PHONE)
 	private String cellPhone;
@@ -86,6 +86,7 @@ public class User extends BaseEntity {
 	}
 
 	@Field
+	@Column(unique = true)
 	public String getIdNumber() {
 		return idNumber;
 	}
@@ -95,7 +96,7 @@ public class User extends BaseEntity {
 	}
 
 	@Field
-	@Column(nullable = false, unique = true, updatable = false)
+	@Column
 	public String getName() {
 		return name;
 	}
@@ -121,8 +122,12 @@ public class User extends BaseEntity {
 		this.serialNumber = serialNumber;
 	}
 
+	/**
+	 * 邮箱不能为空，用于登录
+	 * @return
+	 */
 	@Field
-	@Column(unique = true, updatable = true)
+	@Column(nullable = false, unique = true, updatable = true)
 	public String getEmail() {
 		return email;
 	}

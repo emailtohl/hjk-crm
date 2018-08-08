@@ -34,6 +34,8 @@ public class Flow extends BaseEntity {
 	private FlowType flowType;
 	// 申请人id
 	private String applyUserId;
+	// 申请人姓名
+	private String applyUserName;
 	// 历史的审核信息
 	private List<Check> checks = new ArrayList<>();
 	
@@ -93,6 +95,14 @@ public class Flow extends BaseEntity {
 		this.applyUserId = applyUserId;
 	}
 	
+	@Column(name = "apply_user_name", nullable = false, updatable = false)
+	public String getApplyUserName() {
+		return applyUserName;
+	}
+	public void setApplyUserName(String applyUserName) {
+		this.applyUserName = applyUserName;
+	}
+
 	@ElementCollection
 	@CollectionTable(name = "flow_data_check", joinColumns = @JoinColumn(name = "flow_data_id"))
 	@OrderBy("checkTime ASC")

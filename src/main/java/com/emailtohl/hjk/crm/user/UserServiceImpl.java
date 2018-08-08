@@ -45,6 +45,9 @@ public class UserServiceImpl extends StandardService<User, Long> implements User
 	@Override
 	public User create(@Valid User user) {
 		validate(user);
+		if (!hasText(user.getName())) {// 如果用户名是空的，那么将邮箱前缀作为用户名
+			user.setName(user.getEmail().split("@")[0].trim());
+		}
 		user.setAccountNonExpired(true);
 		user.setAccountNonLocked(true);
 		user.setCredentialsNonExpired(true);
@@ -52,11 +55,15 @@ public class UserServiceImpl extends StandardService<User, Long> implements User
 		String hashedPw = passwordEncoder.encode(user.getPassword());
 		user.setPassword(hashedPw);
 		userRepo.persist(user);
-		org.activiti.engine.identity.User u = identityService.newUser(user.getName());
+		String userId = user.getId().toString();
+		org.activiti.engine.identity.User u = identityService.newUser(userId);
 		u.setEmail(user.getEmail());
-		u.setFirstName(user.getNickname());
+		u.setFirstName(user.getName());
+		u.setLastName(user.getNickname());
 		u.setPassword(hashedPw);
 		identityService.saveUser(u);
+		identityService.setUserInfo(userId, "cellPhone", user.getCellPhone());
+		identityService.setUserInfo(userId, "idNumber", user.getIdNumber());
 		return user;
 	}
 
@@ -87,10 +94,15 @@ public class UserServiceImpl extends StandardService<User, Long> implements User
 		}
 		if (hasText(user.getIdNumber())) {
 			source.setIdNumber(user.getIdNumber());
+			identityService.setUserInfo(id.toString(), "idNumber", user.getIdNumber());
+		}
+		if (hasText(user.getName())) {
+			source.setName(user.getName());
+			u.setFirstName(user.getName());
 		}
 		if (hasText(user.getNickname())) {
 			source.setNickname(user.getNickname());
-			u.setFirstName(user.getNickname());
+			u.setLastName(user.getNickname());
 		}
 		if (hasText(user.getEmail())) {
 			source.setEmail(user.getEmail());
@@ -98,6 +110,7 @@ public class UserServiceImpl extends StandardService<User, Long> implements User
 		}
 		if (hasText(user.getCellPhone())) {
 			source.setCellPhone(user.getCellPhone());
+			identityService.setUserInfo(id.toString(), "cellPhone", user.getCellPhone());
 		}
 		if (hasText(user.getAddress())) {
 			source.setAddress(user.getAddress());
@@ -120,9 +133,9 @@ public class UserServiceImpl extends StandardService<User, Long> implements User
 
 	@Override
 	public void delete(Long id) {
-		String name = userRepo.findById(id).get().getName();
-		identityService.createGroupQuery().groupMember(name).list().stream().map(Group::getId)
-				.forEach(groupId -> identityService.deleteMembership(name, groupId));
+		String _id = id.toString();
+		identityService.createGroupQuery().groupMember(_id).list().stream().map(Group::getId)
+				.forEach(groupId -> identityService.deleteMembership(_id, groupId));
 		userRepo.deleteById(id);
 	}
 
@@ -141,17 +154,17 @@ public class UserServiceImpl extends StandardService<User, Long> implements User
 
 	@Override
 	public void setGroups(Long id, GroupEnum... groups) {
-		String name = userRepo.findById(id).get().getName();
-		identityService.createGroupQuery().groupMember(name).list().stream().map(Group::getId)
-				.forEach(groupId -> identityService.deleteMembership(name, groupId));
+		String _id = id.toString();
+		identityService.createGroupQuery().groupMember(_id).list().stream().map(Group::getId)
+				.forEach(groupId -> identityService.deleteMembership(_id, groupId));
 		Arrays.stream(groups).filter(groupId -> GroupEnum.ADMIN != groupId)
-				.forEach(groupId -> identityService.createMembership(name, groupId.name()));
+				.forEach(groupId -> identityService.createMembership(_id, groupId.name()));
 	}
 
 	@Override
 	public Set<GroupEnum> getGroups(Long id) {
-		String name = userRepo.findById(id).get().getName();
-		return identityService.createGroupQuery().groupMember(name).list().stream().map(Group::getId)
+		String _id = id.toString();
+		return identityService.createGroupQuery().groupMember(_id).list().stream().map(Group::getId)
 				.map(GroupEnum::valueOf).collect(Collectors.toSet());
 	}
 

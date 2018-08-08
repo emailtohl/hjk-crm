@@ -28,6 +28,7 @@ import org.springframework.web.cors.CorsUtils;
 @Import({ BeansConfig.class })
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
+	public static final String SEPARATOR = ":";
 	@Autowired
 	private IdentityService identityService;
 	@Autowired
@@ -57,14 +58,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Override
 	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-		auth.userDetailsService(username -> {
-			User user = identityService.createUserQuery().userId(username).singleResult();
+		auth.userDetailsService(email -> {// email是必填项，用作登录
+			User user = identityService.createUserQuery().userEmail(email).singleResult();
 			if (user == null) {
-				throw new UsernameNotFoundException(username);
+				throw new UsernameNotFoundException(email);
 			}
-			List<String> groupIds = identityService.createGroupQuery().groupMember(username).list().stream()
+			List<String> groupIds = identityService.createGroupQuery().groupMember(user.getId()).list().stream()
 					.map(Group::getId).collect(Collectors.toList());
-			return new org.springframework.security.core.userdetails.User(user.getId(), user.getPassword(),
+			return new org.springframework.security.core.userdetails.User(user.getId() + SEPARATOR + user.getFirstName(),
+					user.getPassword(),
 					AuthorityUtils.createAuthorityList(groupIds.toArray(new String[groupIds.size()])));
 		}).passwordEncoder(passwordEncoder);
 	}

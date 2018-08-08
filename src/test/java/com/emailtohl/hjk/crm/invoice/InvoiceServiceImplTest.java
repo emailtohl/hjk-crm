@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import com.emailtohl.hjk.crm.config.SecurityConfig;
 import com.emailtohl.hjk.crm.entities.Flow;
 import com.emailtohl.hjk.crm.entities.Invoice;
 import com.emailtohl.hjk.crm.entities.InvoiceType;
@@ -26,8 +27,8 @@ import com.github.emailtohl.lib.StandardService;
 @SpringBootTest
 public class InvoiceServiceImplTest {
 	@Autowired
-	@Qualifier("foo")
-	private User foo;
+	@Qualifier("troungSon")
+	private User troungSon;
 	@Autowired
 	@Qualifier("lisa")
 	private User lisa;
@@ -39,7 +40,7 @@ public class InvoiceServiceImplTest {
 
 	@Before
 	public void setUp() throws Exception {
-		changeUser(foo.getName());
+		changeUser(troungSon);
 		Invoice invoice = new Invoice();
 		invoice.setType(InvoiceType.ORDINARY);
 		invoice.setOrganization("浙江基恒康门业有限公司");
@@ -65,7 +66,7 @@ public class InvoiceServiceImplTest {
 
 	@Test
 	public void testFlow() {
-		changeUser(lisa.getName());
+		changeUser(lisa);
 		List<Flow> flows = invoiceService.findTodoTasks();
 		assertFalse(flows.isEmpty());
 		Flow flow = flows.get(0);
@@ -74,7 +75,7 @@ public class InvoiceServiceImplTest {
 		System.out.println("阅读开票信息，然后进行审批：\n" + invoice);
 		invoiceService.check(flow.getTaskId(), false, "修改备注信息");
 		
-		changeUser(foo.getName());
+		changeUser(troungSon);
 		flows = invoiceService.findTodoTasks();
 		assertFalse(flows.isEmpty());
 		flow = flows.get(0);
@@ -84,7 +85,7 @@ public class InvoiceServiceImplTest {
 		invoice = invoiceService.update(id, invoice);
 		invoiceService.check(flows.get(0).getTaskId(), true, "已修改");
 		
-		changeUser(lisa.getName());
+		changeUser(lisa);
 		flows = invoiceService.findTodoTasks();
 		assertFalse(flows.isEmpty());
 		flow = flows.get(0);
@@ -96,9 +97,10 @@ public class InvoiceServiceImplTest {
 		assertTrue(invoice.getPass());
 	}
 	
-	private void changeUser(String name) {
-		identityService.setAuthenticatedUserId(name);
-		StandardService.USERNAME.set(name);
+	private void changeUser(User user) {
+		String userId = user.getId().toString();
+		identityService.setAuthenticatedUserId(userId);
+		StandardService.USER_ID.set(userId + SecurityConfig.SEPARATOR + user.getName());
 	}
 
 }
