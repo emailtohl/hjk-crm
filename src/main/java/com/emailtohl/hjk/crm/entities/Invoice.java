@@ -20,6 +20,7 @@ import org.hibernate.search.annotations.Field;
 import org.hibernate.search.annotations.FieldBridge;
 import org.hibernate.search.annotations.Indexed;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.github.emailtohl.lib.jpa.BaseEntity;
 import com.github.emailtohl.lib.jpa.EnumBridgeCust;
 
@@ -27,6 +28,7 @@ import com.github.emailtohl.lib.jpa.EnumBridgeCust;
  * 发票
  * @author HeLei
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 @Indexed
 @Audited
 @Entity

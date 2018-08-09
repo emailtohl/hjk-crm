@@ -21,6 +21,8 @@ import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.cors.CorsUtils;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 /**
  * 安全层配置
  * @author HeLei
@@ -34,6 +36,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	private IdentityService identityService;
 	@Autowired
 	private PasswordEncoder passwordEncoder;
+	@Autowired
+	private ObjectMapper om;
 
 	@Override
 	public void configure(WebSecurity security) {
@@ -51,7 +55,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		.antMatchers(permitAll).permitAll()
 		.antMatchers(HttpMethod.POST, "/users").permitAll()
 		.anyRequest().authenticated()
-		.and().formLogin()
+		.and().formLogin().usernameParameter("email").permitAll().successHandler((req, resp, auth) -> resp.getWriter().write(om.writeValueAsString(auth)))
 		.and().logout().logoutSuccessUrl("/login")
 		.and().csrf().ignoringAntMatchers("/topic", "/queue", "/socket")
         // allow same origin to frame our site to support iframe SockJS

@@ -74,7 +74,7 @@ public class UserServiceImpl extends StandardService<User, Long> implements User
 		identityService.setUserInfo(userId, "cellPhone", user.getCellPhone());
 		identityService.setUserInfo(userId, "idNumber", user.getIdNumber());
 		user.getGroups().forEach(g -> identityService.createMembership(userId, g.id));
-		return user;
+		return transientDetail(user);
 	}
 
 	@Override
@@ -189,13 +189,15 @@ public class UserServiceImpl extends StandardService<User, Long> implements User
 			return source;
 		}
 		User target = new User();
-		BeanUtils.copyProperties(source, target,
-				User.getIgnoreProperties("password", "lastLogin", "lastChangeCredentials", "age", "groups"));
+		BeanUtils.copyProperties(source, target, "password", "groups");
 		return target;
 	}
 
 	@Override
-	protected User transientDetail(@Valid User source) {
+	protected User transientDetail(User source) {
+		if (source == null) {
+			return null;
+		}
 		User target = toTransient(source);
 		Set<GroupEnum> groups = identityService.createGroupQuery().groupMember(source.getId().toString()).list()
 				.stream().map(Group::getId).map(GroupEnum::valueOf).collect(Collectors.toSet());

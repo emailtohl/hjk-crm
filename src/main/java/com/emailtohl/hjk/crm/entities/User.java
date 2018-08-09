@@ -31,6 +31,7 @@ import org.hibernate.search.annotations.Store;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.github.emailtohl.lib.ConstantPattern;
 import com.github.emailtohl.lib.jpa.BaseEntity;
 import com.github.emailtohl.lib.jpa.EnumBridgeCust;
@@ -40,6 +41,7 @@ import com.github.emailtohl.lib.jpa.EnumBridgeCust;
  * 
  * @author HeLei
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 @Indexed
 @Entity
 @Table(name = "users")
