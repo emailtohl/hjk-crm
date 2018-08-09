@@ -1,10 +1,16 @@
 package com.emailtohl.hjk.crm.controller;
+import java.io.IOException;
 
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
+
+import org.activiti.engine.identity.Picture;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
+import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,6 +24,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.emailtohl.hjk.crm.entities.GroupEnum;
 import com.emailtohl.hjk.crm.entities.User;
 import com.emailtohl.hjk.crm.user.UserService;
+import com.github.emailtohl.lib.exception.InnerDataStateException;
+import com.github.emailtohl.lib.exception.NotFoundException;
 import com.github.emailtohl.lib.jpa.BaseEntity;
 import com.github.emailtohl.lib.jpa.Paging;
 
@@ -38,7 +46,7 @@ public class UserCtl {
 	 */
 	@GetMapping("exist/{name}")
 	public boolean exist(@PathVariable("name") String name) {
-		return userService.exist(name);
+		return userService.emailIsExist(name);
 	}
 
 	/**
@@ -129,6 +137,26 @@ public class UserCtl {
 	@GetMapping("{id}/groups")
 	public String getGroupIds(@PathVariable("id") Long id) {
 		return userService.getGroups(id).toString();
+	}
+	
+	/**
+	 * 获取用户头像
+	 * @param id
+	 * @param response
+	 */
+	@GetMapping("userPicture/{id}")
+	public void getUserPicture(@PathVariable("id") Long id, HttpServletResponse response) {
+		Picture pic = userService.getUserPicture(id);
+		if (pic == null) {
+			throw new NotFoundException("not exist " + id);
+		}
+		response.setHeader("content-disposition", "attachment;fileName=" + id.toString());
+		response.setContentType(pic.getMimeType());
+		try (ServletOutputStream out = response.getOutputStream()) {
+			StreamUtils.copy(pic.getBytes(), out);
+		} catch (IOException e) {
+			throw new InnerDataStateException("read file failed", e);
+		}
 	}
 
 	public static class Form {

@@ -10,8 +10,12 @@ import javax.validation.Valid;
 
 import org.activiti.engine.IdentityService;
 import org.activiti.engine.identity.Group;
+import org.activiti.engine.identity.Picture;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -36,10 +40,15 @@ public class UserServiceImpl extends StandardService<User, Long> implements User
 	private UserRepo userRepo;
 	@Autowired
 	private IdentityService identityService;
+	
+	private ExampleMatcher emailMatcher = ExampleMatcher.matching().withMatcher("email", GenericPropertyMatchers.exact());
 
 	@Override
-	public boolean exist(String name) {
-		return userRepo.exist(name);
+	public boolean emailIsExist(String email) {
+		User u = new User();
+		u.setEmail(email);
+		Example<User> example = Example.<User>of(u, emailMatcher);
+		return userRepo.exists(example);
 	}
 
 	@Override
@@ -166,6 +175,11 @@ public class UserServiceImpl extends StandardService<User, Long> implements User
 		String _id = id.toString();
 		return identityService.createGroupQuery().groupMember(_id).list().stream().map(Group::getId)
 				.map(GroupEnum::valueOf).collect(Collectors.toSet());
+	}
+
+	@Override
+	public Picture getUserPicture(Long id) {
+		return identityService.getUserPicture(id.toString());
 	}
 
 	@Override

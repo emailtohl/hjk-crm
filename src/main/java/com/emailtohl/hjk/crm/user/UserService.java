@@ -2,6 +2,7 @@ package com.emailtohl.hjk.crm.user;
 
 import java.util.Set;
 
+import org.activiti.engine.identity.Picture;
 import org.springframework.data.domain.Pageable;
 
 import com.emailtohl.hjk.crm.entities.GroupEnum;
@@ -19,7 +20,7 @@ public interface UserService {
 	 * @param name
 	 * @return
 	 */
-	boolean exist(String name);
+	boolean emailIsExist(String name);
 	
 	/**
 	 * 创建用户信息
@@ -77,5 +78,12 @@ public interface UserService {
 	 * @return
 	 */
 	Set<GroupEnum> getGroups(Long id);
+	
+	/**
+	 * 获取用户头像
+	 * @param id
+	 * @return
+	 */
+	Picture getUserPicture(Long id);
 	
 }
