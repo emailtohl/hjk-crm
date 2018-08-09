@@ -88,4 +88,5 @@ public class FileCtl {
 			LOG.error(BinFile.getFilename() + " file read failed", e);
 		}
 	}
+	
 }

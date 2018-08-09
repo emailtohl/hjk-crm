@@ -1,14 +1,12 @@
-package com.emailtohl.hjk.hjkcrm;
+package com.emailtohl.hjk.crm;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import com.emailtohl.hjk.crm.HjkCrmApplication;
-
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = HjkCrmApplication.class)
+@SpringBootTest
 public class HjkCrmApplicationTests {
 
 	@Test
