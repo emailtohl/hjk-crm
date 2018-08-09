@@ -6,6 +6,8 @@ import java.time.LocalDateTime;
 import java.time.Period;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -14,6 +16,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -74,6 +77,8 @@ public class User extends BaseEntity {
 	private BinFile image;
 	@Size(max = 300)
 	private String description;
+	
+	private Set<GroupEnum> groups = new HashSet<>();
 
 	@Field(bridge = @FieldBridge(impl = EnumBridgeCust.class))
 	@Enumerated(EnumType.STRING)
@@ -278,6 +283,14 @@ public class User extends BaseEntity {
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+	
+	@Transient
+	public Set<GroupEnum> getGroups() {
+		return groups;
+	}
+	public void setGroups(Set<GroupEnum> groups) {
+		this.groups = groups;
 	}
 
 	@Override

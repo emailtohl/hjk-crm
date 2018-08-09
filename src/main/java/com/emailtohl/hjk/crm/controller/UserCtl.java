@@ -41,12 +41,12 @@ public class UserCtl {
 	private UserService userService;
 	/**
 	 * 用户名是否存在
-	 * @param name
+	 * @param email
 	 * @return
 	 */
-	@GetMapping("exist/{name}")
-	public boolean exist(@PathVariable("name") String name) {
-		return userService.emailIsExist(name);
+	@GetMapping("exist/{email}")
+	public boolean exist(@PathVariable("email") String email) {
+		return userService.emailIsExist(email);
 	}
 
 	/**
@@ -58,7 +58,6 @@ public class UserCtl {
 	@PostMapping
 	public User create(@RequestBody User user) {
 		return userService.create(user);
-
 	}
 
 	/**

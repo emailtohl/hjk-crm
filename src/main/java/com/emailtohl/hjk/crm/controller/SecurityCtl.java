@@ -2,7 +2,11 @@ package com.emailtohl.hjk.crm.controller;
 
 import java.security.Principal;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Map;
 import java.util.stream.Collectors;
+
+import javax.servlet.http.HttpSession;
 
 import org.springframework.http.MediaType;
 import org.springframework.security.web.csrf.CsrfToken;
@@ -57,4 +61,13 @@ public class SecurityCtl {
 		return groupsJson;
 	}
 
+	/**
+	 * session ID包含在名为“X-Auth-Token”的header中
+	 * @param session
+	 * @return
+	 */
+	@GetMapping("token")
+	public Map<String, String> token(HttpSession session) {
+		return Collections.singletonMap("token", session.getId());
+	}
 }
