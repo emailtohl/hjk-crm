@@ -60,7 +60,17 @@ public class UserServiceImpl extends StandardService<User, Long> implements User
 		user.setAccountNonExpired(true);
 		user.setAccountNonLocked(true);
 		user.setCredentialsNonExpired(true);
-		user.setEnabled(true);
+		
+		Set<GroupEnum> groups = user.getGroups();
+		// 若该用户不仅是属于客户组的话，那么size就会大于1
+		// 如果size小于等于1的话，那么就判断该用户是否只含有客户组
+		// 以上两种情况，该用户属于内部账号，不能立即启用
+		if (groups.size() > 1 || (groups.size() == 1 && !groups.contains(GroupEnum.CUSTOMER))) {
+			user.setEnabled(false);
+		} else {
+			user.setEnabled(true);
+		}
+		
 		String hashedPw = passwordEncoder.encode(user.getPassword());
 		user.setPassword(hashedPw);
 		userRepo.persist(user);

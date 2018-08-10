@@ -18,9 +18,12 @@ import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
 import org.activiti.engine.form.AbstractFormType;
 import org.activiti.engine.impl.form.StringFormType;
+import org.activiti.rest.common.application.DefaultContentTypeResolver;
+import org.activiti.rest.service.api.RestResponseFactory;
 import org.activiti.spring.ProcessEngineFactoryBean;
 import org.activiti.spring.SpringProcessEngineConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ClassPathResource;
@@ -36,6 +39,7 @@ import com.emailtohl.hjk.crm.invoice.InvoiceRepo;
  * @author HeLei
  */
 @Configuration
+@ComponentScan(basePackages = { "org.activiti.rest", "org.activiti.conf" })
 public class ActivitiConfig {
 	
 	@Bean
@@ -154,6 +158,20 @@ public class ActivitiConfig {
 		return engine.getManagementService();
 	}
 	
+	/**
+	 * 集成REST服务需要的bean
+	 * 
+	 * @return
+	 */
+	@Bean
+	public RestResponseFactory restResponseFactory() {
+		return new RestResponseFactory();
+	}
+
+	@Bean
+	public DefaultContentTypeResolver contentTypeResolver() {
+		return new DefaultContentTypeResolver();
+	}
 }
 
 class BigtextFormType extends StringFormType {

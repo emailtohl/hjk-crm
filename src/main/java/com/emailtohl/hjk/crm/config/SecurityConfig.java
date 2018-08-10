@@ -53,7 +53,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		security
 		.authorizeRequests()
 		.antMatchers(permitAll).permitAll()
-		.antMatchers(HttpMethod.POST, "/users").permitAll()
+//		.antMatchers(HttpMethod.POST, "/users").permitAll()
 		.anyRequest().authenticated()
 		.and().formLogin().usernameParameter("email").permitAll().successHandler((req, resp, auth) -> resp.getWriter().write(om.writeValueAsString(auth)))
 		.and().logout().logoutSuccessUrl("/login")
