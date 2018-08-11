@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.emailtohl.hjk.crm.entities.GroupEnum;
 
 /**
- * 安全相关的接口
+ * 一些基础数据的接口
  * 
  * @author HeLei
  */

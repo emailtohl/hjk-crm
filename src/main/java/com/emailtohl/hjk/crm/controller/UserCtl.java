@@ -11,6 +11,7 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
 import org.springframework.util.StreamUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -44,9 +45,13 @@ public class UserCtl {
 	 * @param email
 	 * @return
 	 */
-	@GetMapping("exist/{email}")
-	public boolean exist(@PathVariable("email") String email) {
-		return userService.emailIsExist(email);
+	@GetMapping("exist")
+	public boolean exist(@RequestParam(required = false, defaultValue = "") String email) {
+		if (StringUtils.hasText(email)) {
+			return userService.emailIsExist(email);
+		} else {
+			return false;
+		}
 	}
 
 	/**
@@ -156,6 +161,15 @@ public class UserCtl {
 		} catch (IOException e) {
 			throw new InnerDataStateException("read file failed", e);
 		}
+	}
+	
+	/**
+	 * 重置用户密码
+	 * @param form
+	 */
+	@PostMapping("resetPassword")
+	public void resetPassword(@RequestBody Form form) {
+		userService.resetPassword(form.id);
 	}
 
 	public static class Form {

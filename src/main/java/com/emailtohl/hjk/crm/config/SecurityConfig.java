@@ -49,11 +49,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Override
 	protected void configure(HttpSecurity security) throws Exception {
-		String[] permitAll = { "/csrf", "/principal", "/token", "/groups", "/swagger-resources/**", "/api-docs/**" };
+		String[] permitAll = { "/csrf", "/principal", "/token", "/groups", "/users/exist", "/swagger-resources/**",
+				"/api-docs/**" };
 		security
 		.authorizeRequests()
 		.antMatchers(permitAll).permitAll()
-//		.antMatchers(HttpMethod.POST, "/users").permitAll()
+		.antMatchers(HttpMethod.POST, "/users").permitAll()
 		.anyRequest().authenticated()
 		.and().formLogin().usernameParameter("email").permitAll().successHandler((req, resp, auth) -> resp.getWriter().write(om.writeValueAsString(auth)))
 		.and().logout().logoutSuccessUrl("/login")

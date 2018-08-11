@@ -194,6 +194,16 @@ public class UserServiceImpl extends StandardService<User, Long> implements User
 	}
 
 	@Override
+	public void resetPassword(Long id) {
+		User u = userRepo.findById(id).get();
+		String hashed = passwordEncoder.encode("123456");
+		u.setPassword(hashed);
+		org.activiti.engine.identity.User _u = identityService.createUserQuery().userId(id.toString()).singleResult();
+		_u.setPassword(hashed);
+		identityService.saveUser(_u);
+	}
+
+	@Override
 	protected User toTransient(User source) {
 		if (source == null) {
 			return source;

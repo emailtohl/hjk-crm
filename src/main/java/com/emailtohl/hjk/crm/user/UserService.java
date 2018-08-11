@@ -86,4 +86,10 @@ public interface UserService {
 	 */
 	Picture getUserPicture(Long id);
 	
+	/**
+	 * 重置密码为123456
+	 * @param id
+	 */
+	void resetPassword(Long id);
+	
 }
