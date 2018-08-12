@@ -5,10 +5,12 @@ import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -35,8 +37,39 @@ import com.github.emailtohl.lib.jpa.Paging;
 @RequestMapping(value = "invoices", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 public class InvoiceCtl {
 	private static final Logger LOG = LogManager.getLogger();
+	@Autowired
 	private InvoiceService invoiceService;
 
+	/**
+	 * 检查该纳税人识别号是否存在
+	 * @param taxNumber
+	 * @return
+	 */
+	@GetMapping("isTaxNumberExist")
+	public boolean isTaxNumberExist(@RequestParam(required = false, defaultValue = "") String taxNumber) {
+		boolean reslut = false;
+		if (StringUtils.hasText(taxNumber)) {
+			reslut = invoiceService.isTaxNumberExist(taxNumber);
+		}
+		LOG.debug(" taxNumber exist {} ", reslut);
+		return reslut;
+	}
+	
+	/**
+	 * 检查该账户是否存在
+	 * @param account
+	 * @return
+	 */
+	@GetMapping("isAccountExist")
+	public boolean isAccountExist(@RequestParam(required = false, defaultValue = "") String account) {
+		boolean reslut = false;
+		if (StringUtils.hasText(account)) {
+			reslut = invoiceService.isAccountExist(account);
+		}
+		LOG.debug(" account exist {} ", reslut);
+		return reslut;
+	}
+	
 	/**
 	 * 创建发票资料
 	 * 

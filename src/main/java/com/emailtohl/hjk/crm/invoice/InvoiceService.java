@@ -16,6 +16,21 @@ import com.github.emailtohl.lib.jpa.AuditedRepository.Tuple;
  * @author HeLei
  */
 public interface InvoiceService {
+	
+	/**
+	 * 检查该税号是否存在
+	 * @param taxNumber 税号
+	 * @return
+	 */
+	boolean isTaxNumberExist(String taxNumber);
+	
+	/**
+	 * 检查该账户是否存在
+	 * @param account
+	 * @return
+	 */
+	boolean isAccountExist(String account);
+	
 	/**
 	 * 创建发票资料
 	 * @param invoice

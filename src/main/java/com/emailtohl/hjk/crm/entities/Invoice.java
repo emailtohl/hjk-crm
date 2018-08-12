@@ -6,8 +6,6 @@ import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.OneToMany;
@@ -17,12 +15,10 @@ import javax.validation.constraints.NotNull;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.hibernate.search.annotations.Field;
-import org.hibernate.search.annotations.FieldBridge;
 import org.hibernate.search.annotations.Indexed;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.github.emailtohl.lib.jpa.BaseEntity;
-import com.github.emailtohl.lib.jpa.EnumBridgeCust;
 
 /**
  * 发票
@@ -34,9 +30,6 @@ import com.github.emailtohl.lib.jpa.EnumBridgeCust;
 @Entity
 public class Invoice extends BaseEntity {
 	private static final long serialVersionUID = -2949903806197415296L;
-	// 普票还是专票
-	@NotNull
-	private InvoiceType type;
 	// 公司名
 	@NotNull
 	private String organization;
@@ -74,16 +67,6 @@ public class Invoice extends BaseEntity {
 	
 	// 与流程相关的信息
 	private Flow flow;
-	
-	@Field(bridge = @FieldBridge(impl = EnumBridgeCust.class))
-	@Enumerated(EnumType.STRING)
-	@Column(nullable = false)
-	public InvoiceType getType() {
-		return type;
-	}
-	public void setType(InvoiceType type) {
-		this.type = type;
-	}
 	
 	@Field
 	@Column(nullable = false)

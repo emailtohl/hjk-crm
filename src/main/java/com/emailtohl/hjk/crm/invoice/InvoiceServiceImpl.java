@@ -17,6 +17,9 @@ import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -57,6 +60,25 @@ public class InvoiceServiceImpl extends StandardService<Invoice, Long> implement
 	@Autowired
 	private TaskService taskService;
 
+	private ExampleMatcher taxNumberMatcher = ExampleMatcher.matching().withMatcher("taxNumber", GenericPropertyMatchers.exact());
+	private ExampleMatcher accountMatcher = ExampleMatcher.matching().withMatcher("taxNumber", GenericPropertyMatchers.exact());
+
+	@Override
+	public boolean isTaxNumberExist(String taxNumber) {
+		Invoice invoice = new Invoice();
+		invoice.setTaxNumber(taxNumber);
+		Example<Invoice> example = Example.<Invoice>of(invoice, taxNumberMatcher);
+		return invoiceRepo.exists(example);
+	}
+	
+	@Override
+	public boolean isAccountExist(String account) {
+		Invoice invoice = new Invoice();
+		invoice.setAccount(account);
+		Example<Invoice> example = Example.<Invoice>of(invoice, accountMatcher);
+		return invoiceRepo.exists(example);
+	}
+	
 	@Override
 	public Invoice create(Invoice invoice) {
 		// 校验提交的表单信息
@@ -143,9 +165,6 @@ public class InvoiceServiceImpl extends StandardService<Invoice, Long> implement
 	@Override
 	public Invoice update(Long id, Invoice invoice) {
 		Invoice source = invoiceRepo.findById(id).get();
-		if (invoice.getType() != null) {
-			source.setType(invoice.getType());
-		}
 		if (hasText(invoice.getOrganization())) {
 			source.setOrganization(invoice.getOrganization());
 		}

@@ -19,7 +19,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import com.emailtohl.hjk.crm.config.SecurityConfig;
 import com.emailtohl.hjk.crm.entities.Flow;
 import com.emailtohl.hjk.crm.entities.Invoice;
-import com.emailtohl.hjk.crm.entities.InvoiceType;
 import com.emailtohl.hjk.crm.entities.User;
 import com.github.emailtohl.lib.StandardService;
 
@@ -42,7 +41,6 @@ public class InvoiceServiceImplTest {
 	public void setUp() throws Exception {
 		changeUser(troungSon);
 		Invoice invoice = new Invoice();
-		invoice.setType(InvoiceType.ORDINARY);
 		invoice.setOrganization("浙江基恒康门业有限公司");
 		invoice.setTaxNumber("91330702790992808Q");
 		invoice.setOrganizationAddress("金华市婺城新城区临江工业园区星康路99号");
