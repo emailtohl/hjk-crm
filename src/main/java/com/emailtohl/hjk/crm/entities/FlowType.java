@@ -6,5 +6,5 @@ package com.emailtohl.hjk.crm.entities;
  * @author HeLei
  */
 public enum FlowType {
-	INVOICE/* 发票审批 */
+	ORGANIZATION, INVOICE/* 发票审批 */
 }

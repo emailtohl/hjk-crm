@@ -9,13 +9,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.emailtohl.hjk.crm.entities.Flow;
-import com.emailtohl.hjk.crm.invoice.InvoiceService;
+import com.emailtohl.hjk.crm.organization.OrganizationService;
 
 @RestController
 @RequestMapping("flow")
 public class FlowCtl {
 	@Autowired
-	private InvoiceService invoiceService;
+	private OrganizationService invoiceService;
 	
 	/**
 	 * 查询当前用户的任务

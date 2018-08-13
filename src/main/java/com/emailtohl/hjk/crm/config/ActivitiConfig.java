@@ -30,8 +30,8 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import com.emailtohl.hjk.crm.invoice.CompleteListener;
-import com.emailtohl.hjk.crm.invoice.InvoiceRepo;
+import com.emailtohl.hjk.crm.flow.CompleteListener;
+import com.emailtohl.hjk.crm.organization.OrganizationRepo;
 
 /**
  * 流程配置
@@ -43,7 +43,7 @@ import com.emailtohl.hjk.crm.invoice.InvoiceRepo;
 public class ActivitiConfig {
 	
 	@Bean
-	public CompleteListener taskCompleteListener(InvoiceRepo invoiceRepo) {
+	public CompleteListener taskCompleteListener(OrganizationRepo invoiceRepo) {
 		return new CompleteListener(invoiceRepo);
 	}
 
@@ -58,7 +58,11 @@ public class ActivitiConfig {
 		cfg.setJpaHandleTransaction(false);
 		cfg.setJpaCloseEntityManager(false);
 		cfg.setCustomFormTypes(Arrays.asList(new BigtextFormType(), new DoubleFormType(), new JavascriptFormType()));
-		cfg.setDeploymentResources(new Resource[] { new ClassPathResource("processes/invoice.bpmn"), new ClassPathResource("processes/leave.bpmn") });
+		cfg.setDeploymentResources(new Resource[] {
+			new ClassPathResource("processes/invoice.bpmn"),
+			new ClassPathResource("processes/organization.bpmn"),
+			new ClassPathResource("processes/leave.bpmn"),
+		});
 		cfg.setActivityFontName("宋体");
 		cfg.setLabelFontName("宋体");
 		

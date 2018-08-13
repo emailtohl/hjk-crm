@@ -1,4 +1,4 @@
-package com.emailtohl.hjk.crm.invoice;
+package com.emailtohl.hjk.crm.organization;
 
 import java.util.List;
 import java.util.Set;
@@ -7,7 +7,7 @@ import org.springframework.data.domain.Pageable;
 
 import com.emailtohl.hjk.crm.entities.Flow;
 import com.emailtohl.hjk.crm.entities.BinFile;
-import com.emailtohl.hjk.crm.entities.Invoice;
+import com.emailtohl.hjk.crm.entities.Organization;
 import com.github.emailtohl.lib.jpa.Paging;
 import com.github.emailtohl.lib.jpa.AuditedRepository.Tuple;
 
@@ -15,7 +15,7 @@ import com.github.emailtohl.lib.jpa.AuditedRepository.Tuple;
  * 发票资料管理接口
  * @author HeLei
  */
-public interface InvoiceService {
+public interface OrganizationService {
 	
 	/**
 	 * 检查该税号是否存在
@@ -33,31 +33,31 @@ public interface InvoiceService {
 	
 	/**
 	 * 创建发票资料
-	 * @param invoice
+	 * @param organization
 	 * @return
 	 */
-	Invoice create(Invoice invoice);
+	Organization create(Organization organization);
 	
 	/**
 	 * 读取发票资料
 	 * @param id
 	 * @return
 	 */
-	Invoice read(Long id);
+	Organization read(Long id);
 	
 	/**
 	 * 通过流程实例id读取发票资料
 	 * @param processInstanceId
 	 * @return
 	 */
-	Invoice findByFlowProcessInstanceId(String processInstanceId);
+	Organization findByFlowProcessInstanceId(String processInstanceId);
 	
 	/**
-	 * 根据发票资料的id查询其凭证
-	 * @param invoiceId
+	 * 根据资料的id查询其凭证
+	 * @param organizationId
 	 * @return
 	 */
-	Set<BinFile> getCredentials(Long invoiceId);
+	Set<BinFile> getCredentials(Long organizationId);
 	
 	/**
 	 * 查询发票资料
@@ -65,15 +65,15 @@ public interface InvoiceService {
 	 * @param pageable
 	 * @return
 	 */
-	Paging<Invoice> query(String query, Pageable pageable);
+	Paging<Organization> query(String query, Pageable pageable);
 	
 	/**
 	 * 修改发票资料
 	 * @param id
-	 * @param invoice
+	 * @param organization
 	 * @return
 	 */
-	Invoice update(Long id, Invoice invoice);
+	Organization update(Long id, Organization organization);
 	
 	/**
 	 * 删除发票资料
@@ -92,7 +92,7 @@ public interface InvoiceService {
 	 * @param taskId
 	 * @return
 	 */
-	Invoice claim(String taskId);
+	Organization claim(String taskId);
 	
 	/**
 	 * 审核任务，包括申请人重提申请或放弃申请
@@ -107,7 +107,7 @@ public interface InvoiceService {
 	 * @param id
 	 * @return
 	 */
-	List<Tuple<Invoice>> getRevisions(Long id);
+	List<Tuple<Organization>> getRevisions(Long id);
 	
 	/**
 	 * 获取历史某版本的详情
@@ -115,5 +115,11 @@ public interface InvoiceService {
 	 * @param revision
 	 * @return
 	 */
-	Invoice getEntityAtRevision(Long id, Number revision);
+	Organization getEntityAtRevision(Long id, Number revision);
+	
+	/**
+	 * 客户查询自己申请的组织信息
+	 * @return
+	 */
+	List<Organization> myRegisterOrganization();
 }

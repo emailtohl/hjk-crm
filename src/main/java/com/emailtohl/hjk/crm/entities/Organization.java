@@ -21,24 +21,24 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.github.emailtohl.lib.jpa.BaseEntity;
 
 /**
- * 发票
+ * 公司和组织信息
  * @author HeLei
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Indexed
 @Audited
 @Entity
-public class Invoice extends BaseEntity {
+public class Organization extends BaseEntity {
 	private static final long serialVersionUID = -2949903806197415296L;
 	// 公司名
 	@NotNull
-	private String organization;
+	private String name;
 	// 税号
 	@NotNull
 	private String taxNumber;
 	// 公司注册地址
 	@NotNull
-	private String organizationAddress;
+	private String address;
 	// 公司电话
 	@NotNull
 	private String telephone;
@@ -70,11 +70,11 @@ public class Invoice extends BaseEntity {
 	
 	@Field
 	@Column(nullable = false)
-	public String getOrganization() {
-		return organization;
+	public String getName() {
+		return name;
 	}
-	public void setOrganization(String organization) {
-		this.organization = organization;
+	public void setName(String name) {
+		this.name = name;
 	}
 	
 	@Field
@@ -88,11 +88,11 @@ public class Invoice extends BaseEntity {
 	
 	@Field
 	@Column(nullable = false)
-	public String getOrganizationAddress() {
-		return organizationAddress;
+	public String getAddress() {
+		return address;
 	}
-	public void setOrganizationAddress(String organizationAddress) {
-		this.organizationAddress = organizationAddress;
+	public void setAddress(String address) {
+		this.address = address;
 	}
 	
 	@Field

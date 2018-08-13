@@ -1,4 +1,4 @@
-package com.emailtohl.hjk.crm.invoice;
+package com.emailtohl.hjk.crm.organization;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -29,7 +29,7 @@ import com.emailtohl.hjk.crm.entities.BinFile;
 import com.emailtohl.hjk.crm.entities.Check;
 import com.emailtohl.hjk.crm.entities.Flow;
 import com.emailtohl.hjk.crm.entities.FlowType;
-import com.emailtohl.hjk.crm.entities.Invoice;
+import com.emailtohl.hjk.crm.entities.Organization;
 import com.emailtohl.hjk.crm.file.BinFileRepo;
 import com.emailtohl.hjk.crm.flow.FlowRepo;
 import com.github.emailtohl.lib.StandardService;
@@ -47,10 +47,10 @@ import com.github.emailtohl.lib.jpa.Paging;
  */
 @Service
 @Transactional
-public class InvoiceServiceImpl extends StandardService<Invoice, Long> implements InvoiceService {
-	public final static String PROCESS_DEFINITION_KEY = "invoice";
+public class OrganizationServiceImpl extends StandardService<Organization, Long> implements OrganizationService {
+	public final static String PROCESS_DEFINITION_KEY = "organization";
 	@Autowired
-	private InvoiceRepo invoiceRepo;
+	private OrganizationRepo organizationRepo;
 	@Autowired
 	private FlowRepo flowRepo;
 	@Autowired
@@ -65,40 +65,40 @@ public class InvoiceServiceImpl extends StandardService<Invoice, Long> implement
 
 	@Override
 	public boolean isTaxNumberExist(String taxNumber) {
-		Invoice invoice = new Invoice();
-		invoice.setTaxNumber(taxNumber);
-		Example<Invoice> example = Example.<Invoice>of(invoice, taxNumberMatcher);
-		return invoiceRepo.exists(example);
+		Organization organization = new Organization();
+		organization.setTaxNumber(taxNumber);
+		Example<Organization> example = Example.<Organization>of(organization, taxNumberMatcher);
+		return organizationRepo.exists(example);
 	}
 	
 	@Override
 	public boolean isAccountExist(String account) {
-		Invoice invoice = new Invoice();
-		invoice.setAccount(account);
-		Example<Invoice> example = Example.<Invoice>of(invoice, accountMatcher);
-		return invoiceRepo.exists(example);
+		Organization organization = new Organization();
+		organization.setAccount(account);
+		Example<Organization> example = Example.<Organization>of(organization, accountMatcher);
+		return organizationRepo.exists(example);
 	}
 	
 	@Override
-	public Invoice create(Invoice invoice) {
+	public Organization create(Organization organization) {
 		// 校验提交的表单信息
-		validate(invoice);
-		invoice.setPass(false);
+		validate(organization);
+		organization.setPass(false);
 		// 如果没有填写收票地址，那么就把公司地址设置为收票地址
-		if (!hasText(invoice.getDeliveryAddress())) {
-			invoice.setDeliveryAddress(invoice.getOrganizationAddress());
+		if (!hasText(organization.getDeliveryAddress())) {
+			organization.setDeliveryAddress(organization.getAddress());
 		}
 		// 保存凭证信息
-		Set<BinFile> pbf = invoice.getCredentials().stream().filter(c -> c.getId() != null).map(BinFile::getId)
+		Set<BinFile> pbf = organization.getCredentials().stream().filter(c -> c.getId() != null).map(BinFile::getId)
 				.map(id -> binFileRepo.findById(id).get()).collect(Collectors.toSet());
-		invoice.getCredentials().clear();// 清空参数里面的凭证
-		invoice.getCredentials().addAll(pbf);// 再添加上持久化的凭证
+		organization.getCredentials().clear();// 清空参数里面的凭证
+		organization.getCredentials().addAll(pbf);// 再添加上持久化的凭证
 		// 先保存开票资料，获取ID
-		invoiceRepo.persist(invoice);
+		organizationRepo.persist(organization);
 
 		// 关联流程
 		Flow fd = new Flow();
-		fd.setFlowType(FlowType.INVOICE);
+		fd.setFlowType(FlowType.ORGANIZATION);
 		String[] username = USER_ID.get().split(SecurityConfig.SEPARATOR);
 		fd.setApplyUserId(username[0]);
 		fd.setApplyUserName(username[1]);
@@ -106,7 +106,7 @@ public class InvoiceServiceImpl extends StandardService<Invoice, Long> implement
 		LocalDate d = LocalDate.now();
 		int year = d.getYear(), month = d.getMonthValue(), day = d.getDayOfMonth();
 		StringBuilder flowNum = new StringBuilder();
-		flowNum.append(FlowType.INVOICE.name()).append('-').append(year);
+		flowNum.append(FlowType.ORGANIZATION.name()).append('-').append(year);
 		if (month < 10) {
 			flowNum.append('-').append(0).append(month);
 		} else {
@@ -117,12 +117,13 @@ public class InvoiceServiceImpl extends StandardService<Invoice, Long> implement
 		} else {
 			flowNum.append('-').append(day);
 		}
-		String businessKey = invoice.getId().toString();
+		String businessKey = organization.getId().toString();
 		flowNum.append('-').append(businessKey);
 		// 设置流程编号
 		fd.setFlowNum(flowNum.toString());
 		// 填写点流程的传输信息
 		Map<String, Object> variables = new HashMap<>();
+		variables.put("flowType", FlowType.ORGANIZATION);
 		variables.put("applyUserId", username[0]);
 		variables.put("applyUserName", username[1]);
 		variables.put("flowNum", flowNum);
@@ -134,66 +135,66 @@ public class InvoiceServiceImpl extends StandardService<Invoice, Long> implement
 
 		fd.setProcessInstanceId(processInstanceId);
 		flowRepo.save(fd);
-		invoice.setFlow(fd);
-		return invoice;
+		organization.setFlow(fd);
+		return organization;
 	}
 
 	@Override
-	public Invoice read(Long id) {
-		Invoice source = invoiceRepo.findById(id).get();
+	public Organization read(Long id) {
+		Organization source = organizationRepo.findById(id).get();
 		return transientDetail(source);
 	}
 
 	@Override
-	public Invoice findByFlowProcessInstanceId(String processInstanceId) {
-		Invoice source = invoiceRepo.findByFlow_ProcessInstanceId(processInstanceId);
+	public Organization findByFlowProcessInstanceId(String processInstanceId) {
+		Organization source = organizationRepo.findByFlow_ProcessInstanceId(processInstanceId);
 		return transientDetail(source);
 	}
 
 	@Override
-	public Paging<Invoice> query(Invoice example, Pageable pageable) {
-		Page<Invoice> page = invoiceRepo.queryForPage(example, pageable);
-		List<Invoice> ls = page.getContent().stream().map(this::toTransient).collect(Collectors.toList());
+	public Paging<Organization> query(Organization example, Pageable pageable) {
+		Page<Organization> page = organizationRepo.queryForPage(example, pageable);
+		List<Organization> ls = page.getContent().stream().map(this::toTransient).collect(Collectors.toList());
 		return new Paging<>(ls, pageable, page.getTotalElements());
 	}
 
 	@Override
-	public List<Invoice> query(Invoice example) {
-		return invoiceRepo.queryForList(example).stream().map(this::toTransient).collect(Collectors.toList());
+	public List<Organization> query(Organization example) {
+		return organizationRepo.queryForList(example).stream().map(this::toTransient).collect(Collectors.toList());
 	}
 
 	@Override
-	public Invoice update(Long id, Invoice invoice) {
-		Invoice source = invoiceRepo.findById(id).get();
-		if (hasText(invoice.getOrganization())) {
-			source.setOrganization(invoice.getOrganization());
+	public Organization update(Long id, Organization organization) {
+		Organization source = organizationRepo.findById(id).get();
+		if (hasText(organization.getName())) {
+			source.setName(organization.getName());
 		}
-		if (hasText(invoice.getTaxNumber())) {
-			source.setTaxNumber(invoice.getTaxNumber());
+		if (hasText(organization.getTaxNumber())) {
+			source.setTaxNumber(organization.getTaxNumber());
 		}
-		if (hasText(invoice.getOrganizationAddress())) {
-			source.setOrganizationAddress(invoice.getOrganizationAddress());
+		if (hasText(organization.getAddress())) {
+			source.setAddress(organization.getAddress());
 		}
-		if (hasText(invoice.getTelephone())) {
-			source.setTelephone(invoice.getTelephone());
+		if (hasText(organization.getTelephone())) {
+			source.setTelephone(organization.getTelephone());
 		}
-		if (hasText(invoice.getDepositBank())) {
-			source.setDepositBank(invoice.getDepositBank());
+		if (hasText(organization.getDepositBank())) {
+			source.setDepositBank(organization.getDepositBank());
 		}
-		if (hasText(invoice.getAccount())) {
-			source.setAccount(invoice.getAccount());
+		if (hasText(organization.getAccount())) {
+			source.setAccount(organization.getAccount());
 		}
-		if (hasText(invoice.getPrincipal())) {
-			source.setPrincipal(invoice.getPrincipal());
+		if (hasText(organization.getPrincipal())) {
+			source.setPrincipal(organization.getPrincipal());
 		}
-		if (hasText(invoice.getPrincipalPhone())) {
-			source.setPrincipalPhone(invoice.getPrincipalPhone());
+		if (hasText(organization.getPrincipalPhone())) {
+			source.setPrincipalPhone(organization.getPrincipalPhone());
 		}
-		if (hasText(invoice.getDeliveryAddress())) {
-			source.setDeliveryAddress(invoice.getDeliveryAddress());
+		if (hasText(organization.getDeliveryAddress())) {
+			source.setDeliveryAddress(organization.getDeliveryAddress());
 		}
-		if (invoice.getCredentials().size() > 0) {
-			Set<BinFile> pbf = invoice.getCredentials().stream().filter(c -> c.getId() != null).map(BinFile::getId)
+		if (organization.getCredentials().size() > 0) {
+			Set<BinFile> pbf = organization.getCredentials().stream().filter(c -> c.getId() != null).map(BinFile::getId)
 					.map(fid -> binFileRepo.findById(fid).get()).collect(Collectors.toSet());
 			source.getCredentials().clear();// 清空参数里面的凭证
 			source.getCredentials().addAll(pbf);// 再添加上持久化的凭证
@@ -203,7 +204,7 @@ public class InvoiceServiceImpl extends StandardService<Invoice, Long> implement
 
 	@Override
 	public void delete(Long id) {
-		invoiceRepo.deleteById(id);
+		organizationRepo.deleteById(id);
 	}
 
 	/**
@@ -227,7 +228,7 @@ public class InvoiceServiceImpl extends StandardService<Invoice, Long> implement
 		// 根据流程的业务ID查询实体并关联
 		return tasks.stream().map(task -> {
 			Flow flow = new Flow();
-			flow.setFlowType(FlowType.INVOICE);
+			flow.setFlowType(FlowType.ORGANIZATION);
 			flow.taskInfo(task);
 			return flow;
 		}).collect(Collectors.toList());
@@ -239,7 +240,7 @@ public class InvoiceServiceImpl extends StandardService<Invoice, Long> implement
 	 * @param taskId
 	 * @return
 	 */
-	public Invoice claim(String taskId) {
+	public Organization claim(String taskId) {
 		Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
 		if (task == null) {
 			throw new NotFoundException("taskId: " + taskId + " not found");
@@ -252,7 +253,7 @@ public class InvoiceServiceImpl extends StandardService<Invoice, Long> implement
 			throw new NotAcceptableException("Activiti task already claimed exception", e);
 		}
 		String processInstanceId = task.getProcessInstanceId();
-		return transientDetail(invoiceRepo.findByFlow_ProcessInstanceId(processInstanceId));
+		return transientDetail(organizationRepo.findByFlow_ProcessInstanceId(processInstanceId));
 	}
 
 	/**
@@ -278,7 +279,7 @@ public class InvoiceServiceImpl extends StandardService<Invoice, Long> implement
 			throw new ForbiddenException(username[1] + " are not the executor of the task");
 		}
 		switch (task.getTaskDefinitionKey()) {
-		case "administrationAudit":
+		case "administration_audit":
 			// 将审核信息添加到流程参数上，并完成此任务
 			runtimeService.setVariable(task.getExecutionId(), "checkApproved", checkApproved);
 			runtimeService.setVariable(task.getExecutionId(), "checkComment", checkComment);
@@ -301,43 +302,50 @@ public class InvoiceServiceImpl extends StandardService<Invoice, Long> implement
 	}
 
 	@Override
-	public Set<BinFile> getCredentials(Long invoiceId) {
-		Invoice source = invoiceRepo.findById(invoiceId).get();
+	public Set<BinFile> getCredentials(Long organizationId) {
+		Organization source = organizationRepo.findById(organizationId).get();
 		return source.getCredentials();
 	}
 
 	@Override
-	public Paging<Invoice> query(String query, Pageable pageable) {
-		Page<Invoice> page = invoiceRepo.search(query, pageable);
-		List<Invoice> ls = page.getContent().stream().map(this::toTransient).collect(Collectors.toList());
+	public Paging<Organization> query(String query, Pageable pageable) {
+		Page<Organization> page = organizationRepo.search(query, pageable);
+		List<Organization> ls = page.getContent().stream().map(this::toTransient).collect(Collectors.toList());
 		return new Paging<>(ls, pageable, page.getTotalElements());
 	}
 	
 	@Override
-	public List<Tuple<Invoice>> getRevisions(Long id) {
-		return invoiceRepo.getRevisions(id).stream().map(t -> {
-			return new Tuple<Invoice>(toTransient(t.entity), t.defaultRevisionEntity, t.revisionType);
+	public List<Tuple<Organization>> getRevisions(Long id) {
+		return organizationRepo.getRevisions(id).stream().map(t -> {
+			return new Tuple<Organization>(toTransient(t.entity), t.defaultRevisionEntity, t.revisionType);
 		}).collect(Collectors.toList());
 	}
 	
 	@Override
-	public Invoice getEntityAtRevision(Long id, Number revision) {
-		return transientDetail(invoiceRepo.getEntityAtRevision(id, revision));
+	public Organization getEntityAtRevision(Long id, Number revision) {
+		return transientDetail(organizationRepo.getEntityAtRevision(id, revision));
+	}
+	
+	@Override
+	public List<Organization> myRegisterOrganization() {
+		String[] username = USER_ID.get().split(SecurityConfig.SEPARATOR);
+		return organizationRepo.findByFlow_ApplyUserId(username[0]).stream().map(this::toTransient)
+				.collect(Collectors.toList());
 	}
 
 	@Override
-	protected Invoice toTransient(Invoice source) {
+	protected Organization toTransient(Organization source) {
 		if (source == null) {
 			return source;
 		}
-		Invoice target = new Invoice();
+		Organization target = new Organization();
 		BeanUtils.copyProperties(source, target, "credentials", "flow");
 		return target;
 	}
 
 	@Override
-	protected Invoice transientDetail(Invoice source) {
-		Invoice target = toTransient(source);
+	protected Organization transientDetail(Organization source) {
+		Organization target = toTransient(source);
 		Flow sourceFlow = source.getFlow();
 		Flow targetFlow = new Flow();
 		BeanUtils.copyProperties(sourceFlow, targetFlow, "checks");

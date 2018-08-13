@@ -22,8 +22,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.emailtohl.hjk.crm.entities.BinFile;
 import com.emailtohl.hjk.crm.entities.Flow;
-import com.emailtohl.hjk.crm.entities.Invoice;
-import com.emailtohl.hjk.crm.invoice.InvoiceService;
+import com.emailtohl.hjk.crm.entities.Organization;
+import com.emailtohl.hjk.crm.organization.OrganizationService;
 import com.github.emailtohl.lib.jpa.AuditedRepository.Tuple;
 import com.github.emailtohl.lib.jpa.BaseEntity;
 import com.github.emailtohl.lib.jpa.Paging;
@@ -34,11 +34,11 @@ import com.github.emailtohl.lib.jpa.Paging;
  * @author HeLei
  */
 @RestController
-@RequestMapping(value = "invoices", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-public class InvoiceCtl {
+@RequestMapping(value = "organization", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+public class OrganizationCtl {
 	private static final Logger LOG = LogManager.getLogger();
 	@Autowired
-	private InvoiceService invoiceService;
+	private OrganizationService organizationService;
 
 	/**
 	 * 检查该纳税人识别号是否存在
@@ -49,7 +49,7 @@ public class InvoiceCtl {
 	public boolean isTaxNumberExist(@RequestParam(required = false, defaultValue = "") String taxNumber) {
 		boolean reslut = false;
 		if (StringUtils.hasText(taxNumber)) {
-			reslut = invoiceService.isTaxNumberExist(taxNumber);
+			reslut = organizationService.isTaxNumberExist(taxNumber);
 		}
 		LOG.debug(" taxNumber exist {} ", reslut);
 		return reslut;
@@ -64,7 +64,7 @@ public class InvoiceCtl {
 	public boolean isAccountExist(@RequestParam(required = false, defaultValue = "") String account) {
 		boolean reslut = false;
 		if (StringUtils.hasText(account)) {
-			reslut = invoiceService.isAccountExist(account);
+			reslut = organizationService.isAccountExist(account);
 		}
 		LOG.debug(" account exist {} ", reslut);
 		return reslut;
@@ -73,12 +73,12 @@ public class InvoiceCtl {
 	/**
 	 * 创建发票资料
 	 * 
-	 * @param invoice
+	 * @param organization
 	 * @return
 	 */
 	@PostMapping
-	public Invoice create(@RequestBody Invoice invoice) {
-		return invoiceService.create(invoice);
+	public Organization create(@RequestBody Organization organization) {
+		return organizationService.create(organization);
 	}
 
 	/**
@@ -88,19 +88,19 @@ public class InvoiceCtl {
 	 * @return
 	 */
 	@GetMapping("{id}")
-	public Invoice read(@PathVariable("id") Long id) {
-		return invoiceService.read(id);
+	public Organization read(@PathVariable("id") Long id) {
+		return organizationService.read(id);
 	}
 
 	/**
 	 * 根据发票资料的id查询其凭证
 	 * 
-	 * @param invoiceId
+	 * @param organizationId
 	 * @return
 	 */
-	@GetMapping("{invoiceId}/credentials")
-	public Set<BinFile> getCredentials(@PathVariable("invoiceId") Long invoiceId) {
-		return invoiceService.getCredentials(invoiceId);
+	@GetMapping("{organizationId}/credentials")
+	public Set<BinFile> getCredentials(@PathVariable("organizationId") Long organizationId) {
+		return organizationService.getCredentials(organizationId);
 	}
 
 	/**
@@ -111,10 +111,10 @@ public class InvoiceCtl {
 	 * @return
 	 */
 	@GetMapping("query")
-	public Paging<Invoice> query(@RequestParam(required = false, defaultValue = "") String query,
+	public Paging<Organization> query(@RequestParam(required = false, defaultValue = "") String query,
 			@PageableDefault(page = 0, size = 20, sort = { BaseEntity.ID_PROPERTY_NAME,
 					BaseEntity.MODIFY_DATE_PROPERTY_NAME }, direction = Direction.DESC) Pageable pageable) {
-		return invoiceService.query(query, pageable);
+		return organizationService.query(query, pageable);
 	}
 
 	/**
@@ -124,7 +124,7 @@ public class InvoiceCtl {
 	 */
 	@GetMapping("todoTasks")
 	public List<Flow> findTodoTasks() {
-		return invoiceService.findTodoTasks();
+		return organizationService.findTodoTasks();
 	}
 
 	/**
@@ -134,9 +134,9 @@ public class InvoiceCtl {
 	 * @return
 	 */
 	@PostMapping("claim")
-	public Invoice claim(@RequestBody Form f) {
+	public Organization claim(@RequestBody Form f) {
 		LOG.debug("claim: {}" + f);
-		return invoiceService.claim(f.taskId);
+		return organizationService.claim(f.taskId);
 	}
 
 	/**
@@ -148,18 +148,18 @@ public class InvoiceCtl {
 	 */
 	@PostMapping("check")
 	public void check(@RequestBody Form f) {
-		invoiceService.check(f.taskId, f.checkApproved, f.checkComment);
+		organizationService.check(f.taskId, f.checkApproved, f.checkComment);
 	}
 
 	/**
 	 * 修改开票资料
 	 * @param id
-	 * @param invoice
+	 * @param organization
 	 * @return
 	 */
 	@PutMapping("{id}")
-	public Invoice update(@PathVariable("id") Long id, @RequestBody Invoice invoice) {
-		return invoiceService.update(id, invoice);
+	public Organization update(@PathVariable("id") Long id, @RequestBody Organization organization) {
+		return organizationService.update(id, organization);
 	}
 	
 	/**
@@ -168,8 +168,8 @@ public class InvoiceCtl {
 	 * @return
 	 */
 	@GetMapping("history/{id}")
-	public List<Tuple<Invoice>> getRevisions(@PathVariable("id") Long id) {
-		return invoiceService.getRevisions(id);
+	public List<Tuple<Organization>> getRevisions(@PathVariable("id") Long id) {
+		return organizationService.getRevisions(id);
 	}
 	
 	/**
@@ -179,15 +179,24 @@ public class InvoiceCtl {
 	 * @return
 	 */
 	@GetMapping("history/{id}/revision/{revision}")
-	public Invoice getEntityAtRevision(@PathVariable("id") Long id, @PathVariable("revision") Number revision) {
-		return invoiceService.getEntityAtRevision(id, revision);
+	public Organization getEntityAtRevision(@PathVariable("id") Long id, @PathVariable("revision") Number revision) {
+		return organizationService.getEntityAtRevision(id, revision);
+	}
+	
+	/**
+	 * 客户查询自己申请的组织信息
+	 * @return
+	 */
+	@GetMapping("myRegisterOrganization")
+	public List<Organization> myRegisterOrganization() {
+		return organizationService.myRegisterOrganization();
 	}
 
 	public static class Form {
 		public Long id;
 		public String taskId;
 		public Boolean reApply;
-		public Invoice invoice;
+		public Organization organization;
 		public Boolean checkApproved;
 		public String checkComment;
 	}

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="com.emailtohl.hjk.crm">
-  <process id="invoice" name="开票申请" isExecutable="true">
-    <documentation>发票开票申请</documentation>
+  <process id="organization" name="开票申请" isExecutable="true">
+    <documentation>注册公司信息</documentation>
     <startEvent id="startevent1" name="Start" activiti:initiator="applyUserId">
       <extensionElements>
         <activiti:formProperty id="startDate" name="请假开始日期" type="date" datePattern="yyyy-MM-dd" required="true"></activiti:formProperty>
@@ -10,7 +10,7 @@
         <activiti:formProperty id="validScript" type="javascript" default="alert('表单已经加载完毕');"></activiti:formProperty>
       </extensionElements>
     </startEvent>
-    <userTask id="finance_handle" name="财务人员处理" activiti:candidateGroups="FINANCE"></userTask>
+    <userTask id="administration_audit" name="行政人员审批" activiti:candidateGroups="ADMINISTRATION"></userTask>
     <exclusiveGateway id="exclusivegateway1" name="Exclusive Gateway"></exclusiveGateway>
     <userTask id="modifyApply" name="调整申请" activiti:assignee="${applyUserId}"></userTask>
     <endEvent id="endevent1" name="End">
@@ -19,12 +19,12 @@
       </extensionElements>
     </endEvent>
     <exclusiveGateway id="exclusivegateway2" name="Exclusive Gateway"></exclusiveGateway>
-    <sequenceFlow id="flow1" sourceRef="startevent1" targetRef="finance_handle"></sequenceFlow>
-    <sequenceFlow id="flow2" sourceRef="finance_handle" targetRef="exclusivegateway1"></sequenceFlow>
+    <sequenceFlow id="flow1" sourceRef="startevent1" targetRef="administration_audit"></sequenceFlow>
+    <sequenceFlow id="flow2" sourceRef="administration_audit" targetRef="exclusivegateway1"></sequenceFlow>
     <sequenceFlow id="flow4" name="拒绝" sourceRef="exclusivegateway1" targetRef="modifyApply">
       <conditionExpression xsi:type="tFormalExpression"><![CDATA[${checkApproved == false}]]></conditionExpression>
     </sequenceFlow>
-    <sequenceFlow id="flow6" name="重新申请" sourceRef="exclusivegateway2" targetRef="finance_handle">
+    <sequenceFlow id="flow6" name="重新申请" sourceRef="exclusivegateway2" targetRef="administration_audit">
       <conditionExpression xsi:type="tFormalExpression"><![CDATA[${reApply == true}]]></conditionExpression>
     </sequenceFlow>
     <sequenceFlow id="flow5" sourceRef="modifyApply" targetRef="exclusivegateway2"></sequenceFlow>
@@ -45,12 +45,12 @@
     </textAnnotation>
     <association id="association1" sourceRef="modifyApply" targetRef="textannotation1"></association>
   </process>
-  <bpmndi:BPMNDiagram id="BPMNDiagram_invoice">
-    <bpmndi:BPMNPlane bpmnElement="invoice" id="BPMNPlane_invoice">
+  <bpmndi:BPMNDiagram id="BPMNDiagram_organization">
+    <bpmndi:BPMNPlane bpmnElement="organization" id="BPMNPlane_organization">
       <bpmndi:BPMNShape bpmnElement="startevent1" id="BPMNShape_startevent1">
         <omgdc:Bounds height="35.0" width="35.0" x="10.0" y="30.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape bpmnElement="finance_handle" id="BPMNShape_finance_handle">
+      <bpmndi:BPMNShape bpmnElement="administration_audit" id="BPMNShape_administration_audit">
         <omgdc:Bounds height="55.0" width="105.0" x="90.0" y="20.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="exclusivegateway1" id="BPMNShape_exclusivegateway1">
