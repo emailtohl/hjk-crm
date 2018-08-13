@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
 
+import org.apache.ibatis.annotations.Delete;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,15 +61,20 @@ public class FileCtl {
 				try (InputStream in = filePart.getInputStream();
 						ByteArrayOutputStream out = new ByteArrayOutputStream()) {
 					StreamUtils.copy(in, out);
-					BinFile BinFile = new BinFile(submittedFileName, FILE_NAME_MAP.getContentTypeFor(submittedFileName),
+					BinFile binFile = new BinFile(submittedFileName, FILE_NAME_MAP.getContentTypeFor(submittedFileName),
 							out.toByteArray());
-					res.add(BinFile);
+					res.add(binFileRepo.save(binFile));
 				} catch (IOException e) {
 					LOG.error(submittedFileName + " file read failed", e);
 				}
 			}
 		}
 		return res;
+	}
+	
+	@Delete(value = "{id}")
+	public void delete(@PathVariable("id") Long id) {
+		binFileRepo.deleteById(id);
 	}
 
 	@GetMapping(value = "{id}")
