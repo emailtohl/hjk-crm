@@ -19,12 +19,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
 
-import org.apache.ibatis.annotations.Delete;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.util.StreamUtils;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -72,7 +72,7 @@ public class FileCtl {
 		return res;
 	}
 	
-	@Delete(value = "{id}")
+	@DeleteMapping(value = "{id}")
 	public void delete(@PathVariable("id") Long id) {
 		binFileRepo.deleteById(id);
 	}
