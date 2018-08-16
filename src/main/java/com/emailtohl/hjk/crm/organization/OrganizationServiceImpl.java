@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 
 import org.activiti.engine.ActivitiTaskAlreadyClaimedException;
+import org.activiti.engine.IdentityService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
 import org.activiti.engine.runtime.ProcessInstance;
@@ -59,6 +60,8 @@ public class OrganizationServiceImpl extends StandardService<Organization, Long>
 	private RuntimeService runtimeService;
 	@Autowired
 	private TaskService taskService;
+	@Autowired
+	private IdentityService identityService;
 
 	private ExampleMatcher taxNumberMatcher = ExampleMatcher.matching().withMatcher("taxNumber", GenericPropertyMatchers.exact());
 	private ExampleMatcher accountMatcher = ExampleMatcher.matching().withMatcher("taxNumber", GenericPropertyMatchers.exact());
@@ -293,7 +296,12 @@ public class OrganizationServiceImpl extends StandardService<Organization, Long>
 			return;
 		}
 		// 维护相关数据
-		flow.getChecks().add(new Check(task, checkApproved, checkComment));
+		Check check = new Check(task, checkApproved, checkComment);
+		org.activiti.engine.identity.User u = identityService.createUserQuery().userId(check.getCheckerId()).singleResult();
+		if (u != null) {
+			check.setCheckerName(u.getFirstName());
+		}
+		flow.getChecks().add(check);
 		if (hasText(checkComment)) {
 			// 将审批的评论添加进记录中
 			taskService.addComment(taskId, task.getProcessInstanceId(), checkComment);
@@ -349,6 +357,11 @@ public class OrganizationServiceImpl extends StandardService<Organization, Long>
 		Flow sourceFlow = source.getFlow();
 		Flow targetFlow = new Flow();
 		BeanUtils.copyProperties(sourceFlow, targetFlow, "checks");
+		Task task = taskService.createTaskQuery().processInstanceId(sourceFlow.getProcessInstanceId()).singleResult();
+		targetFlow.setTaskAssignee(task.getAssignee());
+		targetFlow.setTaskDefinitionKey(task.getTaskDefinitionKey());
+		targetFlow.setTaskId(task.getId());
+		targetFlow.setTaskName(task.getName());
 		targetFlow.getChecks().addAll(sourceFlow.getChecks());// 懒加载所有的check信息
 		target.setFlow(targetFlow);
 		target.getCredentials().addAll(source.getCredentials());// 懒加载所有的凭证

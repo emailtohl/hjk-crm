@@ -25,6 +25,8 @@ public class Check implements Serializable {
 	private String taskName;
 	// 审核人id
 	private String checkerId;
+	// 审核人姓名
+	private String checkerName;
 	// 审核是否通过
 	private Boolean checkApproved;
 	// 审核意见
@@ -37,7 +39,7 @@ public class Check implements Serializable {
 	public Check(Task task, boolean checkApproved, String checkComment) {
 		this.taskDefinitionKey = task.getTaskDefinitionKey();
 		this.taskName = task.getName();
-		this.checkerId = task.getAssignee();
+		this.checkerId = task.getOwner();
 		this.checkTime = new Date();
 		this.checkApproved = checkApproved;
 		this.checkComment = checkComment;
@@ -65,6 +67,14 @@ public class Check implements Serializable {
 	}
 	public void setCheckerId(String checkerId) {
 		this.checkerId = checkerId;
+	}
+
+	@Column(name = "checker_name")
+	public String getCheckerName() {
+		return checkerName;
+	}
+	public void setCheckerName(String checkerName) {
+		this.checkerName = checkerName;
 	}
 
 	@Column(name = "check_approved", nullable = false, updatable = false)

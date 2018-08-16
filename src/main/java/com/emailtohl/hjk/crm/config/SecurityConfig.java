@@ -49,7 +49,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Override
 	protected void configure(HttpSecurity security) throws Exception {
-		String[] permitAll = { "/csrf", "/principal", "/token", "/groups", "/users/exist", "/swagger-resources/**",
+		String[] permitAll = { "/csrf", "/token", "/groups", "/users/exist", "/swagger-resources/**",
 				"/api-docs/**" };
 		security
 		.authorizeRequests()
