@@ -2,6 +2,7 @@ package com.emailtohl.hjk.crm.entities;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
@@ -14,6 +15,7 @@ import javax.persistence.OrderBy;
 import javax.persistence.Transient;
 
 import org.activiti.engine.task.Task;
+import org.springframework.beans.BeanUtils;
 
 import com.github.emailtohl.lib.jpa.BaseEntity;
 
@@ -159,6 +161,18 @@ public class Flow extends BaseEntity {
 	}
 	public void setNextActivityName(String nextActivityName) {
 		this.nextActivityName = nextActivityName;
+	}
+	
+	public Flow toTransient() {
+		Flow target = new Flow();
+		BeanUtils.copyProperties(this, target, "checks");
+		return target;
+	}
+
+	public Flow transientDetail() {
+		Flow target = toTransient();
+		target.getChecks().addAll(getChecks().stream().map(check -> check).collect(Collectors.toSet()));
+		return target;
 	}
 	
 }

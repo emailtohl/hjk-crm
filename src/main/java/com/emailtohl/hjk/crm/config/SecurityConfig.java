@@ -57,7 +57,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		.antMatchers(HttpMethod.POST, "/users").permitAll()
 		.anyRequest().authenticated()
 		.and().formLogin().usernameParameter("email").permitAll().successHandler((req, resp, auth) -> resp.getWriter().write(om.writeValueAsString(auth)))
-		.and().logout().logoutSuccessUrl("/login")
+		.and().logout().permitAll().logoutSuccessUrl("/login")
 		.and().csrf().ignoringAntMatchers("/topic", "/queue", "/socket")
         // allow same origin to frame our site to support iframe SockJS
         .and().headers().frameOptions().sameOrigin()

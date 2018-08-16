@@ -230,9 +230,10 @@ public class OrganizationServiceImpl extends StandardService<Organization, Long>
 		tasks.addAll(unsignedTasks);
 		// 根据流程的业务ID查询实体并关联
 		return tasks.stream().map(task -> {
-			Flow flow = new Flow();
-			flow.setFlowType(FlowType.ORGANIZATION);
+			Flow flow = flowRepo.findByProcessInstanceId(task.getProcessInstanceId());
+			flow = flow.toTransient();
 			flow.taskInfo(task);
+			flowRepo.findByProcessInstanceId(task.getProcessInstanceId());
 			return flow;
 		}).collect(Collectors.toList());
 	}
