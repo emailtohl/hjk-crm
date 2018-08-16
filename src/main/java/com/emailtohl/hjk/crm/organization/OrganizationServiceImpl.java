@@ -359,7 +359,14 @@ public class OrganizationServiceImpl extends StandardService<Organization, Long>
 		Flow targetFlow = new Flow();
 		BeanUtils.copyProperties(sourceFlow, targetFlow, "checks");
 		Task task = taskService.createTaskQuery().processInstanceId(sourceFlow.getProcessInstanceId()).singleResult();
-		targetFlow.setTaskAssignee(task.getAssignee());
+		String taskAssignee = task.getAssignee();
+		if (hasText(taskAssignee)) {
+			targetFlow.setTaskAssignee(taskAssignee);
+			org.activiti.engine.identity.User u = identityService.createUserQuery().userId(taskAssignee).singleResult();
+			if (u != null) {
+				targetFlow.setTaskAssigneeName(u.getFirstName());
+			}
+		}
 		targetFlow.setTaskDefinitionKey(task.getTaskDefinitionKey());
 		targetFlow.setTaskId(task.getId());
 		targetFlow.setTaskName(task.getName());

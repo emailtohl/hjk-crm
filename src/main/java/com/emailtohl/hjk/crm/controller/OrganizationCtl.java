@@ -72,7 +72,7 @@ public class OrganizationCtl {
 	}
 	
 	/**
-	 * 创建发票资料
+	 * 创建公司信息
 	 * 
 	 * @param organization
 	 * @return
@@ -83,7 +83,7 @@ public class OrganizationCtl {
 	}
 
 	/**
-	 * 读取发票资料
+	 * 读取公司信息
 	 * 
 	 * @param id
 	 * @return
@@ -92,9 +92,20 @@ public class OrganizationCtl {
 	public Organization read(@PathVariable("id") Long id) {
 		return organizationService.read(id);
 	}
+	
+	/**
+	 * 读取公司信息
+	 * 
+	 * @param id
+	 * @return
+	 */
+	@GetMapping("processInstanceId/{processInstanceId}")
+	public Organization readByProcessInstanceId(@PathVariable("processInstanceId") String processInstanceId) {
+		return organizationService.findByFlowProcessInstanceId(processInstanceId);
+	}
 
 	/**
-	 * 根据发票资料的id查询其凭证
+	 * 根据公司信息的id查询其凭证
 	 * 
 	 * @param organizationId
 	 * @return
@@ -105,7 +116,7 @@ public class OrganizationCtl {
 	}
 
 	/**
-	 * 查询发票资料
+	 * 查询公司信息
 	 * 
 	 * @param query
 	 * @param pageable

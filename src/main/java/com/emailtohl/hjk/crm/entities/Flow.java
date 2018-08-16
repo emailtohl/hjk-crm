@@ -21,7 +21,7 @@ import com.github.emailtohl.lib.jpa.BaseEntity;
 
 /**
  * 流程中涉及的数据，以下字段在业务流程中不断变化，所以不做存储：
- * checkApproved、checkComment、taskId、taskName、taskAssignee、activityId、nextActivityId、nextActivityName
+ * checkApproved、checkComment、taskId、taskName、taskAssignee、taskAssigneeName、taskDefinitionKey、nextActivityId、nextActivityName
  * 
  * @author HeLei
  */
@@ -47,8 +47,10 @@ public class Flow extends BaseEntity {
 	private String taskId;
 	// 任务的名字
 	private String taskName;
-	// 当前任务是否被签收
+	// 当前任务签收人的ID
 	private String taskAssignee;
+	// 当前任务签收人的名字
+	private String taskAssigneeName;
 	// 当前所在的活动id
 	private String taskDefinitionKey;
 	// 下一个活动id
@@ -60,7 +62,7 @@ public class Flow extends BaseEntity {
 		this.processInstanceId = task.getProcessInstanceId();
 		this.taskId = task.getId();
 		this.taskName = task.getName();
-		this.taskAssignee = task.getAssignee();
+		this.taskAssignee = task.getOwner();
 		this.taskDefinitionKey = task.getTaskDefinitionKey();
 	}
 	
@@ -137,6 +139,14 @@ public class Flow extends BaseEntity {
 	}
 	public void setTaskAssignee(String taskAssignee) {
 		this.taskAssignee = taskAssignee;
+	}
+
+	@Transient
+	public String getTaskAssigneeName() {
+		return taskAssigneeName;
+	}
+	public void setTaskAssigneeName(String taskAssignee) {
+		this.taskAssigneeName = taskAssignee;
 	}
 
 	@Transient
