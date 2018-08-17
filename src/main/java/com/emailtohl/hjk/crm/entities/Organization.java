@@ -33,6 +33,8 @@ import com.github.emailtohl.lib.jpa.BaseEntity;
 @Entity
 public class Organization extends BaseEntity {
 	private static final long serialVersionUID = -2949903806197415296L;
+	// 创建者用户id
+	private String creatorId;
 	// 公司名
 	@NotNull
 	private String name;
@@ -67,9 +69,17 @@ public class Organization extends BaseEntity {
 	private String receiver;
 	// 是否通过审批
 	private Boolean pass;
-	
 	// 与流程相关的信息
 	private List<Flow> flows = new ArrayList<>();
+	
+	@Field
+	@Column(nullable = false)
+	public String getCreatorId() {
+		return creatorId;
+	}
+	public void setCreatorId(String creatorId) {
+		this.creatorId = creatorId;
+	}
 	
 	@Field
 	@Column(nullable = false)

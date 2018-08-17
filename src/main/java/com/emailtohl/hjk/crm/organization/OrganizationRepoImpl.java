@@ -5,6 +5,7 @@ import java.util.List;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Root;
 
 import org.springframework.stereotype.Repository;
@@ -33,6 +34,8 @@ class OrganizationRepoImpl extends AuditedRepository<Organization, Long> impleme
 		Root<Organization> r = q.from(entityClass);
 		Join<Organization, Flow> join = r.join("flows");
 		q = q.select(r).where(cb.equal(join.get("applyUserId"), applyUserId));
+		Order o = cb.desc(r.get(Organization.MODIFY_DATE_PROPERTY_NAME));
+		q = q.orderBy(o);
 		return entityManager.createQuery(q).getResultList();
 	}
 

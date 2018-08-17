@@ -85,6 +85,8 @@ public class OrganizationServiceImpl extends StandardService<Organization, Long>
 	public Organization create(Organization organization) {
 		// 校验提交的表单信息
 		validate(organization);
+		String[] username = USER_ID.get().split(SecurityConfig.SEPARATOR);
+		organization.setCreatorId(username[0]);
 		organization.setPass(false);
 		// 如果没有填写收票地址，那么就把公司地址设置为收票地址
 		if (!hasText(organization.getDeliveryAddress())) {
@@ -98,7 +100,6 @@ public class OrganizationServiceImpl extends StandardService<Organization, Long>
 		// 先保存开票资料，获取ID
 		organizationRepo.persist(organization);
 		String businessKey = organization.getId().toString();
-		String[] username = USER_ID.get().split(SecurityConfig.SEPARATOR);
 		// 关联流程
 		Flow fd = new Flow(businessKey, FlowType.ORGANIZATION, username[0]);
 		fd.setApplyUserName(username[1]);
@@ -180,11 +181,24 @@ public class OrganizationServiceImpl extends StandardService<Organization, Long>
 			source.getCredentials().clear();// 清空参数里面的凭证
 			source.getCredentials().addAll(pbf);// 再添加上持久化的凭证
 		}
+		
+		// 如果修改人就是创建者，若同时当前流程处于modifyApply状态，则直接帮其完成任务
+		String[] username = USER_ID.get().split(SecurityConfig.SEPARATOR);
+		String userId = username[0];
+		if (userId.equals(source.getCreatorId())) {
+			Task task = taskService.createTaskQuery().processInstanceBusinessKey(source.getId().toString()).singleResult();
+			if (task != null && "modifyApply".equals(task.getTaskDefinitionKey())) {
+				taskService.complete(task.getId());
+			}
+		}
 		return transientDetail(source);
 	}
 
 	@Override
 	public void delete(Long id) {
+		String[] username = USER_ID.get().split(SecurityConfig.SEPARATOR);
+		ProcessInstance p = runtimeService.createProcessInstanceQuery().processInstanceBusinessKey(id.toString(), PROCESS_DEFINITION_KEY).singleResult();
+		runtimeService.deleteProcessInstance(p.getId(), "delete by " + username);
 		organizationRepo.deleteById(id);
 	}
 
