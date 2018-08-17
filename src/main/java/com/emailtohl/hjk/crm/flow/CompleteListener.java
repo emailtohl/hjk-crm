@@ -22,7 +22,7 @@ public class CompleteListener implements ExecutionListener {
 		FlowType flowType = (FlowType) execution.getVariable("flowType");
 		switch (flowType) {
 		case ORGANIZATION:
-			Organization organization = organizationRepo.findByFlow_ProcessInstanceId(execution.getProcessInstanceId());
+			Organization organization = organizationRepo.getByProcessInstanceId(execution.getProcessInstanceId());
 			boolean result = (boolean) execution.getVariable("result");
 			organization.setPass(result);
 			break;

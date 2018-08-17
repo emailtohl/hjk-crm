@@ -1,6 +1,8 @@
 package com.emailtohl.hjk.crm.entities;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -9,13 +11,14 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
+import javax.persistence.OrderBy;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.hibernate.search.annotations.Field;
 import org.hibernate.search.annotations.Indexed;
+import org.hibernate.search.annotations.IndexedEmbedded;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.github.emailtohl.lib.jpa.BaseEntity;
@@ -66,7 +69,7 @@ public class Organization extends BaseEntity {
 	private Boolean pass;
 	
 	// 与流程相关的信息
-	private Flow flow;
+	private List<Flow> flows = new ArrayList<>();
 	
 	@Field
 	@Column(nullable = false)
@@ -186,13 +189,16 @@ public class Organization extends BaseEntity {
 	}
 	
 	@NotAudited
-	@OneToOne(cascade = CascadeType.ALL)
-	@JoinColumn(name = "flow_id")
-	public Flow getFlow() {
-		return flow;
+	@IndexedEmbedded(depth = 1)
+	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+	@JoinTable(name = "organization_flow"
+	, joinColumns = { @JoinColumn(name = "organization_id", referencedColumnName = "id") }
+	, inverseJoinColumns = { @JoinColumn(name = "flow_id", referencedColumnName = "id") })
+	@OrderBy(CREATE_DATE_PROPERTY_NAME + " ASC")
+	public List<Flow> getFlows() {
+		return flows;
 	}
-	public void setFlow(Flow flow) {
-		this.flow = flow;
+	public void setFlows(List<Flow> flows) {
+		this.flows = flows;
 	}
-	
 }

@@ -36,13 +36,13 @@ public class Check implements Serializable {
 	
 	public Check() {}
 	
-	public Check(Task task, boolean checkApproved, String checkComment) {
-		this.taskDefinitionKey = task.getTaskDefinitionKey();
-		this.taskName = task.getName();
-		this.checkerId = task.getOwner();
-		this.checkTime = new Date();
+	public Check(String checkerId, boolean checkApproved, String checkComment, Task task) {
+		this.checkerId = checkerId;
 		this.checkApproved = checkApproved;
 		this.checkComment = checkComment;
+		this.taskDefinitionKey = task.getTaskDefinitionKey();
+		this.taskName = task.getName();
+		this.checkTime = new Date();
 	}
 
 	@Column(nullable = false, updatable = false)

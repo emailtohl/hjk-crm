@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.NoSuchElementException;
 
+import javax.persistence.NoResultException;
 import javax.validation.ConstraintViolationException;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +39,12 @@ public class ErrorHandler {
 	
 	@ExceptionHandler(NoSuchElementException.class)
 	public ResponseEntity<String> handle(NoSuchElementException ex) {
+		String msg = getMessage(ex);
+		return new ResponseEntity<>(msg, HttpStatus.NOT_FOUND);
+	}
+	
+	@ExceptionHandler(NoResultException.class)
+	public ResponseEntity<String> handle(NoResultException ex) {
 		String msg = getMessage(ex);
 		return new ResponseEntity<>(msg, HttpStatus.NOT_FOUND);
 	}

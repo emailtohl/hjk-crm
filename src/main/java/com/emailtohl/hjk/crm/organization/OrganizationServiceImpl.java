@@ -1,6 +1,5 @@
 package com.emailtohl.hjk.crm.organization;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -98,47 +97,26 @@ public class OrganizationServiceImpl extends StandardService<Organization, Long>
 		organization.getCredentials().addAll(pbf);// 再添加上持久化的凭证
 		// 先保存开票资料，获取ID
 		organizationRepo.persist(organization);
-
-		// 关联流程
-		Flow fd = new Flow();
-		fd.setFlowType(FlowType.ORGANIZATION);
-		String[] username = USER_ID.get().split(SecurityConfig.SEPARATOR);
-		fd.setApplyUserId(username[0]);
-		fd.setApplyUserName(username[1]);
-		// 计算流程编号
-		LocalDate d = LocalDate.now();
-		int year = d.getYear(), month = d.getMonthValue(), day = d.getDayOfMonth();
-		StringBuilder flowNum = new StringBuilder();
-		flowNum.append(FlowType.ORGANIZATION.name()).append('-').append(year);
-		if (month < 10) {
-			flowNum.append('-').append(0).append(month);
-		} else {
-			flowNum.append('-').append(month);
-		}
-		if (day < 10) {
-			flowNum.append('-').append(0).append(day);
-		} else {
-			flowNum.append('-').append(day);
-		}
 		String businessKey = organization.getId().toString();
-		flowNum.append('-').append(businessKey);
-		// 设置流程编号
-		fd.setFlowNum(flowNum.toString());
+		String[] username = USER_ID.get().split(SecurityConfig.SEPARATOR);
+		// 关联流程
+		Flow fd = new Flow(businessKey, FlowType.ORGANIZATION, username[0]);
+		fd.setApplyUserName(username[1]);
+		
 		// 填写点流程的传输信息
 		Map<String, Object> variables = new HashMap<>();
+		variables.put("businessKey", businessKey);
 		variables.put("flowType", FlowType.ORGANIZATION);
 		variables.put("applyUserId", username[0]);
 		variables.put("applyUserName", username[1]);
-		variables.put("flowNum", flowNum);
-		variables.put("businessKey", businessKey);
+		variables.put("flowNum", fd.getFlowNum());
 		ProcessInstance processInstance = runtimeService.startProcessInstanceByKey(PROCESS_DEFINITION_KEY, businessKey,
 				variables);
 		String processInstanceId = processInstance.getId();
 		LOG.debug("start process of {key={}, bkey={}, pid={}}", PROCESS_DEFINITION_KEY, businessKey, processInstanceId);
-
 		fd.setProcessInstanceId(processInstanceId);
 		flowRepo.save(fd);
-		organization.setFlow(fd);
+		organization.getFlows().add(fd);
 		return organization;
 	}
 
@@ -150,7 +128,7 @@ public class OrganizationServiceImpl extends StandardService<Organization, Long>
 
 	@Override
 	public Organization findByFlowProcessInstanceId(String processInstanceId) {
-		Organization source = organizationRepo.findByFlow_ProcessInstanceId(processInstanceId);
+		Organization source = organizationRepo.getByProcessInstanceId(processInstanceId);
 		return transientDetail(source);
 	}
 
@@ -257,7 +235,7 @@ public class OrganizationServiceImpl extends StandardService<Organization, Long>
 			throw new NotAcceptableException("Activiti task already claimed exception", e);
 		}
 		String processInstanceId = task.getProcessInstanceId();
-		return transientDetail(organizationRepo.findByFlow_ProcessInstanceId(processInstanceId));
+		return transientDetail(organizationRepo.getByProcessInstanceId(processInstanceId));
 	}
 
 	/**
@@ -297,7 +275,7 @@ public class OrganizationServiceImpl extends StandardService<Organization, Long>
 			return;
 		}
 		// 维护相关数据
-		Check check = new Check(task, checkApproved, checkComment);
+		Check check = new Check(userId, checkApproved, checkComment, task);
 		org.activiti.engine.identity.User u = identityService.createUserQuery().userId(check.getCheckerId()).singleResult();
 		if (u != null) {
 			check.setCheckerName(u.getFirstName());
@@ -338,7 +316,7 @@ public class OrganizationServiceImpl extends StandardService<Organization, Long>
 	@Override
 	public List<Organization> myRegisterOrganization() {
 		String[] username = USER_ID.get().split(SecurityConfig.SEPARATOR);
-		return organizationRepo.findByFlow_ApplyUserId(username[0]).stream().map(this::toTransient)
+		return organizationRepo.getByApplyUserId(username[0]).stream().map(this::toTransient)
 				.collect(Collectors.toList());
 	}
 
@@ -348,32 +326,42 @@ public class OrganizationServiceImpl extends StandardService<Organization, Long>
 			return source;
 		}
 		Organization target = new Organization();
-		BeanUtils.copyProperties(source, target, "credentials", "flow");
+		BeanUtils.copyProperties(source, target, "credentials", "flows");
 		return target;
 	}
 
 	@Override
 	protected Organization transientDetail(Organization source) {
 		Organization target = toTransient(source);
-		Flow sourceFlow = source.getFlow();
-		Flow targetFlow = new Flow();
-		BeanUtils.copyProperties(sourceFlow, targetFlow, "checks");
-		Task task = taskService.createTaskQuery().processInstanceId(sourceFlow.getProcessInstanceId()).singleResult();
-		String taskAssignee = task.getAssignee();
-		if (hasText(taskAssignee)) {
-			targetFlow.setTaskAssignee(taskAssignee);
-			org.activiti.engine.identity.User u = identityService.createUserQuery().userId(taskAssignee).singleResult();
-			if (u != null) {
-				targetFlow.setTaskAssigneeName(u.getFirstName());
-			}
-		}
-		targetFlow.setTaskDefinitionKey(task.getTaskDefinitionKey());
-		targetFlow.setTaskId(task.getId());
-		targetFlow.setTaskName(task.getName());
-		targetFlow.getChecks().addAll(sourceFlow.getChecks());// 懒加载所有的check信息
-		target.setFlow(targetFlow);
+		List<Flow> flows = source.getFlows().stream().map(Flow::transientDetail).peek(this::appendTaskInfo)
+				.peek(this::appendTaskAssigneeName).collect(Collectors.toList());
+		target.getFlows().addAll(flows);
 		target.getCredentials().addAll(source.getCredentials());// 懒加载所有的凭证
 		return target;
 	}
 
+	private void appendTaskInfo(Flow flow) {
+		Task task = taskService.createTaskQuery().processInstanceId(flow.getProcessInstanceId()).singleResult();
+		if (task == null) {
+			return;
+		}
+		String taskAssignee = task.getAssignee();
+		if (hasText(taskAssignee)) {
+			flow.setTaskAssignee(taskAssignee);
+			org.activiti.engine.identity.User u = identityService.createUserQuery().userId(taskAssignee).singleResult();
+			if (u != null) {
+				flow.setTaskAssigneeName(u.getFirstName());
+			}
+		}
+		flow.taskInfo(task);
+	}
+	
+	private void appendTaskAssigneeName(Flow flow) {
+		if (hasText(flow.getTaskAssignee())) {
+			org.activiti.engine.identity.User u = identityService.createUserQuery().userId(flow.getTaskAssignee()).singleResult();
+			if (u != null) {
+				flow.setTaskAssigneeName(u.getFirstName());
+			}
+		}
+	}
 }

@@ -1,8 +1,8 @@
 package com.emailtohl.hjk.crm.entities;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
@@ -28,6 +28,8 @@ import com.github.emailtohl.lib.jpa.BaseEntity;
 @Entity
 public class Flow extends BaseEntity {
 	private static final long serialVersionUID = 6842886315737049187L;
+	// 业务主键
+	private String businessKey;
 	// 关联Activiti的流程id
 	private String processInstanceId;
 	// 表单号
@@ -57,15 +59,48 @@ public class Flow extends BaseEntity {
 	private String nextActivityId;
 	// 下一个活动id
 	private String nextActivityName;
+	
+	public Flow() {}
+
+	public Flow(String businessKey, FlowType flowType, String applyUserId) {
+		this.businessKey = businessKey;
+		this.flowType = flowType;
+		this.applyUserId = applyUserId;
+		// 计算流程编号
+		LocalDate d = LocalDate.now();
+		int year = d.getYear(), month = d.getMonthValue(), day = d.getDayOfMonth();
+		StringBuilder flowNum = new StringBuilder();
+		flowNum.append(flowType.name()).append('-').append(year);
+		if (month < 10) {
+			flowNum.append('-').append(0).append(month);
+		} else {
+			flowNum.append('-').append(month);
+		}
+		if (day < 10) {
+			flowNum.append('-').append(0).append(day);
+		} else {
+			flowNum.append('-').append(day);
+		}
+		flowNum.append('-').append(businessKey);
+		this.flowNum = flowNum.toString();
+	}
 
 	public void taskInfo(Task task) {
 		this.processInstanceId = task.getProcessInstanceId();
 		this.taskId = task.getId();
 		this.taskName = task.getName();
-		this.taskAssignee = task.getOwner();
+		this.taskAssignee = task.getAssignee();
 		this.taskDefinitionKey = task.getTaskDefinitionKey();
 	}
 	
+	@Column(name = "business_key", nullable = false, updatable = false)
+	public String getBusinessKey() {
+		return businessKey;
+	}
+	public void setBusinessKey(String businessKey) {
+		this.businessKey = businessKey;
+	}
+
 	@Column(name = "process_instance_id", nullable = false, updatable = false)
 	public String getProcessInstanceId() {
 		return processInstanceId;
@@ -181,7 +216,8 @@ public class Flow extends BaseEntity {
 
 	public Flow transientDetail() {
 		Flow target = toTransient();
-		target.getChecks().addAll(getChecks().stream().map(check -> check).collect(Collectors.toSet()));
+		// 将Hibernate封装的Set改为普通的HashSet
+		target.getChecks().addAll(getChecks());
 		return target;
 	}
 	
