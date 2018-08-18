@@ -42,12 +42,21 @@ public class UserServiceImpl extends StandardService<User, Long> implements User
 	private IdentityService identityService;
 	
 	private ExampleMatcher emailMatcher = ExampleMatcher.matching().withMatcher("email", GenericPropertyMatchers.exact());
+	private ExampleMatcher cellPhoneMatcher = ExampleMatcher.matching().withMatcher("cellPhone", GenericPropertyMatchers.exact());
 
 	@Override
 	public boolean emailIsExist(String email) {
 		User u = new User();
 		u.setEmail(email);
 		Example<User> example = Example.<User>of(u, emailMatcher);
+		return userRepo.exists(example);
+	}
+
+	@Override
+	public boolean cellPhoneIsExist(String cellPhone) {
+		User u = new User();
+		u.setCellPhone(cellPhone);
+		Example<User> example = Example.<User>of(u, cellPhoneMatcher);
 		return userRepo.exists(example);
 	}
 

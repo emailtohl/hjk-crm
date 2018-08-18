@@ -188,7 +188,7 @@ public class OrganizationServiceImpl extends StandardService<Organization, Long>
 		if (userId.equals(source.getCreatorId())) {
 			Task task = taskService.createTaskQuery().processInstanceBusinessKey(source.getId().toString()).singleResult();
 			if (task != null && "modifyApply".equals(task.getTaskDefinitionKey())) {
-				taskService.complete(task.getId());
+				check(task.getId(), true, "update");
 			}
 		}
 		return transientDetail(source);
@@ -196,10 +196,12 @@ public class OrganizationServiceImpl extends StandardService<Organization, Long>
 
 	@Override
 	public void delete(Long id) {
-		String[] username = USER_ID.get().split(SecurityConfig.SEPARATOR);
-		ProcessInstance p = runtimeService.createProcessInstanceQuery().processInstanceBusinessKey(id.toString(), PROCESS_DEFINITION_KEY).singleResult();
-		runtimeService.deleteProcessInstance(p.getId(), "delete by " + username);
 		organizationRepo.deleteById(id);
+		ProcessInstance p = runtimeService.createProcessInstanceQuery().processInstanceBusinessKey(id.toString(), PROCESS_DEFINITION_KEY).singleResult();
+		if (p != null) {
+			String[] username = USER_ID.get().split(SecurityConfig.SEPARATOR);
+			runtimeService.deleteProcessInstance(p.getId(), "delete by " + username);
+		}
 	}
 
 	/**
@@ -310,7 +312,12 @@ public class OrganizationServiceImpl extends StandardService<Organization, Long>
 
 	@Override
 	public Paging<Organization> query(String query, Pageable pageable) {
-		Page<Organization> page = organizationRepo.search(query, pageable);
+		Page<Organization> page;
+		if (hasText(query)) {
+			page = organizationRepo.search(query, pageable);
+		} else {
+			page = organizationRepo.findAll(pageable);
+		}
 		List<Organization> ls = page.getContent().stream().map(this::toTransient).collect(Collectors.toList());
 		return new Paging<>(ls, pageable, page.getTotalElements());
 	}
@@ -347,6 +354,10 @@ public class OrganizationServiceImpl extends StandardService<Organization, Long>
 	@Override
 	protected Organization transientDetail(Organization source) {
 		Organization target = toTransient(source);
+		org.activiti.engine.identity.User u = identityService.createUserQuery().userId(source.getCreatorId()).singleResult();
+		if (u != null) {
+			target.setCreatorName((u.getFirstName()));
+		}
 		List<Flow> flows = source.getFlows().stream().map(Flow::transientDetail).peek(this::appendTaskInfo)
 				.peek(this::appendTaskAssigneeName).collect(Collectors.toList());
 		target.getFlows().addAll(flows);

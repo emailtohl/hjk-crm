@@ -16,11 +16,18 @@ import com.github.emailtohl.lib.jpa.Paging;
 public interface UserService {
 	
 	/**
-	 * 用户名是否存在
-	 * @param name
+	 * 邮箱是否存在
+	 * @param email
 	 * @return
 	 */
-	boolean emailIsExist(String name);
+	boolean emailIsExist(String email);
+	
+	/**
+	 * 手机号是否存在
+	 * @param cellPhone
+	 * @return
+	 */
+	boolean cellPhoneIsExist(String cellPhone);
 	
 	/**
 	 * 创建用户信息

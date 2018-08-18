@@ -1,7 +1,12 @@
 package com.emailtohl.hjk.crm.config;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.activiti.engine.IdentityService;
 import org.activiti.engine.identity.Group;
@@ -17,9 +22,11 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.web.cors.CorsUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -49,8 +56,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Override
 	protected void configure(HttpSecurity security) throws Exception {
-		String[] permitAll = { "/csrf", "/token", "/groups", "/users/exist", "/swagger-resources/**",
-				"/api-docs/**" };
+		String[] permitAll = { "/csrf", "/token", "/groups", "/users/isEmailExist", "/users/isCellPhoneExist",
+				"/swagger-resources/**", "/api-docs/**" };
 		security
 		.authorizeRequests()
 		.antMatchers(permitAll).permitAll()
@@ -58,6 +65,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		.anyRequest().authenticated()
 		.and().formLogin().usernameParameter("email").permitAll().successHandler((req, resp, auth) -> resp.getWriter().write(om.writeValueAsString(auth)))
 		.and().logout().permitAll().logoutSuccessUrl("/login")
+		.and().exceptionHandling().authenticationEntryPoint(new AuthenticationEntryPoint() {
+			@Override
+			public void commence(HttpServletRequest request, HttpServletResponse response,
+					AuthenticationException authException) throws IOException, ServletException {
+				response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
+						authException.getMessage());
+			}})
 		.and().csrf().ignoringAntMatchers("/topic", "/queue", "/socket")
         // allow same origin to frame our site to support iframe SockJS
         .and().headers().frameOptions().sameOrigin()

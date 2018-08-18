@@ -45,10 +45,20 @@ public class UserCtl {
 	 * @param email
 	 * @return
 	 */
-	@GetMapping("exist")
-	public boolean exist(@RequestParam(required = false, defaultValue = "") String email) {
+	@GetMapping("isEmailExist")
+	public boolean isEmailExist(@RequestParam(required = false, defaultValue = "") String email) {
 		if (StringUtils.hasText(email)) {
 			return userService.emailIsExist(email);
+		} else {
+			return false;
+		}
+	}
+	
+
+	@GetMapping("isCellPhoneExist")
+	public boolean isCellPhoneExist(@RequestParam(required = false, defaultValue = "") String cellPhone) {
+		if (StringUtils.hasText(cellPhone)) {
+			return userService.cellPhoneIsExist(cellPhone);
 		} else {
 			return false;
 		}

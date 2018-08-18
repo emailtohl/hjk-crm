@@ -12,7 +12,7 @@ import com.github.emailtohl.lib.jpa.Paging;
 import com.github.emailtohl.lib.jpa.AuditedRepository.Tuple;
 
 /**
- * 发票资料管理接口
+ * 公司信息管理接口
  * @author HeLei
  */
 public interface OrganizationService {
@@ -32,21 +32,21 @@ public interface OrganizationService {
 	boolean isAccountExist(String account);
 	
 	/**
-	 * 创建发票资料
+	 * 创建公司信息
 	 * @param organization
 	 * @return
 	 */
 	Organization create(Organization organization);
 	
 	/**
-	 * 读取发票资料
+	 * 读取公司信息
 	 * @param id
 	 * @return
 	 */
 	Organization read(Long id);
 	
 	/**
-	 * 通过流程实例id读取发票资料
+	 * 通过流程实例id读取公司信息
 	 * @param processInstanceId
 	 * @return
 	 */
@@ -60,7 +60,7 @@ public interface OrganizationService {
 	Set<BinFile> getCredentials(Long organizationId);
 	
 	/**
-	 * 查询发票资料
+	 * 查询公司信息
 	 * @param query
 	 * @param pageable
 	 * @return
@@ -68,7 +68,7 @@ public interface OrganizationService {
 	Paging<Organization> query(String query, Pageable pageable);
 	
 	/**
-	 * 修改发票资料
+	 * 修改公司信息
 	 * @param id
 	 * @param organization
 	 * @return
@@ -76,7 +76,7 @@ public interface OrganizationService {
 	Organization update(Long id, Organization organization);
 	
 	/**
-	 * 删除发票资料
+	 * 删除公司信息
 	 * @param id
 	 */
 	void delete(Long id);

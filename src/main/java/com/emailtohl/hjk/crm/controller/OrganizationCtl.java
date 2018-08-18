@@ -122,8 +122,8 @@ public class OrganizationCtl {
 	 * @param pageable
 	 * @return
 	 */
-	@GetMapping("query")
-	public Paging<Organization> query(@RequestParam(required = false, defaultValue = "") String query,
+	@GetMapping("search")
+	public Paging<Organization> search(@RequestParam(required = false, defaultValue = "") String query,
 			@PageableDefault(page = 0, size = 20, sort = { BaseEntity.ID_PROPERTY_NAME,
 					BaseEntity.MODIFY_DATE_PROPERTY_NAME }, direction = Direction.DESC) Pageable pageable) {
 		return organizationService.query(query, pageable);

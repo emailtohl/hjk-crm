@@ -12,6 +12,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.envers.Audited;
@@ -35,6 +36,8 @@ public class Organization extends BaseEntity {
 	private static final long serialVersionUID = -2949903806197415296L;
 	// 创建者用户id
 	private String creatorId;
+	// 创建者用户姓名
+	private String creatorName;
 	// 公司名
 	@NotNull
 	private String name;
@@ -79,6 +82,14 @@ public class Organization extends BaseEntity {
 	}
 	public void setCreatorId(String creatorId) {
 		this.creatorId = creatorId;
+	}
+	
+	@Transient
+	public String getCreatorName() {
+		return creatorName;
+	}
+	public void setCreatorName(String creatorName) {
+		this.creatorName = creatorName;
 	}
 	
 	@Field
