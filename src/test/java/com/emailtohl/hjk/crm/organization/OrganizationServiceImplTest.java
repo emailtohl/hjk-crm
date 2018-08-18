@@ -27,11 +27,11 @@ import com.github.emailtohl.lib.StandardService;
 @SpringBootTest
 public class OrganizationServiceImplTest {
 	@Autowired
-	@Qualifier("troungSon")
-	private User troungSon;
+	@Qualifier("Lily")
+	private User Lily;
 	@Autowired
-	@Qualifier("lisa")
-	private User lisa;
+	@Qualifier("Lisa")
+	private User Lisa;
 	@Autowired
 	private IdentityService identityService;
 	@Autowired
@@ -40,7 +40,7 @@ public class OrganizationServiceImplTest {
 
 	@Before
 	public void setUp() throws Exception {
-		changeUser(troungSon);
+		changeUser(Lily);
 		Organization organization = new Organization();
 		organization.setName("浙江基恒康门业有限公司");
 		organization.setTaxNumber("91330702790992808Q");
@@ -64,7 +64,7 @@ public class OrganizationServiceImplTest {
 
 	@Test
 	public void testFlow() {
-		changeUser(lisa);
+		changeUser(Lisa);
 		List<Flow> flows = organizationService.findTodoTasks();
 		assertFalse(flows.isEmpty());
 		Flow flow = flows.get(0);
@@ -73,7 +73,7 @@ public class OrganizationServiceImplTest {
 		System.out.println("阅读开票信息，然后进行审批：\n" + organization);
 		organizationService.check(flow.getTaskId(), false, "修改备注信息");
 		
-		changeUser(troungSon);
+		changeUser(Lily);
 		flows = organizationService.findTodoTasks();
 		assertFalse(flows.isEmpty());
 		flow = flows.get(0);
@@ -81,9 +81,10 @@ public class OrganizationServiceImplTest {
 		assertNotNull(organization);
 		organization.setRemark("这是新提交的");
 		organization = organizationService.update(id, organization);
-		organizationService.check(flows.get(0).getTaskId(), true, "已修改");
+//		若是提交人修改了内容，自动为其处理流程
+//		organizationService.check(flows.get(0).getTaskId(), true, "已修改");
 		
-		changeUser(lisa);
+		changeUser(Lisa);
 		flows = organizationService.findTodoTasks();
 		assertFalse(flows.isEmpty());
 		flow = flows.get(0);

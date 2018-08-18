@@ -4,6 +4,7 @@ import static com.emailtohl.hjk.crm.entities.GroupEnum.ADMIN;
 import static com.emailtohl.hjk.crm.entities.GroupEnum.ADMINISTRATION;
 import static com.emailtohl.hjk.crm.entities.GroupEnum.CUSTOMER;
 import static com.emailtohl.hjk.crm.entities.GroupEnum.FINANCE;
+import static com.emailtohl.hjk.crm.entities.GroupEnum.FOREIGN;
 import static com.emailtohl.hjk.crm.entities.GroupEnum.MARKET;
 
 import java.io.IOException;
@@ -77,6 +78,11 @@ public class InitConfig {
 	public Group market() {
 		return getGroup(MARKET);
 	}
+	
+	@Bean
+	public Group foreign() {
+		return getGroup(FOREIGN);
+	}
 
 	@Bean
 	public Group customer() {
@@ -132,9 +138,9 @@ public class InitConfig {
 	@Bean
 	public User userAdmin(@Qualifier("admin") Group admin, @Qualifier("finance") Group finance,
 			@Qualifier("administration") Group administration, @Qualifier("market") Group market,
-			@Qualifier("customer") Group customer) throws IOException {
+			@Qualifier("foreign") Group foreign, @Qualifier("customer") Group customer) throws IOException {
 		// email, password, groupEnum, name, nickname, cellPhone
-		User u = getUser("admin@localhost", "admin", ADMIN, "admin", "admin", "19012345678");
+		User u = getUser("admin@localhost", "123456", ADMIN, "admin", "admin", "19012345678");
 		ClassPathResource resource = new ClassPathResource("image/icon-head-admin.png");
 		try (InputStream in = resource.getInputStream()) {
 			byte[] bytes = StreamUtils.copyToByteArray(in);
@@ -145,11 +151,9 @@ public class InitConfig {
 	}
 
 	@Bean
-	public User lisa(@Qualifier("admin") Group admin, @Qualifier("finance") Group finance,
-			@Qualifier("administration") Group administration, @Qualifier("market") Group market,
-			@Qualifier("customer") Group customer) throws IOException {
+	public User Lisa(@Qualifier("userAdmin") User userAdmin/*依赖加载所有的group*/) throws IOException {
 		// email, password, groupEnum, name, nickname, cellPhone
-		User u = getUser("398776453@qq.com", "lisa", ADMINISTRATION, "Ms Huang", "lisa", "13996248085");
+		User u = getUser("398776453@qq.com", "123456", ADMINISTRATION, "Ms Huang", "Lisa", "13996248085");
 		ClassPathResource resource = new ClassPathResource("image/icon-head-lisa.jpg");
 		try (InputStream in = resource.getInputStream()) {
 			byte[] bytes = StreamUtils.copyToByteArray(in);
@@ -160,35 +164,51 @@ public class InitConfig {
 	}
 
 	@Bean
-	public User mark(@Qualifier("admin") Group admin, @Qualifier("finance") Group finance,
-			@Qualifier("administration") Group administration, @Qualifier("market") Group market,
-			@Qualifier("customer") Group customer) throws IOException {
+	public User Bill(@Qualifier("userAdmin") User userAdmin/*依赖加载所有的group*/) throws IOException {
 		// email, password, groupEnum, name, nickname, cellPhone
-		return getUser("mark@localhost", "mark", MARKET, null, "mark", null);
+		return getUser("Bill@localhost", "Bill", MARKET, "Bill", "Bill", null);
+	}
+	
+	@Bean
+	public User Jenny(@Qualifier("userAdmin") User userAdmin/*依赖加载所有的group*/) throws IOException {
+		// email, password, groupEnum, name, nickname, cellPhone
+		return getUser("Jenny@localhost", "Jenny", MARKET, "Jenny", "Jenny", null);
+	}
+	
+	@Bean
+	public User Tom(@Qualifier("userAdmin") User userAdmin/*依赖加载所有的group*/) throws IOException {
+		// email, password, groupEnum, name, nickname, cellPhone
+		return getUser("Tom@localhost", "Tom", FINANCE, "Tom", "Tom", null);
+	}
+	
+	@Bean
+	public User Amy(@Qualifier("userAdmin") User userAdmin/*依赖加载所有的group*/) throws IOException {
+		// email, password, groupEnum, name, nickname, cellPhone
+		return getUser("Amy@localhost", "Amy", FINANCE, "Amy", "Amy", null);
 	}
 
 	@Bean
-	public User adminw(@Qualifier("admin") Group admin, @Qualifier("finance") Group finance,
-			@Qualifier("administration") Group administration, @Qualifier("market") Group market,
-			@Qualifier("customer") Group customer) throws IOException {
+	public User Andy(@Qualifier("userAdmin") User userAdmin/*依赖加载所有的group*/) throws IOException {
 		// email, password, groupEnum, name, nickname, cellPhone
-		return getUser("adminw@localhost", "adminw", ADMINISTRATION, "adminw", "adminw", null);
+		return getUser("Andy@localhost", "123456", FOREIGN, "Andy", "Andy", null);
+	}
+	
+	@Bean
+	public User Tony(@Qualifier("userAdmin") User userAdmin/*依赖加载所有的group*/) throws IOException {
+		// email, password, groupEnum, name, nickname, cellPhone
+		return getUser("Tony@localhost", "123456", FOREIGN, "Tony", "Tony", null);
 	}
 
 	@Bean
-	public User troungSon(@Qualifier("admin") Group admin, @Qualifier("finance") Group finance,
-			@Qualifier("administration") Group administration, @Qualifier("market") Group market,
-			@Qualifier("customer") Group customer) throws IOException {
+	public User Lily(@Qualifier("userAdmin") User userAdmin/*依赖加载所有的group*/) throws IOException {
 		// email, password, groupEnum, name, nickname, cellPhone
-		return getUser("troung@localhost", "troung", CUSTOMER, "troung", "son", null);
+		return getUser("Lily@localhost", "123456", CUSTOMER, "Lily", "Lily", null);
 	}
 
 	@Bean
-	public User amy(@Qualifier("admin") Group admin, @Qualifier("finance") Group finance,
-			@Qualifier("administration") Group administration, @Qualifier("market") Group market,
-			@Qualifier("customer") Group customer) throws IOException {
+	public User Thomas(@Qualifier("userAdmin") User userAdmin/*依赖加载所有的group*/) throws IOException {
 		// email, password, groupEnum, name, nickname, cellPhone
-		return getUser("amy@localhost", "amy", FINANCE, "amy", "amy", null);
+		return getUser("Thomas@localhost", "123456", FINANCE, "Thomas", "Thomas", null);
 	}
 
 }

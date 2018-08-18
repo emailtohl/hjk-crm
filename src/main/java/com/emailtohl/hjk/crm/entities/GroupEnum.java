@@ -2,7 +2,7 @@ package com.emailtohl.hjk.crm.entities;
 
 public enum GroupEnum {
 	ADMIN("系统管理员", "EMPLOYEE"), FINANCE("财务", "EMPLOYEE"), ADMINISTRATION("行政", "EMPLOYEE"), MARKET("市场",
-			"EMPLOYEE"), CUSTOMER("客户", "CUSTOMER");
+			"EMPLOYEE"), FOREIGN("外务", "FOREIGN"), CUSTOMER("客户", "CUSTOMER");
 	
 	private GroupEnum(String name, String type) {
 		this.name = name;

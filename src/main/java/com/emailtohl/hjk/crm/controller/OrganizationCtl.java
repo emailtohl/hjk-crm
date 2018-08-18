@@ -1,11 +1,22 @@
 package com.emailtohl.hjk.crm.controller;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Set;
 
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.web.PageableDefault;
@@ -211,6 +222,58 @@ public class OrganizationCtl {
 	@GetMapping("myRegisterOrganization")
 	public List<Organization> myRegisterOrganization() {
 		return organizationService.myRegisterOrganization();
+	}
+	
+	
+	/**
+	 * 将所有公司信息导出成Excel文件
+	 * @return
+	 * @throws IOException 
+	 * @throws FileNotFoundException 
+	 */
+	@GetMapping("export")
+	public void exportExcel(HttpServletResponse response) throws FileNotFoundException, IOException {
+		List<Organization> ls = organizationService.findAll();
+		ClassPathResource r = new ClassPathResource("excel/organization_template.xlsx");
+		response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+		try (InputStream in = r.getInputStream();
+				XSSFWorkbook workbook = new XSSFWorkbook(in);
+				ServletOutputStream out = response.getOutputStream()) {
+			XSSFSheet sheet = workbook.getSheetAt(0);
+			int i = 3;
+			for (Organization o : ls) {
+				XSSFRow row = sheet.getRow(i);
+				if (row == null) {
+					row = sheet.createRow(i);
+				}
+				XSSFCell cell = row.createCell(0);
+				cell.setCellValue(i - 2);
+				cell = row.createCell(1);
+				cell.setCellValue(o.getName());
+				cell = row.createCell(2);
+				cell.setCellValue(o.getTaxNumber());
+				cell = row.createCell(3);
+				cell.setCellValue(o.getAddress());
+				cell = row.createCell(4);
+				cell.setCellValue(o.getTelephone());
+				cell = row.createCell(5);
+				cell.setCellValue(o.getDepositBank());
+				cell = row.createCell(6);
+				cell.setCellValue(o.getAccount());
+				cell = row.createCell(7);
+				cell.setCellValue(o.getPrincipal());
+				cell = row.createCell(8);
+				cell.setCellValue(o.getPrincipalPhone());
+				cell = row.createCell(9);
+				cell.setCellValue(o.getDeliveryAddress());
+				cell = row.createCell(10);
+				cell.setCellValue(o.getRemark());
+				cell = row.createCell(11);
+				cell.setCellValue(o.getReceiver());
+				i++;
+			}
+			workbook.write(out);
+		}
 	}
 
 	public static class Form {

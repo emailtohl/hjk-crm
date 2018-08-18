@@ -1,0 +1,170 @@
+package com.emailtohl.hjk.crm.entities;
+
+import java.util.Date;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
+import javax.validation.constraints.NotNull;
+
+import com.github.emailtohl.lib.jpa.BaseEntity;
+
+@Entity
+public class Invoice extends BaseEntity {
+	private static final long serialVersionUID = -2949903806197415296L;
+	// 开票类型
+	@NotNull
+	private InvoiceType type;
+	// 开票公司
+	@NotNull
+	private Organization organization;
+	
+	// 下面是财务填写
+	// 收款金额
+	private Float income;
+	// 收款时间
+	Date receiveTime;
+	// 差旅费扣除
+	private Float deduct;
+	// 开票金额
+	private Float ticketfee;
+	// 明细
+	private String detail;
+	
+	// 下面有开票人填写
+	// 开票时间
+	private Date ticketTime;
+	// 开票内容
+	private String content;
+	// 发票编号
+	private String invoiceNumber;
+	
+	// 快递公司
+	private String expressCompany;
+	// 快递单号
+	private String expressNumber;
+	// 快递费
+	private String expressFee;
+	// 垫付款
+	private String paymentOn;
+	// 流程
+	private Flow flow;
+	
+	@Column(nullable = false, updatable = false)
+	public InvoiceType getType() {
+		return type;
+	}
+	public void setType(InvoiceType type) {
+		this.type = type;
+	}
+	
+	@ManyToOne
+	@JoinColumn(name = "organization_id", nullable = false)
+	public Organization getOrganization() {
+		return organization;
+	}
+	public void setOrganization(Organization organization) {
+		this.organization = organization;
+	}
+	
+	@Column(nullable = false)
+	public Float getIncome() {
+		return income;
+	}
+	public void setIncome(Float income) {
+		this.income = income;
+	}
+	
+	@Column(nullable = false)
+	public Date getReceiveTime() {
+		return receiveTime;
+	}
+	public void setReceiveTime(Date receiveTime) {
+		this.receiveTime = receiveTime;
+	}
+	
+	public Float getDeduct() {
+		return deduct;
+	}
+	public void setDeduct(Float deduct) {
+		this.deduct = deduct;
+	}
+	
+	@Column(nullable = false)
+	public Float getTicketfee() {
+		return ticketfee;
+	}
+	public void setTicketfee(Float ticketfee) {
+		this.ticketfee = ticketfee;
+	}
+	
+	public String getDetail() {
+		return detail;
+	}
+	public void setDetail(String detail) {
+		this.detail = detail;
+	}
+	
+	public Date getTicketTime() {
+		return ticketTime;
+	}
+	public void setTicketTime(Date ticketTime) {
+		this.ticketTime = ticketTime;
+	}
+	
+	public String getContent() {
+		return content;
+	}
+	public void setContent(String content) {
+		this.content = content;
+	}
+	
+	@Column(nullable = false)
+	public String getInvoiceNumber() {
+		return invoiceNumber;
+	}
+	public void setInvoiceNumber(String invoiceNumber) {
+		this.invoiceNumber = invoiceNumber;
+	}
+	
+	public String getExpressCompany() {
+		return expressCompany;
+	}
+	public void setExpressCompany(String expressCompany) {
+		this.expressCompany = expressCompany;
+	}
+	
+	public String getExpressNumber() {
+		return expressNumber;
+	}
+	public void setExpressNumber(String expressNumber) {
+		this.expressNumber = expressNumber;
+	}
+	
+	public String getExpressFee() {
+		return expressFee;
+	}
+	public void setExpressFee(String expressFee) {
+		this.expressFee = expressFee;
+	}
+	
+	public String getPaymentOn() {
+		return paymentOn;
+	}
+	public void setPaymentOn(String paymentOn) {
+		this.paymentOn = paymentOn;
+	}
+	
+	@OneToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name = "flow_id", nullable = false)
+	public Flow getFlow() {
+		return flow;
+	}
+	public void setFlow(Flow flow) {
+		this.flow = flow;
+	}
+	
+}

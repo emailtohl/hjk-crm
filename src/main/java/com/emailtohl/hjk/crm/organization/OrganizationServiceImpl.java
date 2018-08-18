@@ -264,7 +264,7 @@ public class OrganizationServiceImpl extends StandardService<Organization, Long>
 	public void check(String taskId, boolean checkApproved, String checkComment) {
 		Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
 		if (task == null) {
-			throw new NotFoundException("taskId: " + taskId + "not found");
+			throw new NotFoundException("taskId: " + taskId + " not found");
 		}
 		Flow flow = flowRepo.findByProcessInstanceId(task.getProcessInstanceId());
 		if (flow == null) {
@@ -340,6 +340,12 @@ public class OrganizationServiceImpl extends StandardService<Organization, Long>
 		return organizationRepo.getByApplyUserId(username[0]).stream().map(this::toTransient)
 				.collect(Collectors.toList());
 	}
+	
+	@Override
+	public List<Organization> findAll() {
+		return organizationRepo.findAll().stream().map(this::toTransient)
+				.collect(Collectors.toList());
+	}
 
 	@Override
 	protected Organization toTransient(Organization source) {
@@ -389,4 +395,5 @@ public class OrganizationServiceImpl extends StandardService<Organization, Long>
 			}
 		}
 	}
+
 }

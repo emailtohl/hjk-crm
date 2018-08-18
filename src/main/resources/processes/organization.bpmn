@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="com.emailtohl.hjk.crm">
-  <process id="organization" name="开票申请" isExecutable="true">
+  <process id="organization" name="注册公司信息" isExecutable="true">
     <documentation>注册公司信息</documentation>
     <startEvent id="startevent1" name="Start" activiti:initiator="applyUserId">
       <extensionElements>
@@ -80,7 +80,7 @@
         <omgdi:waypoint x="270.0" y="67.0"></omgdi:waypoint>
         <omgdi:waypoint x="270.0" y="108.0"></omgdi:waypoint>
         <bpmndi:BPMNLabel>
-          <omgdc:Bounds height="17.0" width="22.0" x="280.0" y="67.0"></omgdc:Bounds>
+          <omgdc:Bounds height="42.0" width="22.0" x="280.0" y="67.0"></omgdc:Bounds>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="flow6" id="BPMNEdge_flow6">
@@ -88,7 +88,7 @@
         <omgdi:waypoint x="142.0" y="239.0"></omgdi:waypoint>
         <omgdi:waypoint x="142.0" y="75.0"></omgdi:waypoint>
         <bpmndi:BPMNLabel>
-          <omgdc:Bounds height="17.0" width="44.0" x="152.0" y="221.0"></omgdc:Bounds>
+          <omgdc:Bounds height="42.0" width="44.0" x="152.0" y="221.0"></omgdc:Bounds>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="flow5" id="BPMNEdge_flow5">
@@ -100,7 +100,7 @@
         <omgdi:waypoint x="517.0" y="240.0"></omgdi:waypoint>
         <omgdi:waypoint x="517.0" y="153.0"></omgdi:waypoint>
         <bpmndi:BPMNLabel>
-          <omgdc:Bounds height="17.0" width="44.0" x="429.0" y="247.0"></omgdc:Bounds>
+          <omgdc:Bounds height="42.0" width="44.0" x="429.0" y="247.0"></omgdc:Bounds>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="flow3" id="BPMNEdge_flow3">

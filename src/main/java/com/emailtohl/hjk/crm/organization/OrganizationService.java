@@ -122,4 +122,10 @@ public interface OrganizationService {
 	 * @return
 	 */
 	List<Organization> myRegisterOrganization();
+
+	/**
+	 * 查找所有的公司信息
+	 * @return
+	 */
+	List<Organization> findAll();
 }
