@@ -41,7 +41,7 @@ import com.github.emailtohl.lib.jpa.BaseEntity;
 import com.github.emailtohl.lib.jpa.Paging;
 
 /**
- * 发票信息控制接口
+ * 公司企业信息管理
  * 
  * @author HeLei
  */

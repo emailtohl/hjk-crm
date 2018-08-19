@@ -40,6 +40,8 @@ public class Flow extends BaseEntity {
 	private String applyUserId;
 	// 申请人姓名
 	private String applyUserName;
+	// 描述流程最后的结果
+	private Boolean pass;
 	// 历史的审核信息
 	private List<Check> checks = new ArrayList<>();
 	
@@ -140,6 +142,13 @@ public class Flow extends BaseEntity {
 	}
 	public void setApplyUserName(String applyUserName) {
 		this.applyUserName = applyUserName;
+	}
+
+	public Boolean getPass() {
+		return pass;
+	}
+	public void setPass(Boolean pass) {
+		this.pass = pass;
 	}
 
 	@ElementCollection

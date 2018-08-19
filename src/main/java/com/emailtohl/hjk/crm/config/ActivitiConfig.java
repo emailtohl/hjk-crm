@@ -31,7 +31,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import com.emailtohl.hjk.crm.flow.CompleteListener;
-import com.emailtohl.hjk.crm.organization.OrganizationRepo;
 
 /**
  * 流程配置
@@ -42,11 +41,6 @@ import com.emailtohl.hjk.crm.organization.OrganizationRepo;
 @ComponentScan(basePackages = { "org.activiti.rest", "org.activiti.conf" })
 public class ActivitiConfig {
 	
-	@Bean
-	public CompleteListener taskCompleteListener(OrganizationRepo invoiceRepo) {
-		return new CompleteListener(invoiceRepo);
-	}
-
 	@Bean
 	public SpringProcessEngineConfiguration processEngineConfiguration(DataSource dataSource,
 			PlatformTransactionManager platformTransactionManager, EntityManagerFactory jpaEntityManagerFactory,

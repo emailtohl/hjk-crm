@@ -39,6 +39,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	public static final String SEPARATOR = ":";
+	public static final String AUTHORITY_SEPARATOR = ",";
 	@Autowired
 	private IdentityService identityService;
 	@Autowired
@@ -87,7 +88,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			}
 			List<String> groupIds = identityService.createGroupQuery().groupMember(user.getId()).list().stream()
 					.map(Group::getId).collect(Collectors.toList());
-			return new org.springframework.security.core.userdetails.User(user.getId() + SEPARATOR + user.getFirstName(),
+			return new org.springframework.security.core.userdetails.User(
+					user.getId() + SEPARATOR + user.getFirstName() + SEPARATOR
+							+ String.join(AUTHORITY_SEPARATOR, groupIds),
 					user.getPassword(),
 					AuthorityUtils.createAuthorityList(groupIds.toArray(new String[groupIds.size()])));
 		}).passwordEncoder(passwordEncoder);

@@ -5,11 +5,18 @@ import java.util.Date;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 
+import org.springframework.format.annotation.DateTimeFormat;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.github.emailtohl.lib.jpa.BaseEntity;
 
 @Entity
@@ -24,13 +31,15 @@ public class Invoice extends BaseEntity {
 	
 	// 下面是财务填写
 	// 收款金额
-	private Float income;
+	private Double income;
 	// 收款时间
-	Date receiveTime;
+	private Date receiveTime;
 	// 差旅费扣除
-	private Float deduct;
+	private Double deduct;
 	// 开票金额
-	private Float ticketfee;
+	private Double ticketfee;
+	// 税金
+	private Double tax;
 	// 明细
 	private String detail;
 	
@@ -47,12 +56,15 @@ public class Invoice extends BaseEntity {
 	// 快递单号
 	private String expressNumber;
 	// 快递费
-	private String expressFee;
+	private Double expressFee;
 	// 垫付款
-	private String paymentOn;
+	private Double paymentOn;
+	// 备注
+	private String remark;
 	// 流程
 	private Flow flow;
 	
+	@Enumerated(EnumType.STRING)
 	@Column(nullable = false, updatable = false)
 	public InvoiceType getType() {
 		return type;
@@ -61,8 +73,8 @@ public class Invoice extends BaseEntity {
 		this.type = type;
 	}
 	
-	@ManyToOne
-	@JoinColumn(name = "organization_id", nullable = false)
+	@ManyToOne(optional = false)
+	@JoinColumn(name = "organization_id", updatable = false)
 	public Organization getOrganization() {
 		return organization;
 	}
@@ -70,15 +82,16 @@ public class Invoice extends BaseEntity {
 		this.organization = organization;
 	}
 	
-	@Column(nullable = false)
-	public Float getIncome() {
+	public Double getIncome() {
 		return income;
 	}
-	public void setIncome(Float income) {
+	public void setIncome(Double income) {
 		this.income = income;
 	}
 	
-	@Column(nullable = false)
+	@DateTimeFormat(pattern = "yyyy-MM-dd")
+	@JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
+	@Temporal(TemporalType.DATE)
 	public Date getReceiveTime() {
 		return receiveTime;
 	}
@@ -86,18 +99,24 @@ public class Invoice extends BaseEntity {
 		this.receiveTime = receiveTime;
 	}
 	
-	public Float getDeduct() {
+	public Double getDeduct() {
 		return deduct;
 	}
-	public void setDeduct(Float deduct) {
+	public void setDeduct(Double deduct) {
 		this.deduct = deduct;
 	}
 	
-	@Column(nullable = false)
-	public Float getTicketfee() {
+	public Double getTax() {
+		return tax;
+	}
+	public void setTax(Double tax) {
+		this.tax = tax;
+	}
+	
+	public Double getTicketfee() {
 		return ticketfee;
 	}
-	public void setTicketfee(Float ticketfee) {
+	public void setTicketfee(Double ticketfee) {
 		this.ticketfee = ticketfee;
 	}
 	
@@ -108,6 +127,9 @@ public class Invoice extends BaseEntity {
 		this.detail = detail;
 	}
 	
+	@DateTimeFormat(pattern = "yyyy-MM-dd")
+	@JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
+	@Temporal(TemporalType.DATE)
 	public Date getTicketTime() {
 		return ticketTime;
 	}
@@ -122,7 +144,6 @@ public class Invoice extends BaseEntity {
 		this.content = content;
 	}
 	
-	@Column(nullable = false)
 	public String getInvoiceNumber() {
 		return invoiceNumber;
 	}
@@ -144,22 +165,29 @@ public class Invoice extends BaseEntity {
 		this.expressNumber = expressNumber;
 	}
 	
-	public String getExpressFee() {
+	public Double getExpressFee() {
 		return expressFee;
 	}
-	public void setExpressFee(String expressFee) {
+	public void setExpressFee(Double expressFee) {
 		this.expressFee = expressFee;
 	}
 	
-	public String getPaymentOn() {
+	public Double getPaymentOn() {
 		return paymentOn;
 	}
-	public void setPaymentOn(String paymentOn) {
+	public void setPaymentOn(Double paymentOn) {
 		this.paymentOn = paymentOn;
 	}
 	
+	public String getRemark() {
+		return remark;
+	}
+	public void setRemark(String remark) {
+		this.remark = remark;
+	}
+	
 	@OneToOne(cascade = CascadeType.ALL)
-	@JoinColumn(name = "flow_id", nullable = false)
+	@JoinColumn(name = "flow_id")
 	public Flow getFlow() {
 		return flow;
 	}

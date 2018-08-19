@@ -99,7 +99,7 @@ public class OrganizationServiceImplTest {
 	private void changeUser(User user) {
 		String userId = user.getId().toString();
 		identityService.setAuthenticatedUserId(userId);
-		StandardService.USER_ID.set(userId + SecurityConfig.SEPARATOR + user.getName());
+		StandardService.CURRENT_USER_INFO.set(userId + SecurityConfig.SEPARATOR + user.getName() + SecurityConfig.SEPARATOR);
 	}
 
 }

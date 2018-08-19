@@ -28,7 +28,7 @@ import org.springframework.util.StringUtils;
  */
 @Component
 @Order(Ordered.LOWEST_PRECEDENCE)
-public class UsernameFilter implements Filter {
+public class UserInfoFilter implements Filter {
 	@Autowired
 	private IdentityService identityService;
 
@@ -44,16 +44,16 @@ public class UsernameFilter implements Filter {
 		// 配置在com.emailtohl.hjk.crm.config.SecurityConfig中，当用户登录时，将id和姓名存储在
 		// org.springframework.security.core.userdetails.User的username中
 		// 匿名账号的id为0，代表在系统中不存在的id
-		String username = "0" + SecurityConfig.SEPARATOR + "anonymous";
+		String username = "0" + SecurityConfig.SEPARATOR + "anonymous" + SecurityConfig.SEPARATOR + "";
 		if (auth != null && StringUtils.hasText(auth.getName())) {
 			username = auth.getName();
 		}
-		StandardService.USER_ID.set(username);
+		StandardService.CURRENT_USER_INFO.set(username);
 		identityService.setAuthenticatedUserId(username.split(SecurityConfig.SEPARATOR)[0]);
 		try {
 			chain.doFilter(request, response);
 		} finally {
-			StandardService.USER_ID.remove();
+			StandardService.CURRENT_USER_INFO.remove();
 			identityService.setAuthenticatedUserId(null);
 		}
 	}

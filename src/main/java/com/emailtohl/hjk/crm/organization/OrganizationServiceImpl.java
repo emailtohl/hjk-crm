@@ -85,7 +85,7 @@ public class OrganizationServiceImpl extends StandardService<Organization, Long>
 	public Organization create(Organization organization) {
 		// 校验提交的表单信息
 		validate(organization);
-		String[] username = USER_ID.get().split(SecurityConfig.SEPARATOR);
+		String[] username = CURRENT_USER_INFO.get().split(SecurityConfig.SEPARATOR);
 		organization.setCreatorId(username[0]);
 		organization.setPass(false);
 		// 如果没有填写收票地址，那么就把公司地址设置为收票地址
@@ -183,7 +183,7 @@ public class OrganizationServiceImpl extends StandardService<Organization, Long>
 		}
 		
 		// 如果修改人就是创建者，若同时当前流程处于modifyApply状态，则直接帮其完成任务
-		String[] username = USER_ID.get().split(SecurityConfig.SEPARATOR);
+		String[] username = CURRENT_USER_INFO.get().split(SecurityConfig.SEPARATOR);
 		String userId = username[0];
 		if (userId.equals(source.getCreatorId())) {
 			Task task = taskService.createTaskQuery().processInstanceBusinessKey(source.getId().toString()).singleResult();
@@ -199,7 +199,7 @@ public class OrganizationServiceImpl extends StandardService<Organization, Long>
 		organizationRepo.deleteById(id);
 		ProcessInstance p = runtimeService.createProcessInstanceQuery().processInstanceBusinessKey(id.toString(), PROCESS_DEFINITION_KEY).singleResult();
 		if (p != null) {
-			String[] username = USER_ID.get().split(SecurityConfig.SEPARATOR);
+			String[] username = CURRENT_USER_INFO.get().split(SecurityConfig.SEPARATOR);
 			runtimeService.deleteProcessInstance(p.getId(), "delete by " + username);
 		}
 	}
@@ -209,8 +209,9 @@ public class OrganizationServiceImpl extends StandardService<Organization, Long>
 	 * 
 	 * @return
 	 */
+	@Override
 	public List<Flow> findTodoTasks() {
-		String[] username = USER_ID.get().split(SecurityConfig.SEPARATOR);
+		String[] username = CURRENT_USER_INFO.get().split(SecurityConfig.SEPARATOR);
 		String userId = username[0];
 		List<Task> tasks = new ArrayList<>();
 		// 根据当前人的ID查询
@@ -227,7 +228,6 @@ public class OrganizationServiceImpl extends StandardService<Organization, Long>
 			Flow flow = flowRepo.findByProcessInstanceId(task.getProcessInstanceId());
 			flow = flow.toTransient();
 			flow.taskInfo(task);
-			flowRepo.findByProcessInstanceId(task.getProcessInstanceId());
 			return flow;
 		}).collect(Collectors.toList());
 	}
@@ -238,20 +238,20 @@ public class OrganizationServiceImpl extends StandardService<Organization, Long>
 	 * @param taskId
 	 * @return
 	 */
+	@Override
 	public Organization claim(String taskId) {
 		Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
 		if (task == null) {
 			throw new NotFoundException("taskId: " + taskId + " not found");
 		}
-		String[] username = USER_ID.get().split(SecurityConfig.SEPARATOR);
+		String[] username = CURRENT_USER_INFO.get().split(SecurityConfig.SEPARATOR);
 		String userId = username[0];
 		try {
 			taskService.claim(taskId, userId);
 		} catch (ActivitiTaskAlreadyClaimedException e) {
 			throw new NotAcceptableException("Activiti task already claimed exception", e);
 		}
-		String processInstanceId = task.getProcessInstanceId();
-		return transientDetail(organizationRepo.getByProcessInstanceId(processInstanceId));
+		return transientDetail(organizationRepo.getByProcessInstanceId(task.getProcessInstanceId()));
 	}
 
 	/**
@@ -271,7 +271,7 @@ public class OrganizationServiceImpl extends StandardService<Organization, Long>
 			throw new InnerDataStateException(
 					"not found flow entity by processDefinitionId: " + task.getProcessDefinitionId());
 		}
-		String[] username = USER_ID.get().split(SecurityConfig.SEPARATOR);
+		String[] username = CURRENT_USER_INFO.get().split(SecurityConfig.SEPARATOR);
 		String userId = username[0];
 		if (!userId.equals(task.getAssignee())) {
 			throw new ForbiddenException(username[1] + " are not the executor of the task");
@@ -336,7 +336,7 @@ public class OrganizationServiceImpl extends StandardService<Organization, Long>
 	
 	@Override
 	public List<Organization> myRegisterOrganization() {
-		String[] username = USER_ID.get().split(SecurityConfig.SEPARATOR);
+		String[] username = CURRENT_USER_INFO.get().split(SecurityConfig.SEPARATOR);
 		return organizationRepo.getByApplyUserId(username[0]).stream().map(this::toTransient)
 				.collect(Collectors.toList());
 	}

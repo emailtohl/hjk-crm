@@ -35,6 +35,11 @@ import com.emailtohl.hjk.crm.entities.User;
 
 /**
  * 初始化内置数据
+ * Lisa 行政
+ * Bill，Jenny 销售
+ * Tom，Amy 财务
+ * Andy，Tony 外务
+ * Lily，Thomas 客户
  * 
  * @author HeLei
  */
@@ -208,7 +213,7 @@ public class InitConfig {
 	@Bean
 	public User Thomas(@Qualifier("userAdmin") User userAdmin/*依赖加载所有的group*/) throws IOException {
 		// email, password, groupEnum, name, nickname, cellPhone
-		return getUser("Thomas@localhost", "123456", FINANCE, "Thomas", "Thomas", null);
+		return getUser("Thomas@localhost", "123456", CUSTOMER, "Thomas", "Thomas", null);
 	}
 
 }
