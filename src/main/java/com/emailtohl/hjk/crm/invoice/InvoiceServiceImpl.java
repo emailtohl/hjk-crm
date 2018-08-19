@@ -314,7 +314,9 @@ public class InvoiceServiceImpl extends StandardService<Invoice, Long> implement
 			return source;
 		}
 		Invoice target = toTransient(source);
-		appendTaskInfo(source.getFlow().transientDetail());
+		Flow flow = source.getFlow().transientDetail();
+		appendTaskInfo(flow);
+		target.setFlow(flow);
 		return target;
 	}
 	

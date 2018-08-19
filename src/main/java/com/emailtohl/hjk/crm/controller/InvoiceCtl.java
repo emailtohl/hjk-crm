@@ -41,7 +41,7 @@ public class InvoiceCtl {
 	 * @return
 	 */
 	@PostMapping("start")
-	public Invoice start(Invoice invoice) {
+	public Invoice start(@RequestBody Invoice invoice) {
 		return invoiceService.create(invoice);
 	}
 	

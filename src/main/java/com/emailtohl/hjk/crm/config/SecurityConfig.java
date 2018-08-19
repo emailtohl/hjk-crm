@@ -1,11 +1,8 @@
 package com.emailtohl.hjk.crm.config;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.activiti.engine.IdentityService;
@@ -15,18 +12,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.web.cors.CorsUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -62,17 +56,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		security
 		.authorizeRequests()
 		.antMatchers(permitAll).permitAll()
-		.antMatchers(HttpMethod.POST, "/users").permitAll()
 		.anyRequest().authenticated()
-		.and().formLogin().usernameParameter("email").permitAll().successHandler((req, resp, auth) -> resp.getWriter().write(om.writeValueAsString(auth)))
-		.and().logout().permitAll().logoutSuccessUrl("/login")
-		.and().exceptionHandling().authenticationEntryPoint(new AuthenticationEntryPoint() {
-			@Override
-			public void commence(HttpServletRequest request, HttpServletResponse response,
-					AuthenticationException authException) throws IOException, ServletException {
-				response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
-						authException.getMessage());
-			}})
+		.and().formLogin().usernameParameter("email").permitAll()
+			.successHandler((req, resp, auth) -> resp.getWriter().write(om.writeValueAsString(auth)))
+			.failureHandler((req, resp, auth) -> resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, auth.getMessage()))
+		.and().rememberMe()
+		.and().logout().permitAll()
+			.logoutSuccessHandler((req, resp, auth) -> resp.getWriter().write("{\"success\":true}"))
+//			.logoutSuccessUrl("/login")
+		.and().exceptionHandling().authenticationEntryPoint((req, resp, auth) -> resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, auth.getMessage()))
 		.and().csrf().ignoringAntMatchers("/topic", "/queue", "/socket")
         // allow same origin to frame our site to support iframe SockJS
         .and().headers().frameOptions().sameOrigin()

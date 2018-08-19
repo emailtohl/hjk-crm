@@ -171,25 +171,25 @@ public class InitConfig {
 	@Bean
 	public User Bill(@Qualifier("userAdmin") User userAdmin/*依赖加载所有的group*/) throws IOException {
 		// email, password, groupEnum, name, nickname, cellPhone
-		return getUser("Bill@localhost", "Bill", MARKET, "Bill", "Bill", null);
+		return getUser("Bill@localhost", "123456", MARKET, "Bill", "Bill", null);
 	}
 	
 	@Bean
 	public User Jenny(@Qualifier("userAdmin") User userAdmin/*依赖加载所有的group*/) throws IOException {
 		// email, password, groupEnum, name, nickname, cellPhone
-		return getUser("Jenny@localhost", "Jenny", MARKET, "Jenny", "Jenny", null);
+		return getUser("Jenny@localhost", "123456", MARKET, "Jenny", "Jenny", null);
 	}
 	
 	@Bean
 	public User Tom(@Qualifier("userAdmin") User userAdmin/*依赖加载所有的group*/) throws IOException {
 		// email, password, groupEnum, name, nickname, cellPhone
-		return getUser("Tom@localhost", "Tom", FINANCE, "Tom", "Tom", null);
+		return getUser("Tom@localhost", "123456", FINANCE, "Tom", "Tom", null);
 	}
 	
 	@Bean
 	public User Amy(@Qualifier("userAdmin") User userAdmin/*依赖加载所有的group*/) throws IOException {
 		// email, password, groupEnum, name, nickname, cellPhone
-		return getUser("Amy@localhost", "Amy", FINANCE, "Amy", "Amy", null);
+		return getUser("Amy@localhost", "123456", FINANCE, "Amy", "Amy", null);
 	}
 
 	@Bean
