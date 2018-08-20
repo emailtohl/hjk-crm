@@ -145,8 +145,8 @@ public class InitConfig {
 			@Qualifier("administration") Group administration, @Qualifier("market") Group market,
 			@Qualifier("foreign") Group foreign, @Qualifier("customer") Group customer) throws IOException {
 		// email, password, groupEnum, name, nickname, cellPhone
-		User u = getUser("admin@localhost", "123456", ADMIN, "admin", "admin", "19012345678");
-		ClassPathResource resource = new ClassPathResource("image/icon-head-admin.png");
+		User u = getUser("admin@localhost", "123456", ADMIN, "admin", "admin", "19922388875");
+		ClassPathResource resource = new ClassPathResource("image/icon-my-baby.png");
 		try (InputStream in = resource.getInputStream()) {
 			byte[] bytes = StreamUtils.copyToByteArray(in);
 			Picture p = new Picture(bytes, "application/x-png");

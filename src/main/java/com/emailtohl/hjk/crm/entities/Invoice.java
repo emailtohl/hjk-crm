@@ -14,11 +14,21 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 
+import org.hibernate.search.annotations.DateBridge;
+import org.hibernate.search.annotations.Field;
+import org.hibernate.search.annotations.FieldBridge;
+import org.hibernate.search.annotations.Indexed;
+import org.hibernate.search.annotations.IndexedEmbedded;
+import org.hibernate.search.annotations.Resolution;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.github.emailtohl.lib.jpa.BaseEntity;
+import com.github.emailtohl.lib.jpa.EnumBridgeCust;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
+@Indexed
 @Entity
 public class Invoice extends BaseEntity {
 	private static final long serialVersionUID = -2949903806197415296L;
@@ -64,6 +74,7 @@ public class Invoice extends BaseEntity {
 	// 流程
 	private Flow flow;
 	
+	@Field(bridge = @FieldBridge(impl = EnumBridgeCust.class))
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false, updatable = false)
 	public InvoiceType getType() {
@@ -73,6 +84,7 @@ public class Invoice extends BaseEntity {
 		this.type = type;
 	}
 	
+	@IndexedEmbedded(depth = 1)
 	@ManyToOne(optional = false)
 	@JoinColumn(name = "organization_id", updatable = false)
 	public Organization getOrganization() {
@@ -89,6 +101,8 @@ public class Invoice extends BaseEntity {
 		this.income = income;
 	}
 	
+	@Field
+	@DateBridge(resolution = Resolution.DAY)
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	@JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
 	@Temporal(TemporalType.DATE)
@@ -120,6 +134,7 @@ public class Invoice extends BaseEntity {
 		this.ticketfee = ticketfee;
 	}
 	
+	@Field
 	public String getDetail() {
 		return detail;
 	}
@@ -127,6 +142,8 @@ public class Invoice extends BaseEntity {
 		this.detail = detail;
 	}
 	
+	@Field
+	@DateBridge(resolution = Resolution.DAY)
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	@JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
 	@Temporal(TemporalType.DATE)
@@ -137,6 +154,7 @@ public class Invoice extends BaseEntity {
 		this.ticketTime = ticketTime;
 	}
 	
+	@Field
 	public String getContent() {
 		return content;
 	}
@@ -144,6 +162,7 @@ public class Invoice extends BaseEntity {
 		this.content = content;
 	}
 	
+	@Field
 	public String getInvoiceNumber() {
 		return invoiceNumber;
 	}
@@ -151,6 +170,7 @@ public class Invoice extends BaseEntity {
 		this.invoiceNumber = invoiceNumber;
 	}
 	
+	@Field
 	public String getExpressCompany() {
 		return expressCompany;
 	}
@@ -158,6 +178,7 @@ public class Invoice extends BaseEntity {
 		this.expressCompany = expressCompany;
 	}
 	
+	@Field
 	public String getExpressNumber() {
 		return expressNumber;
 	}
@@ -179,6 +200,7 @@ public class Invoice extends BaseEntity {
 		this.paymentOn = paymentOn;
 	}
 	
+	@Field
 	public String getRemark() {
 		return remark;
 	}
@@ -186,6 +208,7 @@ public class Invoice extends BaseEntity {
 		this.remark = remark;
 	}
 	
+	@IndexedEmbedded(depth = 1)
 	@OneToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "flow_id")
 	public Flow getFlow() {

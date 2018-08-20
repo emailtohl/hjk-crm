@@ -22,14 +22,22 @@
       </extensionElements>
       <conditionExpression xsi:type="tFormalExpression"><![CDATA[${checkApproved == true}]]></conditionExpression>
     </sequenceFlow>
-    <endEvent id="endevent3" name="End"></endEvent>
+    <endEvent id="endevent3" name="End">
+      <extensionElements>
+        <activiti:executionListener event="start" delegateExpression="${completeListener}"></activiti:executionListener>
+      </extensionElements>
+    </endEvent>
     <sequenceFlow id="flow9" sourceRef="exclusivegateway1" targetRef="endevent3">
       <extensionElements>
         <activiti:executionListener event="take" expression="${execution.setVariable('result', false)}"></activiti:executionListener>
       </extensionElements>
       <conditionExpression xsi:type="tFormalExpression"><![CDATA[${checkApproved == false}]]></conditionExpression>
     </sequenceFlow>
-    <endEvent id="endevent4" name="End"></endEvent>
+    <endEvent id="endevent4" name="End">
+      <extensionElements>
+        <activiti:executionListener event="start" delegateExpression="${completeListener}"></activiti:executionListener>
+      </extensionElements>
+    </endEvent>
     <sequenceFlow id="flow10" sourceRef="exclusivegateway2" targetRef="endevent4">
       <extensionElements>
         <activiti:executionListener event="take" expression="${execution.setVariable('result', false)}"></activiti:executionListener>

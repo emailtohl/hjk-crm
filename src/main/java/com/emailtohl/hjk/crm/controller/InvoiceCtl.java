@@ -92,9 +92,9 @@ public class InvoiceCtl {
 	 * @return
 	 */
 	@PostMapping("claim")
-	public Invoice claim(@RequestBody Form f) {
-		LOG.debug("claim: {}" + f.taskId);
-		return invoiceService.claim(f.taskId);
+	public Invoice claim(@RequestParam(value = "taskId", required = true) String taskId) {
+		LOG.debug("claim: {}" + taskId);
+		return invoiceService.claim(taskId);
 	}
 
 	/**
@@ -102,16 +102,11 @@ public class InvoiceCtl {
 	 * 
 	 * @param taskId
 	 * @param checkApproved
-	 * @param invoice
+	 * @param f
 	 */
 	@PostMapping("check")
-	public void check(@RequestBody Form f) {
-		invoiceService.check(f.taskId, f.checkApproved, f);
-	}
-	
-	public class Form extends Invoice {
-		private static final long serialVersionUID = -2069783159467498322L;
-		public String taskId;
-		public Boolean checkApproved;
+	public void check(@RequestParam(value = "taskId", required = true) String taskId,
+			@RequestParam(value = "checkApproved", required = true) Boolean checkApproved, @RequestBody Invoice f) {
+		invoiceService.check(taskId, checkApproved, f);
 	}
 }

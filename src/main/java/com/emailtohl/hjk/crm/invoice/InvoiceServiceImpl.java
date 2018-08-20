@@ -128,7 +128,7 @@ public class InvoiceServiceImpl extends StandardService<Invoice, Long> implement
 			Double tax = supplement.getTax();
 			Double deduct = supplement.getDeduct();
 			String detail = supplement.getDetail();
-			if (income == null || receiveTime == null || ticketfee == null) {
+			if (checkApproved && (income == null || receiveTime == null || ticketfee == null)) {
 				throw new InvalidDataException("Missing amount received or time of receipt or amount invoiced");
 			}
 			invoice.setIncome(income);
@@ -154,7 +154,7 @@ public class InvoiceServiceImpl extends StandardService<Invoice, Long> implement
 			String expressNumber = supplement.getExpressNumber();
 			Double expressFee = supplement.getExpressFee();
 			Double paymentOn = supplement.getPaymentOn();
-			if (invoiceNumber == null || content == null) {
+			if (checkApproved && (invoiceNumber == null || content == null)) {
 				throw new InvalidDataException("Missing invoice number and invoice content");
 			}
 			invoice.setTicketTime(ticketTime);
@@ -209,7 +209,12 @@ public class InvoiceServiceImpl extends StandardService<Invoice, Long> implement
 	
 	@Override
 	public Paging<Invoice> search(String query, Pageable pageable) {
-		Page<Invoice> page = invoiceRepo.search(query, pageable);
+		Page<Invoice> page;
+		if (hasText(query)) {
+			page = invoiceRepo.search(query, pageable);
+		} else {
+			page = invoiceRepo.findAll(pageable);
+		}
 		List<Invoice> ls = page.getContent().stream().map(this::toTransient).collect(Collectors.toList());
 		return new Paging<>(ls, pageable, page.getTotalElements());
 	}
@@ -304,6 +309,7 @@ public class InvoiceServiceImpl extends StandardService<Invoice, Long> implement
 		BeanUtils.copyProperties(source, target, "organization", "flow");
 		Organization targetOrganization = new Organization();
 		BeanUtils.copyProperties(source.getOrganization(), targetOrganization, "credentials", "flows");
+		target.setFlow(source.getFlow().toTransient());
 		target.setOrganization(targetOrganization);
 		return target;
 	}
