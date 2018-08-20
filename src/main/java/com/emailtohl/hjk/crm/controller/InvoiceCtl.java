@@ -1,10 +1,24 @@
 package com.emailtohl.hjk.crm.controller;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.web.PageableDefault;
@@ -19,6 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.emailtohl.hjk.crm.entities.Flow;
 import com.emailtohl.hjk.crm.entities.Invoice;
+import com.emailtohl.hjk.crm.entities.InvoiceType;
 import com.emailtohl.hjk.crm.invoice.InvoiceService;
 import com.github.emailtohl.lib.jpa.BaseEntity;
 import com.github.emailtohl.lib.jpa.Paging;
@@ -108,5 +123,95 @@ public class InvoiceCtl {
 	public void check(@RequestParam(value = "taskId", required = true) String taskId,
 			@RequestParam(value = "checkApproved", required = true) Boolean checkApproved, @RequestBody Invoice f) {
 		invoiceService.check(taskId, checkApproved, f);
+	}
+	
+	/**
+	 * 将所有开票信息导出成Excel文件
+	 * @return
+	 * @throws IOException 
+	 * @throws FileNotFoundException 
+	 */
+	@GetMapping("export")
+	public void exportExcel(HttpServletResponse response) throws FileNotFoundException, IOException {
+		List<Invoice> ls = invoiceService.query(null).stream().filter(invoice -> {
+			Boolean pass = invoice.getFlow().getPass();
+			if (pass != null && !pass)
+				return false;
+			else
+				return true;
+		}).collect(Collectors.toList());
+		ClassPathResource r = new ClassPathResource("excel/invoice_template.xlsx");
+		response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+		try (InputStream in = r.getInputStream();
+				XSSFWorkbook workbook = new XSSFWorkbook(in);
+				ServletOutputStream out = response.getOutputStream()) {
+			XSSFSheet sheet = workbook.getSheetAt(0);
+			int i = 4;
+			for (Invoice o : ls) {
+				XSSFRow row = sheet.getRow(i);
+				if (row == null) {
+					row = sheet.createRow(i);
+				}
+				XSSFCell cell = row.createCell(0);
+				cell.setCellValue(i - 3);
+				cell = row.createCell(1);
+				cell.setCellValue(o.getType() == InvoiceType.ORDINARY ? "普票" : o.getType() == InvoiceType.SPECIAL ? "专票" : o.getType().name());
+				cell = row.createCell(2);
+				cell.setCellValue(format(o.getOrganization().getName()));
+				cell = row.createCell(3);
+				cell.setCellValue(format(o.getReceiveTime()));
+				cell = row.createCell(4);
+				cell.setCellValue(format(o.getIncome()));
+				cell = row.createCell(5);
+				cell.setCellValue(format(o.getDeduct()));
+				cell = row.createCell(6);
+				cell.setCellValue(format(o.getTicketfee()));
+				cell = row.createCell(7);
+				cell.setCellValue(format(o.getDetail()));
+				cell = row.createCell(8);
+				cell.setCellValue(format(o.getTicketTime()));
+				cell = row.createCell(9);
+				cell.setCellValue(format(o.getContent()));
+				cell = row.createCell(10);
+				cell.setCellValue(format(o.getInvoiceNumber()));
+				cell = row.createCell(12);
+				cell.setCellValue(format(o.getPaymentOn()));
+				cell = row.createCell(13);
+				cell.setCellValue(format(o.getExpressTime()));
+				cell = row.createCell(14);
+				cell.setCellValue(format(o.getExpressNumber()));
+				cell = row.createCell(15);
+				cell.setCellValue(format(o.getExpressCompany()));
+				cell = row.createCell(16);
+				cell.setCellValue(format(o.getExpressFee()));
+				cell = row.createCell(17);
+				cell.setCellValue(format(o.getRemark()));
+				i++;
+			}
+			workbook.write(out);
+		}
+	}
+	
+	private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+	
+	private String format(Object o) {
+		if (o == null) {
+			return "";
+		}
+		if (o instanceof String) {
+			return (String) o;
+		}
+		if (o instanceof Date) {
+			return sdf.format(o);
+		}
+		if (o instanceof Double) {
+			String s = o.toString();
+			if (s.contains(".")) {
+				return s.split("\\.")[0];
+			} else {
+				return s;
+			}
+		}
+		return o.toString();
 	}
 }

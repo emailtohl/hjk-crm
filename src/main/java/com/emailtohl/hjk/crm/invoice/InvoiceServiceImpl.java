@@ -118,8 +118,8 @@ public class InvoiceServiceImpl extends StandardService<Invoice, Long> implement
 		if (!userId.equals(task.getAssignee())) {
 			throw new ForbiddenException(username[1] + " are not the executor of the task");
 		}
-		String executionId = task.getExecutionId();
 		String checkComment = "Add invoice information by " + username[1];
+		Map<String, Object> variables = new HashMap<>();
 		switch (task.getTaskDefinitionKey()) {
 		case "finance_handle":
 			Double income = supplement.getIncome();
@@ -137,19 +137,20 @@ public class InvoiceServiceImpl extends StandardService<Invoice, Long> implement
 			invoice.setTax(tax);
 			invoice.setDeduct(deduct);
 			invoice.setDetail(detail);
-			runtimeService.setVariable(executionId, "income", income);
-			runtimeService.setVariable(executionId, "receiveTime", receiveTime);
-			runtimeService.setVariable(executionId, "ticketfee", ticketfee);
-			runtimeService.setVariable(executionId, "tax", tax);
-			runtimeService.setVariable(executionId, "deduct", deduct);
-			runtimeService.setVariable(executionId, "detail", detail);
-			runtimeService.setVariable(task.getExecutionId(), "checkApproved", checkApproved);
-			runtimeService.setVariable(task.getExecutionId(), "checkComment", checkComment);
+			variables.put("income", income);
+			variables.put("receiveTime", receiveTime);
+			variables.put("ticketfee", ticketfee);
+			variables.put("tax", tax);
+			variables.put("deduct", deduct);
+			variables.put("detail", detail);
+			variables.put("checkApproved", checkApproved);
+			variables.put("checkComment", checkComment);
 			break;
 		case "foreign_handle":
 			Date ticketTime = supplement.getTicketTime();
 			String content = supplement.getContent();
 			String invoiceNumber = supplement.getInvoiceNumber();
+			Date expressTime = supplement.getExpressTime();
 			String expressCompany = supplement.getExpressCompany();
 			String expressNumber = supplement.getExpressNumber();
 			Double expressFee = supplement.getExpressFee();
@@ -160,19 +161,22 @@ public class InvoiceServiceImpl extends StandardService<Invoice, Long> implement
 			invoice.setTicketTime(ticketTime);
 			invoice.setContent(content);
 			invoice.setInvoiceNumber(invoiceNumber);
+			invoice.setExpressTime(expressTime);
 			invoice.setExpressCompany(expressCompany);
 			invoice.setExpressNumber(expressNumber);
 			invoice.setExpressFee(expressFee);
 			invoice.setPaymentOn(paymentOn);
-			runtimeService.setVariable(executionId, "ticketTime", ticketTime);
-			runtimeService.setVariable(executionId, "content", content);
-			runtimeService.setVariable(executionId, "invoiceNumber", invoiceNumber);
-			runtimeService.setVariable(executionId, "expressCompany", expressCompany);
-			runtimeService.setVariable(executionId, "expressNumber", expressNumber);
-			runtimeService.setVariable(executionId, "expressFee", expressFee);
-			runtimeService.setVariable(executionId, "paymentOn", paymentOn);
-			runtimeService.setVariable(task.getExecutionId(), "checkApproved", checkApproved);
-			runtimeService.setVariable(task.getExecutionId(), "checkComment", checkComment);
+			variables.put("ticketTime", ticketTime);
+			variables.put("content", content);
+			variables.put("invoiceNumber", invoiceNumber);
+			variables.put("expressTime", expressTime);
+			variables.put("expressCompany", expressCompany);
+			variables.put("expressNumber", expressNumber);
+			variables.put("expressFee", expressFee);
+			variables.put("paymentOn", paymentOn);
+			variables.put("paymentOn", paymentOn);
+			variables.put("checkApproved", checkApproved);
+			variables.put("checkComment", checkComment);
 			break;
 		default:
 			return;
@@ -186,8 +190,8 @@ public class InvoiceServiceImpl extends StandardService<Invoice, Long> implement
 		}
 		flow.getChecks().add(check);
 		// 将审批的评论添加进记录中
-		taskService.addComment(taskId, task.getProcessInstanceId(), "Add invoice information by " + username[1]);
-		taskService.complete(taskId);
+		taskService.addComment(taskId, task.getProcessInstanceId(), checkComment);
+		taskService.complete(taskId, variables);
 	}
 
 	@Override

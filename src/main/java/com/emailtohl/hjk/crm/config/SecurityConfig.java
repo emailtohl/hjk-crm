@@ -1,5 +1,11 @@
 package com.emailtohl.hjk.crm.config;
 
+import static com.emailtohl.hjk.crm.entities.GroupEnum.ADMIN;
+import static com.emailtohl.hjk.crm.entities.GroupEnum.ADMINISTRATION;
+import static com.emailtohl.hjk.crm.entities.GroupEnum.FINANCE;
+import static com.emailtohl.hjk.crm.entities.GroupEnum.FOREIGN;
+import static com.emailtohl.hjk.crm.entities.GroupEnum.MARKET;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -56,6 +62,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		security
 		.authorizeRequests()
 		.antMatchers(permitAll).permitAll()
+		.antMatchers("/back/**").hasAnyAuthority(ADMIN.name(), FINANCE.name(), ADMINISTRATION.name(), MARKET.name(), FOREIGN.name())
 		.anyRequest().authenticated()
 		.and().formLogin().usernameParameter("email").permitAll()
 			.successHandler((req, resp, auth) -> resp.getWriter().write(om.writeValueAsString(auth)))

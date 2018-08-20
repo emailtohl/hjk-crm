@@ -152,7 +152,7 @@ public class Flow extends BaseEntity {
 	}
 
 	@ElementCollection
-	@CollectionTable(name = "flow_data_check", joinColumns = @JoinColumn(name = "flow_data_id"))
+	@CollectionTable(name = "flow_check", joinColumns = @JoinColumn(name = "flow_data_id"))
 	@OrderBy("checkTime ASC")
 	public List<Check> getChecks() {
 		return checks;

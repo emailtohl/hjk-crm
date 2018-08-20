@@ -61,6 +61,8 @@ public class Invoice extends BaseEntity {
 	// 发票编号
 	private String invoiceNumber;
 	
+	// 快递时间
+	private Date expressTime;
 	// 快递公司
 	private String expressCompany;
 	// 快递单号
@@ -101,7 +103,6 @@ public class Invoice extends BaseEntity {
 		this.income = income;
 	}
 	
-	@Field
 	@DateBridge(resolution = Resolution.DAY)
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	@JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
@@ -142,7 +143,6 @@ public class Invoice extends BaseEntity {
 		this.detail = detail;
 	}
 	
-	@Field
 	@DateBridge(resolution = Resolution.DAY)
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	@JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
@@ -168,6 +168,13 @@ public class Invoice extends BaseEntity {
 	}
 	public void setInvoiceNumber(String invoiceNumber) {
 		this.invoiceNumber = invoiceNumber;
+	}
+	
+	public Date getExpressTime() {
+		return expressTime;
+	}
+	public void setExpressTime(Date expressTime) {
+		this.expressTime = expressTime;
 	}
 	
 	@Field
