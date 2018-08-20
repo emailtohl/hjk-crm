@@ -49,7 +49,7 @@ public interface UserService {
 	 * @param pageable
 	 * @return
 	 */
-	Paging<User> query(String query, Pageable pageable);
+	Paging<User> search(String query, Pageable pageable);
 	
 	/**
 	 * 修改用户信息
@@ -99,4 +99,8 @@ public interface UserService {
 	 */
 	void resetPassword(Long id);
 	
+	/**
+	 * 刷新最后登录时间
+	 */
+	void refreshLastLoginTime(Long id);
 }

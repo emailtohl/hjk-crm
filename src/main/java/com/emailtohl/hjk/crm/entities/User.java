@@ -52,7 +52,6 @@ public class User extends BaseEntity {
 	private String idNumber;
 	private String name;
 	private String nickname;// 可存储第三方昵称
-	private String serialNumber; // 编号
 	@Pattern(// 校验
 			regexp = ConstantPattern.EMAIL, flags = { Pattern.Flag.CASE_INSENSITIVE })
 	@NotNull
@@ -119,14 +118,6 @@ public class User extends BaseEntity {
 
 	public void setNickname(String nickname) {
 		this.nickname = nickname;
-	}
-
-	@Field
-	public String getSerialNumber() {
-		return serialNumber;
-	}
-	public void setSerialNumber(String serialNumber) {
-		this.serialNumber = serialNumber;
 	}
 
 	/**

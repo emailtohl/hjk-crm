@@ -1,6 +1,7 @@
 package com.emailtohl.hjk.crm.user;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -169,8 +170,13 @@ public class UserServiceImpl extends StandardService<User, Long> implements User
 	}
 
 	@Override
-	public Paging<User> query(String query, Pageable pageable) {
-		Page<User> page = userRepo.search(query, pageable);
+	public Paging<User> search(String query, Pageable pageable) {
+		Page<User> page;
+		if (hasText(query)) {
+			page = userRepo.search(query, pageable);
+		} else {
+			page = userRepo.findAll(pageable);
+		}
 		List<User> ls = page.getContent().stream().map(this::toTransient).collect(Collectors.toList());
 		return new Paging<>(ls, pageable, page.getTotalElements());
 	}
@@ -210,6 +216,12 @@ public class UserServiceImpl extends StandardService<User, Long> implements User
 		org.activiti.engine.identity.User _u = identityService.createUserQuery().userId(id.toString()).singleResult();
 		_u.setPassword(hashed);
 		identityService.saveUser(_u);
+	}
+	
+	@Override
+	public void refreshLastLoginTime(Long id) {
+		User u = userRepo.findById(id).get();
+		u.setLastLogin(new Date());
 	}
 
 	@Override

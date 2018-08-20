@@ -93,11 +93,11 @@ public class UserCtl {
 	 * @param pageable
 	 * @return
 	 */
-	@GetMapping("query")
-	public Paging<User> query(@RequestParam(required = false, defaultValue = "") String query,
+	@GetMapping("search")
+	public Paging<User> search(@RequestParam(required = false, defaultValue = "") String query,
 			@PageableDefault(page = 0, size = 20, sort = { BaseEntity.ID_PROPERTY_NAME,
 					BaseEntity.MODIFY_DATE_PROPERTY_NAME }, direction = Direction.DESC) Pageable pageable) {
-		return userService.query(query, pageable);
+		return userService.search(query, pageable);
 	}
 
 	/**
@@ -128,7 +128,7 @@ public class UserCtl {
 	 * @param id
 	 * @param enabled
 	 */
-	@PostMapping("approve")
+	@PostMapping("enable")
 	public void enable(@RequestBody Form form) {
 		userService.enable(form.id, form.enabled);
 	}

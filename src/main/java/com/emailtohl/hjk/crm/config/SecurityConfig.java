@@ -29,6 +29,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.cors.CorsUtils;
 
+import com.emailtohl.hjk.crm.user.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 /**
  * 安全层配置
@@ -42,6 +43,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	public static final String AUTHORITY_SEPARATOR = ",";
 	@Autowired
 	private IdentityService identityService;
+	@Autowired
+	private UserService userService;
 	@Autowired
 	private PasswordEncoder passwordEncoder;
 	@Autowired
@@ -63,9 +66,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		.authorizeRequests()
 		.antMatchers(permitAll).permitAll()
 		.antMatchers("/back/**").hasAnyAuthority(ADMIN.name(), FINANCE.name(), ADMINISTRATION.name(), MARKET.name(), FOREIGN.name())
+		.antMatchers("/back/users").hasAnyAuthority(ADMIN.name())
 		.anyRequest().authenticated()
 		.and().formLogin().usernameParameter("email").permitAll()
-			.successHandler((req, resp, auth) -> resp.getWriter().write(om.writeValueAsString(auth)))
+			.successHandler((req, resp, auth) -> {
+				String username = auth.getName();
+				Long id = Long.valueOf(username.split(SEPARATOR)[0]);
+				userService.refreshLastLoginTime(id);
+				resp.getWriter().write(om.writeValueAsString(auth));
+			})
 			.failureHandler((req, resp, auth) -> resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, auth.getMessage()))
 		.and().rememberMe()
 		.and().logout().permitAll()
