@@ -2,6 +2,8 @@ package com.emailtohl.hjk.crm.user;
 
 import java.util.Set;
 
+import javax.validation.constraints.NotNull;
+
 import org.activiti.engine.identity.Picture;
 import org.springframework.data.domain.Pageable;
 
@@ -98,6 +100,14 @@ public interface UserService {
 	 * @param id
 	 */
 	void resetPassword(Long id);
+	
+	/**
+	 * 只能由自己修改自己的密码
+	 * @param id
+	 * @param oldPassword
+	 * @param newPassword
+	 */
+	void updateMyPassword(@NotNull Long id, @NotNull String oldPassword, @NotNull String newPassword);
 	
 	/**
 	 * 刷新最后登录时间

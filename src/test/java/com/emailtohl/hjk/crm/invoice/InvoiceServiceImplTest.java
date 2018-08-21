@@ -109,7 +109,7 @@ public class InvoiceServiceImplTest {
 			supplement.setTax(1165.05);
 			supplement.setDeduct(100.00);
 			supplement.setDetail("测试服务费/认证服务费");
-			invoiceService.check(taskId, true, supplement);
+			invoiceService.check(taskId, true, "", supplement);
 		}
 		// 切到外务人员
 		changeUser(Andy);
@@ -127,7 +127,7 @@ public class InvoiceServiceImplTest {
 			supplement.setExpressFee(50.00);
 			supplement.setPaymentOn(50.00);
 			supplement.setRemark("专票已申请");
-			invoiceService.check(taskId, true, supplement);
+			invoiceService.check(taskId, true, "", supplement);
 		}
 	}
 

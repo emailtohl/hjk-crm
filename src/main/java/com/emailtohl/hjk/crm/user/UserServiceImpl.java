@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 
@@ -22,9 +23,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.emailtohl.hjk.crm.config.SecurityConfig;
 import com.emailtohl.hjk.crm.entities.GroupEnum;
 import com.emailtohl.hjk.crm.entities.User;
 import com.github.emailtohl.lib.StandardService;
+import com.github.emailtohl.lib.exception.ForbiddenException;
 import com.github.emailtohl.lib.jpa.Paging;
 
 /**
@@ -41,10 +44,16 @@ public class UserServiceImpl extends StandardService<User, Long> implements User
 	private UserRepo userRepo;
 	@Autowired
 	private IdentityService identityService;
+	private User admin;
 	
 	private ExampleMatcher emailMatcher = ExampleMatcher.matching().withMatcher("email", GenericPropertyMatchers.exact());
 	private ExampleMatcher cellPhoneMatcher = ExampleMatcher.matching().withMatcher("cellPhone", GenericPropertyMatchers.exact());
 
+	@PostConstruct
+	public void init() {
+		this.admin = userRepo.findByEmail("admin@localhost");
+	}
+	
 	@Override
 	public boolean emailIsExist(String email) {
 		User u = new User();
@@ -163,6 +172,9 @@ public class UserServiceImpl extends StandardService<User, Long> implements User
 
 	@Override
 	public void delete(Long id) {
+		if (admin.getId().equals(id)) {
+			throw new ForbiddenException("Can not delete administrator account");
+		}
 		String _id = id.toString();
 		identityService.createGroupQuery().groupMember(_id).list().stream().map(Group::getId)
 				.forEach(groupId -> identityService.deleteMembership(_id, groupId));
@@ -183,6 +195,9 @@ public class UserServiceImpl extends StandardService<User, Long> implements User
 
 	@Override
 	public void enable(Long id, boolean enabled) {
+		if (!enabled && admin.getId().equals(id)) {
+			throw new ForbiddenException("Can not disable administrator account");
+		}
 		User user = userRepo.findById(id).get();
 		user.setEnabled(enabled);
 	}
@@ -194,6 +209,10 @@ public class UserServiceImpl extends StandardService<User, Long> implements User
 				.forEach(groupId -> identityService.deleteMembership(_id, groupId));
 		Arrays.stream(groups).filter(groupId -> GroupEnum.ADMIN != groupId)
 				.forEach(groupId -> identityService.createMembership(_id, groupId.name()));
+		// 如果是管理员则将原ADMIN组设置进去
+		if (admin.getId().equals(id)) {
+			identityService.createMembership(_id, GroupEnum.ADMIN.name());
+		}
 	}
 
 	@Override
@@ -215,6 +234,24 @@ public class UserServiceImpl extends StandardService<User, Long> implements User
 		u.setPassword(hashed);
 		org.activiti.engine.identity.User _u = identityService.createUserQuery().userId(id.toString()).singleResult();
 		_u.setPassword(hashed);
+		identityService.saveUser(_u);
+	}
+
+	@Override
+	public void updateMyPassword(Long id, String oldPassword, String newPassword) {
+		String[] username = CURRENT_USER_INFO.get().split(SecurityConfig.SEPARATOR);
+		if (!id.toString().equals(username[0])) {
+			throw new ForbiddenException("{\"cause\":\"Only the account itself can change the password\"}");
+		}
+		User u = userRepo.findById(id).get();
+		org.activiti.engine.identity.User _u = identityService.createUserQuery().userId(id.toString()).singleResult();
+		String encodedPassword = u.getPassword();
+		if (!passwordEncoder.matches(oldPassword, encodedPassword)) {
+			throw new ForbiddenException("{\"cause\":\"The original password is incorrect\"}");
+		}
+		String hashedNewPassword = passwordEncoder.encode(newPassword);
+		u.setPassword(hashedNewPassword);
+		_u.setPassword(hashedNewPassword);
 		identityService.saveUser(_u);
 	}
 	

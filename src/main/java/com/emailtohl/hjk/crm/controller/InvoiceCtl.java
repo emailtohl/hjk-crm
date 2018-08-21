@@ -121,8 +121,10 @@ public class InvoiceCtl {
 	 */
 	@PostMapping("check")
 	public void check(@RequestParam(value = "taskId", required = true) String taskId,
-			@RequestParam(value = "checkApproved", required = true) Boolean checkApproved, @RequestBody Invoice f) {
-		invoiceService.check(taskId, checkApproved, f);
+			@RequestParam(value = "checkApproved", required = true) Boolean checkApproved,
+			@RequestParam(value = "checkComment", required = false, defaultValue = "") String checkComment,
+			@RequestBody Invoice f) {
+		invoiceService.check(taskId, checkApproved, checkComment, f);
 	}
 	
 	/**

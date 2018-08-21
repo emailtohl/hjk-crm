@@ -7,5 +7,5 @@ import com.emailtohl.hjk.crm.entities.User;
 
 @Repository
 interface UserRepo extends JpaRepository<User, Long>, UserRepoCust {
-	
+	User findByEmail(String email);
 }

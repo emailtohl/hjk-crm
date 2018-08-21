@@ -18,8 +18,9 @@ public interface InvoiceService {
 	 * @param taskId
 	 * @param checkApproved
 	 * @param supplement
+	 * @param checkComment
 	 */
-	void check(String taskId, boolean checkApproved, Invoice supplement);
+	void check(String taskId, boolean checkApproved, String checkComment, Invoice supplement);
 
 	Invoice read(Long id);
 

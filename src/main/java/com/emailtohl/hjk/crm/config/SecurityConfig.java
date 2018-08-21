@@ -5,6 +5,8 @@ import static com.emailtohl.hjk.crm.entities.GroupEnum.ADMINISTRATION;
 import static com.emailtohl.hjk.crm.entities.GroupEnum.FINANCE;
 import static com.emailtohl.hjk.crm.entities.GroupEnum.FOREIGN;
 import static com.emailtohl.hjk.crm.entities.GroupEnum.MARKET;
+import static org.springframework.http.HttpMethod.DELETE;
+import static org.springframework.http.HttpMethod.POST;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -49,6 +51,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	private PasswordEncoder passwordEncoder;
 	@Autowired
 	private ObjectMapper om;
+	
+	private final String[] EMPLOYEE_GROUPS = { ADMIN.name(), FINANCE.name(), ADMINISTRATION.name(), MARKET.name(),
+			FOREIGN.name() };
 
 	@Override
 	public void configure(WebSecurity security) {
@@ -65,8 +70,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		security
 		.authorizeRequests()
 		.antMatchers(permitAll).permitAll()
-		.antMatchers("/back/**").hasAnyAuthority(ADMIN.name(), FINANCE.name(), ADMINISTRATION.name(), MARKET.name(), FOREIGN.name())
-		.antMatchers("/back/users").hasAnyAuthority(ADMIN.name())
+		.antMatchers("/organization/history/**").hasAnyAuthority(EMPLOYEE_GROUPS)
+		.antMatchers("/organization/export").hasAnyAuthority(EMPLOYEE_GROUPS)
+		.antMatchers("/invoice/export").hasAnyAuthority(EMPLOYEE_GROUPS)
+		.antMatchers(DELETE, "/users/").hasAnyAuthority(ADMIN.name())
+		.antMatchers(POST, "/users/enable").hasAnyAuthority(ADMIN.name())
+		.antMatchers(POST, "/users/*/groups").hasAnyAuthority(ADMIN.name())
+		.antMatchers(POST, "/users/resetPassword").hasAnyAuthority(ADMIN.name())
 		.anyRequest().authenticated()
 		.and().formLogin().usernameParameter("email").permitAll()
 			.successHandler((req, resp, auth) -> {
@@ -112,4 +122,5 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	public AuthenticationManager authenticationManager() throws Exception {
 		return super.authenticationManager();
 	}
+	
 }

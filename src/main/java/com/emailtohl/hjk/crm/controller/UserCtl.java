@@ -54,7 +54,6 @@ public class UserCtl {
 		}
 	}
 	
-
 	@GetMapping("isCellPhoneExist")
 	public boolean isCellPhoneExist(@RequestParam(required = false, defaultValue = "") String cellPhone) {
 		if (StringUtils.hasText(cellPhone)) {
@@ -181,9 +180,20 @@ public class UserCtl {
 	public void resetPassword(@RequestBody Form form) {
 		userService.resetPassword(form.id);
 	}
+	
+	/**
+	 * 更新个人的密码
+	 * @param form
+	 */
+	@PostMapping("updateMyPassword")
+	public void updateMyPassword(@RequestBody Form form) {
+		userService.updateMyPassword(form.id, form.oldPassword, form.newPassword);
+	}
 
 	public static class Form {
 		public Long id;
 		public Boolean enabled;
+		public String oldPassword;
+		public String newPassword;
 	}
 }

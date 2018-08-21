@@ -97,9 +97,10 @@ public class InvoiceServiceImpl extends StandardService<Invoice, Long> implement
 	 * 
 	 * @param taskId
 	 * @param checkApproved
+	 * @param checkComment
 	 * @param supplement
 	 */
-	public void check(String taskId, boolean checkApproved, Invoice supplement) {
+	public void check(String taskId, boolean checkApproved, String checkComment, Invoice supplement) {
 		Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
 		if (task == null) {
 			throw new NotFoundException("taskId: " + taskId + " not found");
@@ -118,7 +119,6 @@ public class InvoiceServiceImpl extends StandardService<Invoice, Long> implement
 		if (!userId.equals(task.getAssignee())) {
 			throw new ForbiddenException(username[1] + " are not the executor of the task");
 		}
-		String checkComment = "Add invoice information by " + username[1];
 		Map<String, Object> variables = new HashMap<>();
 		switch (task.getTaskDefinitionKey()) {
 		case "finance_handle":
@@ -181,8 +181,9 @@ public class InvoiceServiceImpl extends StandardService<Invoice, Long> implement
 		default:
 			return;
 		}
+		String _checkComment = checkApproved && !hasText(checkComment) ? "已处理" : checkComment;
 		// 维护相关数据
-		Check check = new Check(userId, checkApproved, checkComment, task);
+		Check check = new Check(userId, checkApproved, _checkComment, task);
 		org.activiti.engine.identity.User u = identityService.createUserQuery().userId(check.getCheckerId())
 				.singleResult();
 		if (u != null) {
@@ -190,7 +191,7 @@ public class InvoiceServiceImpl extends StandardService<Invoice, Long> implement
 		}
 		flow.getChecks().add(check);
 		// 将审批的评论添加进记录中
-		taskService.addComment(taskId, task.getProcessInstanceId(), checkComment);
+		taskService.addComment(taskId, task.getProcessInstanceId(), _checkComment);
 		taskService.complete(taskId, variables);
 	}
 
