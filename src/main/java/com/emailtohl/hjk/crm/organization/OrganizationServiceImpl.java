@@ -85,6 +85,7 @@ public class OrganizationServiceImpl extends StandardService<Organization, Long>
 	public Organization create(Organization organization) {
 		// 校验提交的表单信息
 		validate(organization);
+		trimStringProperty(organization);
 		String[] username = CURRENT_USER_INFO.get().split(SecurityConfig.SEPARATOR);
 		organization.setCreatorId(username[0]);
 		organization.setPass(false);
@@ -148,6 +149,7 @@ public class OrganizationServiceImpl extends StandardService<Organization, Long>
 	@Override
 	public Organization update(Long id, Organization organization) {
 		Organization source = organizationRepo.findById(id).get();
+		trimStringProperty(organization);
 		if (hasText(organization.getName())) {
 			source.setName(organization.getName());
 		}
@@ -360,9 +362,11 @@ public class OrganizationServiceImpl extends StandardService<Organization, Long>
 	@Override
 	protected Organization transientDetail(Organization source) {
 		Organization target = toTransient(source);
-		org.activiti.engine.identity.User u = identityService.createUserQuery().userId(source.getCreatorId()).singleResult();
-		if (u != null) {
-			target.setCreatorName((u.getFirstName()));
+		if (hasText(source.getCreatorId())) {
+			org.activiti.engine.identity.User u = identityService.createUserQuery().userId(source.getCreatorId()).singleResult();
+			if (u != null) {
+				target.setCreatorName((u.getFirstName()));
+			}
 		}
 		List<Flow> flows = source.getFlows().stream().map(Flow::transientDetail).peek(this::appendTaskInfo)
 				.peek(this::appendTaskAssigneeName).collect(Collectors.toList());

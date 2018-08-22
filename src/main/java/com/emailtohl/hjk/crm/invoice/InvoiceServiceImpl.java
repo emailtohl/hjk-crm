@@ -56,6 +56,7 @@ public class InvoiceServiceImpl extends StandardService<Invoice, Long> implement
 	@Override
 	public Invoice create(Invoice invoice) {
 		validate(invoice);
+		trimStringProperty(invoice);
 		Long organizationId = invoice.getOrganization().getId();
 		if (organizationId == null) {
 			throw new InvalidDataException("not exist id of organization");
@@ -101,6 +102,7 @@ public class InvoiceServiceImpl extends StandardService<Invoice, Long> implement
 	 * @param supplement
 	 */
 	public void check(String taskId, boolean checkApproved, String checkComment, Invoice supplement) {
+		trimStringProperty(supplement);
 		Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
 		if (task == null) {
 			throw new NotFoundException("taskId: " + taskId + " not found");
@@ -239,6 +241,7 @@ public class InvoiceServiceImpl extends StandardService<Invoice, Long> implement
 	@Override
 	public Invoice update(Long id, Invoice newInvoice) {
 		Invoice target = invoiceRepo.findById(id).get();
+		trimStringProperty(newInvoice);
 		// 开票本身就是一个流程，所以不允许更改关联的公司信息以及流程信息
 		BeanUtils.copyProperties(newInvoice, target, Invoice.getIgnoreProperties("organization", "flow"));
 		return transientDetail(target);

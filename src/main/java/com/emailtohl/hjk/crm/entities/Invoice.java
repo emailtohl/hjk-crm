@@ -14,18 +14,16 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 
-import org.hibernate.search.annotations.DateBridge;
 import org.hibernate.search.annotations.Field;
 import org.hibernate.search.annotations.FieldBridge;
 import org.hibernate.search.annotations.Indexed;
 import org.hibernate.search.annotations.IndexedEmbedded;
-import org.hibernate.search.annotations.Resolution;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.github.emailtohl.lib.jpa.BaseEntity;
-import com.github.emailtohl.lib.jpa.EnumBridgeCust;
+import com.github.emailtohl.lib.jpa.StringBridgeCustomization;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Indexed
@@ -76,7 +74,8 @@ public class Invoice extends BaseEntity {
 	// 流程
 	private Flow flow;
 	
-	@Field(bridge = @FieldBridge(impl = EnumBridgeCust.class))
+	@Field
+	@FieldBridge(impl = StringBridgeCustomization.class)
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false, updatable = false)
 	public InvoiceType getType() {
@@ -96,6 +95,8 @@ public class Invoice extends BaseEntity {
 		this.organization = organization;
 	}
 	
+	@Field
+	@FieldBridge(impl = StringBridgeCustomization.class)
 	public Double getIncome() {
 		return income;
 	}
@@ -103,9 +104,10 @@ public class Invoice extends BaseEntity {
 		this.income = income;
 	}
 	
-	@DateBridge(resolution = Resolution.DAY)
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	@JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
+	@Field
+	@FieldBridge(impl = StringBridgeCustomization.class)
 	@Temporal(TemporalType.DATE)
 	public Date getReceiveTime() {
 		return receiveTime;
@@ -114,6 +116,8 @@ public class Invoice extends BaseEntity {
 		this.receiveTime = receiveTime;
 	}
 	
+	@Field
+	@FieldBridge(impl = StringBridgeCustomization.class)
 	public Double getDeduct() {
 		return deduct;
 	}
@@ -121,6 +125,8 @@ public class Invoice extends BaseEntity {
 		this.deduct = deduct;
 	}
 	
+	@Field
+	@FieldBridge(impl = StringBridgeCustomization.class)
 	public Double getTax() {
 		return tax;
 	}
@@ -128,6 +134,8 @@ public class Invoice extends BaseEntity {
 		this.tax = tax;
 	}
 	
+	@Field
+	@FieldBridge(impl = StringBridgeCustomization.class)
 	public Double getTicketfee() {
 		return ticketfee;
 	}
@@ -143,9 +151,10 @@ public class Invoice extends BaseEntity {
 		this.detail = detail;
 	}
 	
-	@DateBridge(resolution = Resolution.DAY)
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	@JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
+	@Field
+	@FieldBridge(impl = StringBridgeCustomization.class)
 	@Temporal(TemporalType.DATE)
 	public Date getTicketTime() {
 		return ticketTime;
@@ -170,6 +179,11 @@ public class Invoice extends BaseEntity {
 		this.invoiceNumber = invoiceNumber;
 	}
 	
+	@DateTimeFormat(pattern = "yyyy-MM-dd")
+	@JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
+	@Field
+	@FieldBridge(impl = StringBridgeCustomization.class)
+	@Temporal(TemporalType.DATE)
 	public Date getExpressTime() {
 		return expressTime;
 	}
@@ -193,6 +207,8 @@ public class Invoice extends BaseEntity {
 		this.expressNumber = expressNumber;
 	}
 	
+	@Field
+	@FieldBridge(impl = StringBridgeCustomization.class)
 	public Double getExpressFee() {
 		return expressFee;
 	}
@@ -200,6 +216,8 @@ public class Invoice extends BaseEntity {
 		this.expressFee = expressFee;
 	}
 	
+	@Field
+	@FieldBridge(impl = StringBridgeCustomization.class)
 	public Double getPaymentOn() {
 		return paymentOn;
 	}

@@ -34,7 +34,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.github.emailtohl.lib.ConstantPattern;
 import com.github.emailtohl.lib.jpa.BaseEntity;
-import com.github.emailtohl.lib.jpa.EnumBridgeCust;
+import com.github.emailtohl.lib.jpa.StringBridgeCustomization;
 
 /**
  * 用户实体类 javax校验的注解在field上，JPA约束的注解写在JavaBean属性上
@@ -81,7 +81,7 @@ public class User extends BaseEntity {
 	
 	private Set<GroupEnum> groups = new HashSet<>();
 
-	@Field(bridge = @FieldBridge(impl = EnumBridgeCust.class))
+	@Field(bridge = @FieldBridge(impl = StringBridgeCustomization.class))
 	@Enumerated(EnumType.STRING)
 	public IdentityType getIdentityType() {
 		return identityType;
@@ -251,7 +251,7 @@ public class User extends BaseEntity {
 		this.age = age;
 	}
 
-	@Field(bridge = @FieldBridge(impl = EnumBridgeCust.class))
+	@Field(bridge = @FieldBridge(impl = StringBridgeCustomization.class))
 	@Enumerated(EnumType.STRING)
 	public Gender getGender() {
 		return gender;
