@@ -43,7 +43,7 @@ public class CorsFilter implements Filter {
 		final HttpServletResponse response = (HttpServletResponse) res;
 		final HttpServletRequest request = (HttpServletRequest) req;
 		String originHeader = request.getHeader("Origin");
-		if (accessControlAllowOrigins.contains(originHeader)) {
+		if (accessControlAllowOrigins.contains(originHeader) || accessControlAllowOrigins.contains("*")) {
 			response.setHeader("Access-Control-Allow-Origin", originHeader);
 			response.setHeader("Access-Control-Allow-Methods", "POST, PUT, GET, OPTIONS, DELETE");
 			response.setHeader("Access-Control-Allow-Headers",
