@@ -70,6 +70,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		security
 		.authorizeRequests()
 		.antMatchers(permitAll).permitAll()
+		.antMatchers(POST, "/users").permitAll()
 		.antMatchers("/organization/history/**").hasAnyAuthority(EMPLOYEE_GROUPS)
 		.antMatchers("/organization/export").hasAnyAuthority(EMPLOYEE_GROUPS)
 		.antMatchers("/invoice/export").hasAnyAuthority(EMPLOYEE_GROUPS)
