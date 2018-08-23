@@ -10,6 +10,7 @@ import javax.persistence.criteria.Root;
 
 import org.springframework.stereotype.Repository;
 
+import com.emailtohl.hjk.crm.entities.BinFile;
 import com.emailtohl.hjk.crm.entities.Flow;
 import com.emailtohl.hjk.crm.entities.Organization;
 import com.github.emailtohl.lib.jpa.AuditedRepository;
@@ -36,6 +37,16 @@ class OrganizationRepoImpl extends AuditedRepository<Organization, Long> impleme
 		q = q.select(r).where(cb.equal(join.get("applyUserId"), applyUserId));
 		Order o = cb.desc(r.get(Organization.MODIFY_DATE_PROPERTY_NAME));
 		q = q.orderBy(o);
+		return entityManager.createQuery(q).getResultList();
+	}
+
+	@Override
+	public List<Long> allAssociatedIds() {
+		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+		CriteriaQuery<Long> q = cb.createQuery(idClass);
+		Root<Organization> r = q.from(entityClass);
+		Join<Organization, BinFile> join = r.join("credentials");
+		q = q.select(join.get("id"));
 		return entityManager.createQuery(q).getResultList();
 	}
 

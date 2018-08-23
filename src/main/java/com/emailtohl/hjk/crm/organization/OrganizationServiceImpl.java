@@ -22,6 +22,7 @@ import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.emailtohl.hjk.crm.config.SecurityConfig;
@@ -31,6 +32,7 @@ import com.emailtohl.hjk.crm.entities.Flow;
 import com.emailtohl.hjk.crm.entities.FlowType;
 import com.emailtohl.hjk.crm.entities.Organization;
 import com.emailtohl.hjk.crm.file.BinFileRepo;
+import com.emailtohl.hjk.crm.file.CleanRepo;
 import com.emailtohl.hjk.crm.flow.FlowRepo;
 import com.github.emailtohl.lib.StandardService;
 import com.github.emailtohl.lib.exception.ForbiddenException;
@@ -55,6 +57,8 @@ public class OrganizationServiceImpl extends StandardService<Organization, Long>
 	private FlowRepo flowRepo;
 	@Autowired
 	private BinFileRepo binFileRepo;
+	@Autowired
+	private CleanRepo cleanRepo;
 	@Autowired
 	private RuntimeService runtimeService;
 	@Autowired
@@ -398,6 +402,17 @@ public class OrganizationServiceImpl extends StandardService<Organization, Long>
 				flow.setTaskAssigneeName(u.getFirstName());
 			}
 		}
+	}
+	
+	/**
+	 * 每三天清理一次
+	 */
+	@Scheduled(fixedDelay = 1000 * 3600 * 24 * 3)
+	@Override
+	public void removeOrphan() {
+		List<Long> ids = organizationRepo.allAssociatedIds();
+		int rows = cleanRepo.removeOrphan(ids);
+		LOG.info("remove orphan {} rows", rows);
 	}
 
 }

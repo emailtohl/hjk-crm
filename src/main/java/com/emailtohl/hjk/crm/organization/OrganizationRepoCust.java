@@ -20,4 +20,9 @@ interface OrganizationRepoCust extends AuditedInterface<Organization, Long> {
 	 */
 	List<Organization> getByApplyUserId(String applyUserId);
 	
+	/**
+	 * 找出所有关联文件的id，以便于清空失去关联的文件
+	 * @return
+	 */
+	List<Long> allAssociatedIds();
 }

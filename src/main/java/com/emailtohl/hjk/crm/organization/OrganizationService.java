@@ -129,4 +129,10 @@ public interface OrganizationService {
 	 */
 	List<Organization> findAll();
 	
+	/**
+	 * 移除与公司信息无效的图片
+	 * @return
+	 */
+	void removeOrphan();
+	
 }

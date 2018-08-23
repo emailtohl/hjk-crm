@@ -101,5 +101,5 @@ public class OrganizationServiceImplTest {
 		identityService.setAuthenticatedUserId(userId);
 		StandardService.CURRENT_USER_INFO.set(userId + SecurityConfig.SEPARATOR + user.getName() + SecurityConfig.SEPARATOR);
 	}
-
+	
 }
