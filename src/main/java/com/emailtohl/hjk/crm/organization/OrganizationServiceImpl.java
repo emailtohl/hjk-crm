@@ -191,11 +191,17 @@ public class OrganizationServiceImpl extends StandardService<Organization, Long>
 		if (hasText(organization.getDeliveryAddress())) {
 			source.setDeliveryAddress(organization.getDeliveryAddress());
 		}
-		if (organization.getCredentials().size() > 0) {
+		if (!organization.getCredentials().isEmpty()) {
 			Set<BinFile> pbf = organization.getCredentials().stream().filter(c -> c.getId() != null).map(BinFile::getId)
 					.map(fid -> binFileRepo.findById(fid).get()).collect(Collectors.toSet());
 			source.getCredentials().clear();// 清空参数里面的凭证
 			source.getCredentials().addAll(pbf);// 再添加上持久化的凭证
+		}
+		if (!organization.getStakeholders().isEmpty()) {
+			Set<User> stakeholders = organization.getStakeholders().stream().filter(u -> u.getId() != null).map(User::getId)
+					.map(userId -> em.find(User.class, userId)).filter(u -> u != null).collect(Collectors.toSet());
+			source.getStakeholders().clear();
+			source.getStakeholders().addAll(stakeholders);
 		}
 		
 		// 如果修改人就是创建者，若同时当前流程处于modifyApply状态，则直接帮其完成任务

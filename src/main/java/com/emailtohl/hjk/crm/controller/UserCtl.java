@@ -1,6 +1,5 @@
 package com.emailtohl.hjk.crm.controller;
 import java.io.IOException;
-import java.util.List;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
@@ -100,15 +99,6 @@ public class UserCtl {
 		return userService.search(query, pageable);
 	}
 	
-	/**
-	 * 获取所有用户
-	 * @return
-	 */
-	@GetMapping("allUsers")
-	public List<User> allUsers() {
-		return userService.allUsers();
-	}
-
 	/**
 	 * 修改用户信息
 	 * 
