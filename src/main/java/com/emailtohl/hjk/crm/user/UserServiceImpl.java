@@ -125,6 +125,11 @@ public class UserServiceImpl extends StandardService<User, Long> implements User
 	}
 
 	@Override
+	public List<User> allUsers() {
+		return userRepo.findAll().stream().map(this::toTransient).collect(Collectors.toList());
+	}
+
+	@Override
 	public User update(Long id, User user) {
 		User source = userRepo.findById(id).get();
 		org.activiti.engine.identity.User u = identityService.createUserQuery().userId(id.toString()).singleResult();

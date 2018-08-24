@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 
 import org.activiti.engine.ActivitiTaskAlreadyClaimedException;
@@ -31,6 +33,7 @@ import com.emailtohl.hjk.crm.entities.Check;
 import com.emailtohl.hjk.crm.entities.Flow;
 import com.emailtohl.hjk.crm.entities.FlowType;
 import com.emailtohl.hjk.crm.entities.Organization;
+import com.emailtohl.hjk.crm.entities.User;
 import com.emailtohl.hjk.crm.file.BinFileRepo;
 import com.emailtohl.hjk.crm.file.CleanRepo;
 import com.emailtohl.hjk.crm.flow.FlowRepo;
@@ -65,6 +68,8 @@ public class OrganizationServiceImpl extends StandardService<Organization, Long>
 	private TaskService taskService;
 	@Autowired
 	private IdentityService identityService;
+	@PersistenceContext
+	private EntityManager em;
 
 	private ExampleMatcher taxNumberMatcher = ExampleMatcher.matching().withMatcher("taxNumber", GenericPropertyMatchers.exact());
 	private ExampleMatcher accountMatcher = ExampleMatcher.matching().withMatcher("taxNumber", GenericPropertyMatchers.exact());
@@ -92,6 +97,11 @@ public class OrganizationServiceImpl extends StandardService<Organization, Long>
 		trimStringProperty(organization);
 		String[] username = CURRENT_USER_INFO.get().split(SecurityConfig.SEPARATOR);
 		organization.setCreatorId(username[0]);
+		User creator = em.find(User.class, Long.valueOf(username[0]));
+		if (creator == null) {
+			throw new InnerDataStateException("The user not exist: " + username[1]);
+		}
+		organization.getStakeholders().add(creator);
 		organization.setPass(false);
 		// 如果没有填写收票地址，那么就把公司地址设置为收票地址
 		if (!hasText(organization.getDeliveryAddress())) {
@@ -341,10 +351,27 @@ public class OrganizationServiceImpl extends StandardService<Organization, Long>
 	}
 	
 	@Override
-	public List<Organization> myRegisterOrganization() {
+	public List<Organization> myRegisterOrganizations() {
 		String[] username = CURRENT_USER_INFO.get().split(SecurityConfig.SEPARATOR);
 		return organizationRepo.getByApplyUserId(username[0]).stream().map(this::toTransient)
 				.collect(Collectors.toList());
+	}
+
+	@Override
+	public List<Organization> getMyRelationshipOrganizations() {
+		String[] username = CURRENT_USER_INFO.get().split(SecurityConfig.SEPARATOR);
+		Long stakeholderId = Long.valueOf(username[0]);
+		return organizationRepo.getBystakeholderId(stakeholderId).stream().map(this::toTransient)
+				.collect(Collectors.toList());
+	}
+
+	@Override
+	public void createRelationship(Long organizationId, Set<Long> stakeholderIds) {
+		Organization organization = organizationRepo.findById(organizationId).get();
+		Set<User> users = stakeholderIds.stream().map(id -> em.find(User.class, id)).filter(u -> u != null)
+				.collect(Collectors.toSet());
+		organization.getStakeholders().clear();
+		organization.getStakeholders().addAll(users);
 	}
 	
 	@Override
@@ -359,7 +386,7 @@ public class OrganizationServiceImpl extends StandardService<Organization, Long>
 			return source;
 		}
 		Organization target = new Organization();
-		BeanUtils.copyProperties(source, target, "credentials", "flows");
+		BeanUtils.copyProperties(source, target, "credentials", "flows", "stakeholders");
 		return target;
 	}
 
@@ -376,6 +403,12 @@ public class OrganizationServiceImpl extends StandardService<Organization, Long>
 				.peek(this::appendTaskAssigneeName).collect(Collectors.toList());
 		target.getFlows().addAll(flows);
 		target.getCredentials().addAll(source.getCredentials());// 懒加载所有的凭证
+		Set<User> stakeholders = source.getStakeholders().stream().map(u -> {
+			User _u = new User();
+			BeanUtils.copyProperties(u, _u, "password", "groups");
+			return _u;
+		}).collect(Collectors.toSet());
+		target.getStakeholders().addAll(stakeholders);
 		return target;
 	}
 
@@ -414,5 +447,4 @@ public class OrganizationServiceImpl extends StandardService<Organization, Long>
 		int rows = cleanRepo.removeOrphan(ids);
 		LOG.info("remove orphan {} rows", rows);
 	}
-
 }

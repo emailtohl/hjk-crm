@@ -121,7 +121,20 @@ public interface OrganizationService {
 	 * 客户查询自己申请的组织信息
 	 * @return
 	 */
-	List<Organization> myRegisterOrganization();
+	List<Organization> myRegisterOrganizations();
+	
+	/**
+	 * 查询出所有与此人有关的组织信息
+	 * @return
+	 */
+	List<Organization> getMyRelationshipOrganizations();
+	
+	/**
+	 * 创建组织信息与干系人的关系，以便于这些干系人都能查找到此组织信息
+	 * @param organizationId
+	 * @param stakeholderIds
+	 */
+	void createRelationship(Long organizationId, Set<Long> stakeholderIds);
 
 	/**
 	 * 查找所有的公司信息

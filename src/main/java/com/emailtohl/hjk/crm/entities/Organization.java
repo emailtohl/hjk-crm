@@ -10,6 +10,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Transient;
@@ -72,6 +73,8 @@ public class Organization extends BaseEntity {
 	private String receiver;
 	// 是否通过审批
 	private Boolean pass;
+	// 干系人，他们都可以使用本公司信息
+	private Set<User> stakeholders = new HashSet<>();
 	// 与流程相关的信息
 	private List<Flow> flows = new ArrayList<>();
 	
@@ -207,6 +210,18 @@ public class Organization extends BaseEntity {
 	}
 	public void setPass(Boolean pass) {
 		this.pass = pass;
+	}
+
+	@NotAudited
+	@ManyToMany
+	@JoinTable(name = "organization_stakeholders"
+	, joinColumns = { @JoinColumn(name = "organization_id", referencedColumnName = "id") }
+	, inverseJoinColumns = { @JoinColumn(name = "user_id", referencedColumnName = "id") })
+	public Set<User> getStakeholders() {
+		return stakeholders;
+	}
+	public void setStakeholders(Set<User> stakeholders) {
+		this.stakeholders = stakeholders;
 	}
 	
 	@NotAudited

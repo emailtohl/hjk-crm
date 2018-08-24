@@ -4,7 +4,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.activiti.engine.IdentityService;
 import org.junit.After;
@@ -20,7 +22,6 @@ import com.emailtohl.hjk.crm.config.SecurityConfig;
 import com.emailtohl.hjk.crm.entities.Flow;
 import com.emailtohl.hjk.crm.entities.Organization;
 import com.emailtohl.hjk.crm.entities.User;
-import com.emailtohl.hjk.crm.organization.OrganizationService;
 import com.github.emailtohl.lib.StandardService;
 
 @RunWith(SpringRunner.class)
@@ -94,6 +95,32 @@ public class OrganizationServiceImplTest {
 		
 		organization = organizationService.read(id);
 		assertTrue(organization.getPass());
+	}
+	
+	@Test
+	public void testGetMyRelationshipOrganizations() {
+		Set<Long> stakeholderIds = new HashSet<>();
+		stakeholderIds.add(Lisa.getId());
+		stakeholderIds.add(Lily.getId());
+		organizationService.createRelationship(id, stakeholderIds);
+		changeUser(Lily);
+		List<Organization> ls = organizationService.getMyRelationshipOrganizations();
+		assertFalse(ls.isEmpty());
+		ls = organizationService.getMyRelationshipOrganizations();
+		changeUser(Lisa);
+		assertFalse(ls.isEmpty());
+		// 即便将创建者删除干系人，同样能够查找到
+		stakeholderIds.remove(Lily.getId());
+		organizationService.createRelationship(id, stakeholderIds);
+		changeUser(Lily);
+		ls = organizationService.getMyRelationshipOrganizations();
+		assertFalse(ls.isEmpty());
+		// 但是删除了非创建者，则不能查询到
+		stakeholderIds.remove(Lisa.getId());
+		organizationService.createRelationship(id, stakeholderIds);
+		changeUser(Lisa);
+		ls = organizationService.getMyRelationshipOrganizations();
+		assertTrue(ls.isEmpty());
 	}
 	
 	private void changeUser(User user) {

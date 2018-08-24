@@ -1,5 +1,6 @@
 package com.emailtohl.hjk.crm.user;
 
+import java.util.List;
 import java.util.Set;
 
 import javax.validation.constraints.NotNull;
@@ -52,6 +53,12 @@ public interface UserService {
 	 * @return
 	 */
 	Paging<User> search(String query, Pageable pageable);
+	
+	/**
+	 * 获取所有用户
+	 * @return
+	 */
+	List<User> allUsers();
 	
 	/**
 	 * 修改用户信息

@@ -1,5 +1,6 @@
 package com.emailtohl.hjk.crm.controller;
 import java.io.IOException;
+import java.util.List;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
@@ -97,6 +98,15 @@ public class UserCtl {
 			@PageableDefault(page = 0, size = 20, sort = { BaseEntity.ID_PROPERTY_NAME,
 					BaseEntity.MODIFY_DATE_PROPERTY_NAME }, direction = Direction.DESC) Pageable pageable) {
 		return userService.search(query, pageable);
+	}
+	
+	/**
+	 * 获取所有用户
+	 * @return
+	 */
+	@GetMapping("allUsers")
+	public List<User> allUsers() {
+		return userService.allUsers();
 	}
 
 	/**

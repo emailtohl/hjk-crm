@@ -219,11 +219,30 @@ public class OrganizationCtl {
 	 * 客户查询自己申请的组织信息
 	 * @return
 	 */
-	@GetMapping("myRegisterOrganization")
-	public List<Organization> myRegisterOrganization() {
-		return organizationService.myRegisterOrganization();
+	@GetMapping("myRegisterOrganizations")
+	public List<Organization> myRegisterOrganizations() {
+		return organizationService.myRegisterOrganizations();
 	}
 	
+	/**
+	 * 查询出所有与此人有关的组织信息
+	 * @param stakeholderId
+	 * @return
+	 */
+	@GetMapping("myRelationshipOrganizations")
+	public List<Organization> getMyRelationshipOrganizations() {
+		return organizationService.getMyRelationshipOrganizations();
+	}
+
+	/**
+	 * 创建组织信息与干系人的关系，以便于这些干系人都能查找到此组织信息
+	 * @param organizationId
+	 * @param stakeholderIds
+	 */
+	@PostMapping("relationship")
+	public void createRelationship(@RequestBody Form f) {
+		organizationService.createRelationship(f.id, f.stakeholderIds);
+	}
 	
 	/**
 	 * 将所有公司信息导出成Excel文件
@@ -283,5 +302,6 @@ public class OrganizationCtl {
 		public Organization organization;
 		public Boolean checkApproved;
 		public String checkComment;
+		public Set<Long> stakeholderIds;
 	}
 }

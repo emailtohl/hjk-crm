@@ -290,7 +290,7 @@ public class User extends BaseEntity {
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result + ((email == null) ? 0 : email.hashCode());
 		return result;
 	}
 
@@ -303,10 +303,10 @@ public class User extends BaseEntity {
 		if (getClass() != obj.getClass())
 			return false;
 		User other = (User) obj;
-		if (name == null) {
-			if (other.getName() != null)
+		if (email == null) {
+			if (other.getEmail() != null)
 				return false;
-		} else if (!name.equals(other.getName()))
+		} else if (!email.equals(other.getEmail()))
 			return false;
 		return true;
 	}
