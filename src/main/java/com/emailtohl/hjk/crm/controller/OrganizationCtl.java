@@ -3,6 +3,9 @@ package com.emailtohl.hjk.crm.controller;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -12,6 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -31,6 +35,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.emailtohl.hjk.crm.entities.BinFile;
 import com.emailtohl.hjk.crm.entities.Flow;
@@ -48,12 +53,14 @@ import com.github.emailtohl.lib.jpa.Paging;
 @RestController
 @RequestMapping(value = "organization", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 public class OrganizationCtl {
-	private static final Logger LOG = LogManager.getLogger();
+	private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-mm-dd");
+	private final Logger LOG = LogManager.getLogger();
 	@Autowired
 	private OrganizationService organizationService;
 
 	/**
 	 * 检查该纳税人识别号是否存在
+	 * 
 	 * @param taxNumber
 	 * @return
 	 */
@@ -66,9 +73,10 @@ public class OrganizationCtl {
 		LOG.debug(" taxNumber exist {} ", reslut);
 		return reslut;
 	}
-	
+
 	/**
 	 * 检查该账户是否存在
+	 * 
 	 * @param account
 	 * @return
 	 */
@@ -81,7 +89,7 @@ public class OrganizationCtl {
 		LOG.debug(" account exist {} ", reslut);
 		return reslut;
 	}
-	
+
 	/**
 	 * 创建公司信息
 	 * 
@@ -103,7 +111,7 @@ public class OrganizationCtl {
 	public Organization read(@PathVariable("id") Long id) {
 		return organizationService.read(id);
 	}
-	
+
 	/**
 	 * 读取公司信息
 	 * 
@@ -135,7 +143,7 @@ public class OrganizationCtl {
 	 */
 	@GetMapping("search")
 	public Paging<Organization> search(@RequestParam(required = false, defaultValue = "") String query,
-			@PageableDefault(page = 0, size = 20, sort = { BaseEntity.ID_PROPERTY_NAME,
+			@PageableDefault(page = 0, size = 10, sort = { BaseEntity.ID_PROPERTY_NAME,
 					BaseEntity.MODIFY_DATE_PROPERTY_NAME }, direction = Direction.DESC) Pageable pageable) {
 		return organizationService.query(query, pageable);
 	}
@@ -176,6 +184,7 @@ public class OrganizationCtl {
 
 	/**
 	 * 修改开票资料
+	 * 
 	 * @param id
 	 * @param organization
 	 * @return
@@ -184,18 +193,20 @@ public class OrganizationCtl {
 	public Organization update(@PathVariable("id") Long id, @RequestBody Organization organization) {
 		return organizationService.update(id, organization);
 	}
-	
+
 	/**
 	 * 删除公司信息
+	 * 
 	 * @param id
 	 */
 	@DeleteMapping("{id}")
 	public void delete(@PathVariable("id") Long id) {
 		organizationService.delete(id);
 	}
-	
+
 	/**
 	 * 获取历史版本列表
+	 * 
 	 * @param id
 	 * @return
 	 */
@@ -203,9 +214,10 @@ public class OrganizationCtl {
 	public List<Tuple<Organization>> getRevisions(@PathVariable("id") Long id) {
 		return organizationService.getRevisions(id);
 	}
-	
+
 	/**
 	 * 获取某修订版详情
+	 * 
 	 * @param id
 	 * @param revision
 	 * @return
@@ -214,18 +226,20 @@ public class OrganizationCtl {
 	public Organization getEntityAtRevision(@PathVariable("id") Long id, @PathVariable("revision") Number revision) {
 		return organizationService.getEntityAtRevision(id, revision);
 	}
-	
+
 	/**
 	 * 客户查询自己申请的组织信息
+	 * 
 	 * @return
 	 */
 	@GetMapping("myRegisterOrganizations")
 	public List<Organization> myRegisterOrganizations() {
 		return organizationService.myRegisterOrganizations();
 	}
-	
+
 	/**
 	 * 查询出所有与此人有关的组织信息
+	 * 
 	 * @param stakeholderId
 	 * @return
 	 */
@@ -236,6 +250,7 @@ public class OrganizationCtl {
 
 	/**
 	 * 创建组织信息与干系人的关系，以便于这些干系人都能查找到此组织信息
+	 * 
 	 * @param organizationId
 	 * @param stakeholderIds
 	 */
@@ -243,12 +258,13 @@ public class OrganizationCtl {
 	public void createRelationship(@RequestBody Form f) {
 		organizationService.createRelationship(f.id, f.stakeholderIds);
 	}
-	
+
 	/**
 	 * 将所有公司信息导出成Excel文件
+	 * 
 	 * @return
-	 * @throws IOException 
-	 * @throws FileNotFoundException 
+	 * @throws IOException
+	 * @throws FileNotFoundException
 	 */
 	@GetMapping("export")
 	public void exportExcel(HttpServletResponse response) throws FileNotFoundException, IOException {
@@ -293,6 +309,87 @@ public class OrganizationCtl {
 			}
 			workbook.write(out);
 		}
+	}
+
+	/**
+	 * 按照模板批量导入公司信息数据
+	 * 
+	 * @param excel
+	 * @throws IOException
+	 */
+	@PostMapping("batchCreate")
+	public String importExcel(@RequestParam("file") MultipartFile excel) throws IOException {
+		try (InputStream in = excel.getInputStream(); XSSFWorkbook workbook = new XSSFWorkbook(in)) {
+			XSSFSheet sheet = workbook.getSheetAt(0);
+			int i = 3, count = 0;
+			while (i < 65535) {
+				XSSFRow row = sheet.getRow(i);
+				if (row == null) {
+					break;
+				}
+				Organization o = new Organization();
+				o.setName(getStringValue(row.getCell(1)));
+				o.setTaxNumber(getStringValue(row.getCell(2)));
+				o.setAddress(getStringValue(row.getCell(3)));
+				o.setTelephone(getStringValue(row.getCell(4)));
+				o.setDepositBank(getStringValue(row.getCell(5)));
+				o.setAccount(getStringValue(row.getCell(6)));
+				o.setPrincipal(getStringValue(row.getCell(7)));
+				o.setPrincipalPhone(getStringValue(row.getCell(8)));
+				o.setDeliveryAddress(getStringValue(row.getCell(9)));
+				o.setRemark(getStringValue(row.getCell(10)));
+				o.setReceiver(getStringValue(row.getCell(11)));
+				try {
+					organizationService.create(o);
+					count++;
+				} catch (Exception e) {
+					LOG.catching(e);
+				}
+				i++;
+			}
+			return String.format("{\"count\":%d}", count);
+		}
+	}
+
+	/**
+	 * 全部以字符串读取cell的值，若遇到异常，则捕获之，继续下一步
+	 * 
+	 * @param cell
+	 * @return
+	 */
+	private String getStringValue(XSSFCell cell) {
+		String result = null;
+		if (cell == null) {
+			return result;
+		}
+		try {
+			result = cell.getStringCellValue();
+		} catch (IllegalStateException e) {
+			try {
+				XSSFRichTextString rts = cell.getRichStringCellValue();
+				if (rts != null) {
+					result = rts.getString();
+				}
+			} catch (IllegalStateException e1) {
+				try {
+					try {
+						result = BigDecimal.valueOf(cell.getNumericCellValue()).toString();
+					} catch (NumberFormatException | NullPointerException e2) {
+						LOG.catching(e2);
+					}
+				} catch (IllegalStateException e3) {
+					try {
+						Date d = cell.getDateCellValue();
+						if (d != null) {
+							result = sdf.format(d);
+						}
+					} catch (IllegalStateException e4) {
+						LOG.catching(e3);
+					}
+				}
+			}
+		}
+		return result;
 	}
 
 	public static class Form {

@@ -453,4 +453,5 @@ public class OrganizationServiceImpl extends StandardService<Organization, Long>
 		int rows = cleanRepo.removeOrphan(ids);
 		LOG.info("remove orphan {} rows", rows);
 	}
+
 }

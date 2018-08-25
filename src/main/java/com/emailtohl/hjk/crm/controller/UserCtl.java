@@ -94,7 +94,7 @@ public class UserCtl {
 	 */
 	@GetMapping("search")
 	public Paging<User> search(@RequestParam(required = false, defaultValue = "") String query,
-			@PageableDefault(page = 0, size = 20, sort = { BaseEntity.ID_PROPERTY_NAME,
+			@PageableDefault(page = 0, size = 10, sort = { BaseEntity.ID_PROPERTY_NAME,
 					BaseEntity.MODIFY_DATE_PROPERTY_NAME }, direction = Direction.DESC) Pageable pageable) {
 		return userService.search(query, pageable);
 	}
