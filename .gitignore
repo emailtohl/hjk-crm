@@ -1,6 +1,7 @@
 /target/
 !.mvn/wrapper/maven-wrapper.jar
 .bpmn/
+*.log
 
 ### STS ###
 .apt_generated
