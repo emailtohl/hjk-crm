@@ -188,12 +188,7 @@ public class UserServiceImpl extends StandardService<User, Long> implements User
 
 	@Override
 	public Paging<User> search(String query, Pageable pageable) {
-		Page<User> page;
-		if (hasText(query)) {
-			page = userRepo.search(query, pageable);
-		} else {
-			page = userRepo.findAll(pageable);
-		}
+		Page<User> page = userRepo.search(query, pageable);
 		List<User> ls = page.getContent().stream().map(this::toTransient).collect(Collectors.toList());
 		return new Paging<>(ls, pageable, page.getTotalElements());
 	}

@@ -333,13 +333,8 @@ public class OrganizationServiceImpl extends StandardService<Organization, Long>
 	}
 
 	@Override
-	public Paging<Organization> query(String query, Pageable pageable) {
-		Page<Organization> page;
-		if (hasText(query)) {
-			page = organizationRepo.search(query, pageable);
-		} else {
-			page = organizationRepo.findAll(pageable);
-		}
+	public Paging<Organization> search(String query, Pageable pageable) {
+		Page<Organization> page = organizationRepo.search(query, pageable);
 		List<Organization> ls = page.getContent().stream().map(this::toTransient).collect(Collectors.toList());
 		return new Paging<>(ls, pageable, page.getTotalElements());
 	}

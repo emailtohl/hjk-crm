@@ -145,7 +145,7 @@ public class OrganizationCtl {
 	public Paging<Organization> search(@RequestParam(required = false, defaultValue = "") String query,
 			@PageableDefault(page = 0, size = 10, sort = { BaseEntity.ID_PROPERTY_NAME,
 					BaseEntity.MODIFY_DATE_PROPERTY_NAME }, direction = Direction.DESC) Pageable pageable) {
-		return organizationService.query(query, pageable);
+		return organizationService.search(query, pageable);
 	}
 
 	/**

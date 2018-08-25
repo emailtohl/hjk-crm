@@ -216,12 +216,7 @@ public class InvoiceServiceImpl extends StandardService<Invoice, Long> implement
 	
 	@Override
 	public Paging<Invoice> search(String query, Pageable pageable) {
-		Page<Invoice> page;
-		if (hasText(query)) {
-			page = invoiceRepo.search(query, pageable);
-		} else {
-			page = invoiceRepo.findAll(pageable);
-		}
+		Page<Invoice> page = invoiceRepo.search(query, pageable);
 		List<Invoice> ls = page.getContent().stream().map(this::toTransient).collect(Collectors.toList());
 		return new Paging<>(ls, pageable, page.getTotalElements());
 	}

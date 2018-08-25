@@ -65,7 +65,7 @@ public interface OrganizationService {
 	 * @param pageable
 	 * @return
 	 */
-	Paging<Organization> query(String query, Pageable pageable);
+	Paging<Organization> search(String query, Pageable pageable);
 	
 	/**
 	 * 修改公司信息
