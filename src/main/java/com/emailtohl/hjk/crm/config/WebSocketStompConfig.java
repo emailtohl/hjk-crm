@@ -21,7 +21,7 @@ public class WebSocketStompConfig implements WebSocketMessageBrokerConfigurer {
 	public void registerStompEndpoints(StompEndpointRegistry registry) {
 		// 访问点为webSocketServer，允许使用socketJs方式来模拟websocket，允许跨域访问
 		// 前端则需要通过“/stomp”地址创建SockJS连接
-		registry.addEndpoint("/stomp").setAllowedOrigins("*").withSockJS();
+		registry.addEndpoint("/stomp").setAllowedOrigins("*")/*.withSockJS()*/;
 	}
 
 	/**
@@ -30,7 +30,7 @@ public class WebSocketStompConfig implements WebSocketMessageBrokerConfigurer {
 	@Override
 	public void configureMessageBroker(MessageBrokerRegistry registry) {
 		registry.enableSimpleBroker("/queue", "/topic");
-		registry.setApplicationDestinationPrefixes("/socket");
+		registry.setApplicationDestinationPrefixes("/app");
 	}
 
 }

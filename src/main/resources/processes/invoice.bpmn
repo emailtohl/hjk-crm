@@ -3,14 +3,22 @@
   <process id="invoice" name="开票申请" isExecutable="true">
     <documentation>发票开票申请</documentation>
     <startEvent id="startevent1" name="Start" activiti:initiator="applyUserId"></startEvent>
-    <userTask id="finance_handle" name="财务填写开票信息" activiti:candidateGroups="FINANCE"></userTask>
+    <userTask id="finance_handle" name="财务填写开票信息" activiti:candidateGroups="FINANCE">
+      <extensionElements>
+        <activiti:taskListener event="create" delegateExpression="${notifyListener}"></activiti:taskListener>
+      </extensionElements>
+    </userTask>
     <exclusiveGateway id="exclusivegateway1" name="Exclusive Gateway"></exclusiveGateway>
     <endEvent id="endevent1" name="End">
       <extensionElements>
         <activiti:executionListener event="end" delegateExpression="${completeListener}"></activiti:executionListener>
       </extensionElements>
     </endEvent>
-    <userTask id="foreign_handle" name="外务人员处理开票" activiti:candidateGroups="FOREIGN"></userTask>
+    <userTask id="foreign_handle" name="外务人员处理开票" activiti:candidateGroups="FOREIGN">
+      <extensionElements>
+        <activiti:taskListener event="create" delegateExpression="${notifyListener}"></activiti:taskListener>
+      </extensionElements>
+    </userTask>
     <sequenceFlow id="flow4" sourceRef="exclusivegateway1" targetRef="foreign_handle">
       <conditionExpression xsi:type="tFormalExpression"><![CDATA[${checkApproved == true}]]></conditionExpression>
     </sequenceFlow>

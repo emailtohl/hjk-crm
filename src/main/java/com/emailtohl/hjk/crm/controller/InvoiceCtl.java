@@ -64,6 +64,10 @@ public class InvoiceCtl {
 	public Paging<Invoice> search(@RequestParam(required = false, defaultValue = "") String query,
 			@PageableDefault(page = 0, size = 10, sort = { BaseEntity.ID_PROPERTY_NAME,
 					BaseEntity.MODIFY_DATE_PROPERTY_NAME }, direction = Direction.DESC) Pageable pageable) {
+		query = query.replaceAll("未完成", " false ");
+		query = query.replaceAll("已完成", " true ");
+		query = query.replaceAll("普票", InvoiceType.ORDINARY.name());
+		query = query.replaceAll("专票", InvoiceType.SPECIAL.name());
 		return invoiceService.search(query, pageable);
 	}
 	

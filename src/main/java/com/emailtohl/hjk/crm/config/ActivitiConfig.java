@@ -31,6 +31,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import com.emailtohl.hjk.crm.flow.CompleteListener;
+import com.emailtohl.hjk.crm.flow.NotifyListener;
 
 /**
  * 流程配置
@@ -44,7 +45,7 @@ public class ActivitiConfig {
 	@Bean
 	public SpringProcessEngineConfiguration processEngineConfiguration(DataSource dataSource,
 			PlatformTransactionManager platformTransactionManager, EntityManagerFactory jpaEntityManagerFactory,
-			Environment env, CompleteListener completeListener) {
+			Environment env, CompleteListener completeListener, NotifyListener notifyListener) {
 		SpringProcessEngineConfiguration cfg = new SpringProcessEngineConfiguration();
 		cfg.setDataSource(dataSource);
 		cfg.setTransactionManager(platformTransactionManager);
@@ -62,6 +63,7 @@ public class ActivitiConfig {
 		
 		Map<Object, Object> beans = new HashMap<>();
 		beans.put("completeListener", completeListener);
+		beans.put("notifyListener", notifyListener);
 		cfg.setBeans(beans);
 		
 		cfg.setDatabaseSchemaUpdate(ProcessEngineConfiguration.DB_SCHEMA_UPDATE_TRUE);

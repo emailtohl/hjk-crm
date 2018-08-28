@@ -10,9 +10,17 @@
         <activiti:formProperty id="validScript" type="javascript" default="alert('表单已经加载完毕');"></activiti:formProperty>
       </extensionElements>
     </startEvent>
-    <userTask id="administration_audit" name="行政人员审批" activiti:candidateGroups="ADMINISTRATION"></userTask>
+    <userTask id="administration_audit" name="行政人员审批" activiti:candidateGroups="ADMINISTRATION">
+      <extensionElements>
+        <activiti:taskListener event="create" delegateExpression="${notifyListener}"></activiti:taskListener>
+      </extensionElements>
+    </userTask>
     <exclusiveGateway id="exclusivegateway1" name="Exclusive Gateway"></exclusiveGateway>
-    <userTask id="modifyApply" name="调整申请" activiti:assignee="${applyUserId}"></userTask>
+    <userTask id="modifyApply" name="调整申请" activiti:assignee="${applyUserId}">
+      <extensionElements>
+        <activiti:taskListener event="create" delegateExpression="${notifyListener}"></activiti:taskListener>
+      </extensionElements>
+    </userTask>
     <endEvent id="endevent1" name="End">
       <extensionElements>
         <activiti:executionListener event="end" delegateExpression="${completeListener}"></activiti:executionListener>
