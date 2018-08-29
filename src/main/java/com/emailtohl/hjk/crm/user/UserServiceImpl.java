@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 
 import org.activiti.engine.IdentityService;
 import org.activiti.engine.identity.Group;
@@ -253,6 +254,11 @@ public class UserServiceImpl extends StandardService<User, Long> implements User
 		u.setPassword(hashedNewPassword);
 		_u.setPassword(hashedNewPassword);
 		identityService.saveUser(_u);
+	}
+	
+	@Override
+	public void setUserPicture(@NotNull String userId, Picture picture) {
+		identityService.setUserPicture(userId.toString(), picture);
 	}
 	
 	@Override

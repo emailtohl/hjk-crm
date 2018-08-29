@@ -117,6 +117,13 @@ public interface UserService {
 	void updateMyPassword(@NotNull Long id, @NotNull String oldPassword, @NotNull String newPassword);
 	
 	/**
+	 * 上传用户头像
+	 * @param userId
+	 * @param picture
+	 */
+	void setUserPicture(@NotNull String userId, Picture picture);
+	
+	/**
 	 * 刷新最后登录时间
 	 */
 	void refreshLastLoginTime(Long id);

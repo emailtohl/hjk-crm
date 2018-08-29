@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.emailtohl.hjk.crm.entities.GroupEnum;
 import com.emailtohl.hjk.crm.entities.User;
@@ -190,6 +191,21 @@ public class UserCtl {
 	@PostMapping("updateMyPassword")
 	public void updateMyPassword(@RequestBody Form form) {
 		userService.updateMyPassword(form.id, form.oldPassword, form.newPassword);
+	}
+	
+	/**
+	 * 上传头像，并返回id
+	 * @param file
+	 * @return
+	 * @throws IOException 
+	 */
+    @PostMapping("uploadPicture/{userId}")
+	public void fileUpload(@PathVariable("userId") String userId, @RequestParam("file") MultipartFile file) throws IOException {
+		if (file.isEmpty()) {
+			return;
+		}
+		Picture p = new Picture(file.getBytes(), file.getContentType());
+		userService.setUserPicture(userId, p);
 	}
 
 	public static class Form {

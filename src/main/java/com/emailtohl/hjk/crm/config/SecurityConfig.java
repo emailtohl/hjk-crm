@@ -57,7 +57,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Override
 	public void configure(WebSecurity security) {
-		String[] ignoring = {"/favicon.ico", "/resources/**"};
+		String[] ignoring = { "/favicon.ico", "/resources/**"};
 		security
 		.ignoring().antMatchers(ignoring)
 		.requestMatchers(CorsUtils::isPreFlightRequest);
@@ -65,8 +65,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Override
 	protected void configure(HttpSecurity security) throws Exception {
-		String[] permitAll = { "/csrf", "/token", "/groups", "/users/isEmailExist", "/users/isCellPhoneExist",
-				"/swagger-resources/**", "/api-docs/**" };
+		String[] permitAll = { "/csrf", "/token", "/groups", "/users/isEmailExist", "/users/isCellPhoneExist", "/swagger-resources/**",
+				"/api-docs/**" };
 		security
 		.authorizeRequests()
 		.antMatchers(permitAll).permitAll()
