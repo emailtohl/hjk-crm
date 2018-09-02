@@ -19,6 +19,22 @@ import com.github.emailtohl.lib.jpa.Paging;
 public interface UserService {
 	
 	/**
+	 * 判断邮箱或手机号是否已存在
+	 * 
+	 * @param emailOrCellPhone
+	 * @return
+	 */
+	boolean emailOrCellPhoneExist(String emailOrCellPhone);
+
+	/**
+	 * 通过用户名或手机号查询用户
+	 * 
+	 * @param emailOrCellPhone
+	 * @return 若未查询到，则返回null
+	 */
+	User byEmailOrCellPhone(String emailOrCellPhone);
+	
+	/**
 	 * 邮箱是否存在
 	 * @param email
 	 * @return

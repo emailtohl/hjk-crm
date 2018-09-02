@@ -41,6 +41,22 @@ import com.github.emailtohl.lib.jpa.Paging;
 public class UserCtl {
 	@Autowired
 	private UserService userService;
+	
+	/**
+	 * 判断邮箱或手机号是否已存在
+	 * 
+	 * @param emailOrCellPhone
+	 * @return
+	 */
+	@GetMapping("emailOrCellPhoneExist")
+	public boolean emailOrCellPhoneExist(@RequestParam(required = false, defaultValue = "") String emailOrCellPhone) {
+		if (StringUtils.hasText(emailOrCellPhone)) {
+			return userService.emailIsExist(emailOrCellPhone);
+		} else {
+			return false;
+		}
+	}
+
 	/**
 	 * 用户名是否存在
 	 * @param email

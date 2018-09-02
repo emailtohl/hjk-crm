@@ -190,7 +190,6 @@ public class User extends BaseEntity {
 
 	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "last_login")
 	public Date getLastLogin() {

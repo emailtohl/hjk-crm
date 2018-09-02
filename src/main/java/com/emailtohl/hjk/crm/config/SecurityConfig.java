@@ -15,7 +15,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.activiti.engine.IdentityService;
 import org.activiti.engine.identity.Group;
-import org.activiti.engine.identity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,6 +30,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.cors.CorsUtils;
 
+import com.emailtohl.hjk.crm.entities.User;
 import com.emailtohl.hjk.crm.user.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 /**
@@ -79,7 +79,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		.antMatchers(POST, "/users/*/groups").hasAnyAuthority(ADMIN.name())
 		.antMatchers(POST, "/users/resetPassword").hasAnyAuthority(ADMIN.name())
 		.anyRequest().authenticated()
-		.and().formLogin().usernameParameter("email").permitAll()
+		.and().formLogin().usernameParameter("emailOrCellPhone").permitAll()
 			.successHandler((req, resp, auth) -> {
 				String username = auth.getName();
 				Long id = Long.valueOf(username.split(SEPARATOR)[0]);
@@ -100,16 +100,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Override
 	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-		auth.userDetailsService(email -> {// email是必填项，用作登录
-			User user = identityService.createUserQuery().userEmail(email).singleResult();
+		auth.userDetailsService(emailOrCellPhone -> {// email是必填项，用作登录，但若是手机号也可以查询
+			User user = userService.byEmailOrCellPhone(emailOrCellPhone);
 			if (user == null) {
-				throw new UsernameNotFoundException(email);
+				throw new UsernameNotFoundException(emailOrCellPhone);
 			}
-			List<String> groupIds = identityService.createGroupQuery().groupMember(user.getId()).list().stream()
-					.map(Group::getId).collect(Collectors.toList());
+			List<String> groupIds = identityService.createGroupQuery().groupMember(user.getId().toString()).list()
+					.stream().map(Group::getId).collect(Collectors.toList());
 			return new org.springframework.security.core.userdetails.User(
-					user.getId() + SEPARATOR + user.getFirstName() + SEPARATOR
-							+ String.join(AUTHORITY_SEPARATOR, groupIds),
+					user.getId() + SEPARATOR + user.getName() + SEPARATOR + String.join(AUTHORITY_SEPARATOR, groupIds),
 					user.getPassword(),
 					AuthorityUtils.createAuthorityList(groupIds.toArray(new String[groupIds.size()])));
 		}).passwordEncoder(passwordEncoder);

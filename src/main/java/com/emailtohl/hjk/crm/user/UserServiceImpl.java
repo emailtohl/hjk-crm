@@ -56,6 +56,16 @@ public class UserServiceImpl extends StandardService<User, Long> implements User
 	}
 	
 	@Override
+	public boolean emailOrCellPhoneExist(String emailOrCellPhone) {
+		return userRepo.emailOrCellPhoneExist(emailOrCellPhone);
+	}
+
+	@Override
+	public User byEmailOrCellPhone(String emailOrCellPhone) {
+		return userRepo.byEmailOrCellPhone(emailOrCellPhone);
+	}
+	
+	@Override
 	public boolean emailIsExist(String email) {
 		User u = new User();
 		u.setEmail(email);
