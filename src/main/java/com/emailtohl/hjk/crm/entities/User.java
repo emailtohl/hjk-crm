@@ -231,6 +231,7 @@ public class User extends BaseEntity {
 		this.birthday = birthday;
 	}
 
+	@Transient
 	public Integer getAge() {
 		Integer age;
 		if (this.birthday != null) {

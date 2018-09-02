@@ -246,6 +246,7 @@ public class UserServiceImpl extends StandardService<User, Long> implements User
 		org.activiti.engine.identity.User _u = identityService.createUserQuery().userId(id.toString()).singleResult();
 		_u.setPassword(hashed);
 		identityService.saveUser(_u);
+		u.setLastChangeCredentials(new Date());
 	}
 
 	@Override
@@ -264,6 +265,7 @@ public class UserServiceImpl extends StandardService<User, Long> implements User
 		u.setPassword(hashedNewPassword);
 		_u.setPassword(hashedNewPassword);
 		identityService.saveUser(_u);
+		u.setLastChangeCredentials(new Date());
 	}
 	
 	@Override
