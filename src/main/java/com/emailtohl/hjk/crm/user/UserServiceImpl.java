@@ -62,7 +62,7 @@ public class UserServiceImpl extends StandardService<User, Long> implements User
 
 	@Override
 	public User byEmailOrCellPhone(String emailOrCellPhone) {
-		return transientDetail(userRepo.byEmailOrCellPhone(emailOrCellPhone));
+		return userRepo.byEmailOrCellPhone(emailOrCellPhone);
 	}
 	
 	@Override
