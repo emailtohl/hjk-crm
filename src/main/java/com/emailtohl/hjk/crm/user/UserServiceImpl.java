@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -16,6 +15,7 @@ import org.activiti.engine.identity.Group;
 import org.activiti.engine.identity.Picture;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers;
@@ -45,15 +45,12 @@ public class UserServiceImpl extends StandardService<User, Long> implements User
 	private UserRepo userRepo;
 	@Autowired
 	private IdentityService identityService;
+	@Autowired
+	@Qualifier("userAdmin")
 	private User admin;
 	
 	private ExampleMatcher emailMatcher = ExampleMatcher.matching().withMatcher("email", GenericPropertyMatchers.exact());
 	private ExampleMatcher cellPhoneMatcher = ExampleMatcher.matching().withMatcher("cellPhone", GenericPropertyMatchers.exact());
-
-	@PostConstruct
-	public void init() {
-		this.admin = userRepo.findByEmail("admin@localhost");
-	}
 	
 	@Override
 	public boolean emailOrCellPhoneExist(String emailOrCellPhone) {
