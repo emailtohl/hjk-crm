@@ -17,8 +17,6 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Past;
 import javax.validation.constraints.Pattern;
@@ -71,9 +69,6 @@ public class User extends BaseEntity {
 	private String address;
 	@Past // 校验，日期相对于当前较早
 	private Date birthday;
-	@Min(value = 1)
-	@Max(value = 120)
-	private Integer age;
 	private Gender gender;
 	private BinFile image;
 	@Size(max = 300)
@@ -233,22 +228,15 @@ public class User extends BaseEntity {
 
 	@Transient
 	public Integer getAge() {
-		Integer age;
-		if (this.birthday != null) {
-			Instant timestamp = Instant.ofEpochMilli(this.birthday.getTime());
-			LocalDateTime date = LocalDateTime.ofInstant(timestamp, ZoneId.systemDefault());
-			LocalDate today = LocalDate.now();
-			LocalDate pastDate = date.toLocalDate();
-			Period years = Period.between(pastDate, today);
-			age = years.getYears();
-		} else {
-			age = this.age;
+		if (this.birthday == null) {
+			return null;
 		}
-		return age;
-	}
-
-	public void setAge(Integer age) {
-		this.age = age;
+		Instant timestamp = Instant.ofEpochMilli(this.birthday.getTime());
+		LocalDateTime date = LocalDateTime.ofInstant(timestamp, ZoneId.systemDefault());
+		LocalDate today = LocalDate.now();
+		LocalDate pastDate = date.toLocalDate();
+		Period years = Period.between(pastDate, today);
+		return years.getYears();
 	}
 
 	@Field(bridge = @FieldBridge(impl = StringBridgeCustomization.class))
