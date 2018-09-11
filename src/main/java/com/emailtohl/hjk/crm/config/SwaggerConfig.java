@@ -2,6 +2,7 @@ package com.emailtohl.hjk.crm.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
@@ -15,6 +16,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
  * 在http://localhost:8080/swagger-ui.html中查看API文档
  * @author HeLei
  */
+@Profile("dev")
 @EnableSwagger2
 @Configuration
 public class SwaggerConfig {
