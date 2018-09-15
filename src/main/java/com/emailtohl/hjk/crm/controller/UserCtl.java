@@ -10,6 +10,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.LockedException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -31,6 +40,12 @@ import com.github.emailtohl.lib.exception.NotFoundException;
 import com.github.emailtohl.lib.jpa.BaseEntity;
 import com.github.emailtohl.lib.jpa.Paging;
 
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+
 /**
  * 用户信息控制接口
  * 
@@ -41,6 +56,38 @@ import com.github.emailtohl.lib.jpa.Paging;
 public class UserCtl {
 	@Autowired
 	private UserService userService;
+	@Autowired
+	private AuthenticationManager authenticationManager;
+	
+
+	@ApiModel(value = "登录对象", description = "包含用户名和密码")
+	private static class Login {
+		@ApiModelProperty(value = "邮箱或手机号", name = "emailOrCellPhone", example = "emailtohl@163.com", required = true)
+		public String emailOrCellPhone;
+		@ApiModelProperty(value = "密码", name = "password", example = "\"123456\"", required = true)
+		public String password;
+	}
+	
+	/**
+	 * 登录，主要用于Swagger等接口需要使用
+	 * @param emailOrCellPhone
+	 * @param password
+	 * @return
+	 */
+	@ApiOperation(value = "登录", notes = "邮箱或手机号进行登录")
+	@ApiResponses(value = {
+		@ApiResponse(code = 200, message = "登录成功"),
+		@ApiResponse(code = 401, message = "登录失败"),
+		@ApiResponse(code = 404, message = "未找到用户名"),
+	})
+	@PostMapping("login")
+	public Authentication login(@RequestBody Login login) throws UsernameNotFoundException, DisabledException, LockedException, BadCredentialsException, AuthenticationException {
+		SecurityContextHolder.clearContext();
+		Authentication token = new UsernamePasswordAuthenticationToken(login.emailOrCellPhone, login.password);
+		Authentication authentication = authenticationManager.authenticate(token);
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+		return authentication;
+	}
 	
 	/**
 	 * 判断邮箱或手机号是否已存在

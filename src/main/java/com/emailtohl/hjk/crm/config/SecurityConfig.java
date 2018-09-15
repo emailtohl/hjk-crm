@@ -19,7 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -45,8 +44,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	public static final String SEPARATOR = ":";
 	public static final String AUTHORITY_SEPARATOR = ",";
 	@Autowired
-	private Environment env;
-	@Autowired
 	private IdentityService identityService;
 	@Autowired
 	private UserService userService;
@@ -60,21 +57,17 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Override
 	public void configure(WebSecurity security) {
-		if (env.acceptsProfiles("dev")) {
-			security.ignoring()
-					.antMatchers("/favicon.ico", "/resources/**", "/swagger-resources/**", "/api-docs/**",
-							"/v2/api-docs/**", "/swagger-ui.html", "/webjars/**")
-					.requestMatchers(CorsUtils::isPreFlightRequest);
-		} else {
-			security.ignoring().antMatchers("/favicon.ico", "/resources/**")
-					.requestMatchers(CorsUtils::isPreFlightRequest);
-		}
+		security.ignoring()
+				.antMatchers("/*.html", "/*.css", "/*.js", "/lib/*.js", "/*.png", "/*.gif", "/*.jpg", "/favicon.ico",
+						"/resources/**", "/swagger-resources/**", "/api-docs/**", "/v2/api-docs/**", "/swagger-ui.html",
+						"/webjars/**")
+				.requestMatchers(CorsUtils::isPreFlightRequest);
 	}
 
 	@Override
 	protected void configure(HttpSecurity security) throws Exception {
 		String[] permitAll = { "/csrf", "/token", "/groups", "/users/isEmailExist", "/users/isCellPhoneExist",
-				"/users/emailOrCellPhoneExist" };
+				"/users/emailOrCellPhoneExist", "/users/login" };
 		security
 		.authorizeRequests()
 		.antMatchers(permitAll).permitAll()
