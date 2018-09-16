@@ -67,7 +67,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(HttpSecurity security) throws Exception {
 		String[] permitAll = { "/csrf", "/token", "/groups", "/users/isEmailExist", "/users/isCellPhoneExist",
-				"/users/emailOrCellPhoneExist", "/users/login" };
+				"/users/emailOrCellPhoneExist", "/_login" };
 		security
 		.authorizeRequests()
 		.antMatchers(permitAll).permitAll()

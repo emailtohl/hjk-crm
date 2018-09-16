@@ -22,6 +22,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.emailtohl.hjk.crm.entities.GroupEnum;
 
+import io.swagger.annotations.ApiOperation;
+
 /**
  * 一些基础数据的接口
  * 
@@ -40,6 +42,7 @@ public class InfoCtl {
 	 * @param token
 	 * @return
 	 */
+	@ApiOperation(value = "获取csrf token", notes = "POST，PUT，DELETE等操作需要先在此接口处获取csrf token，不需要参数")
 	@GetMapping(value = "csrf", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public CsrfToken csrf(CsrfToken token) {
 		Locale locale = LocaleContextHolder.getLocale();
@@ -53,6 +56,7 @@ public class InfoCtl {
 	 * @param principal
 	 * @return
 	 */
+	@ApiOperation(value = "获取用户身份信息", notes = "登录后获取用户身份信息，不需要参数")
 	@GetMapping(value = "principal", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public Principal principal(Principal principal) {
 		return principal;
@@ -77,6 +81,7 @@ public class InfoCtl {
 	 * @param session
 	 * @return
 	 */
+	@ApiOperation(value = "获取session id", notes = "获取当前session的id，不需要参数")
 	@GetMapping("token")
 	public Map<String, String> token(HttpSession session) {
 		return Collections.singletonMap("token", session.getId());
