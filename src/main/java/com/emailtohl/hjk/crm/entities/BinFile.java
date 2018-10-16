@@ -9,11 +9,11 @@ import org.hibernate.search.annotations.Store;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.github.emailtohl.lib.jpa.BaseEntity;
+import com.github.emailtohl.lib.jpa.EntityBase;
 
 @Indexed
 @Entity
-public class BinFile extends BaseEntity {
+public class BinFile extends EntityBase {
 	private static final long serialVersionUID = 5320953121708506932L;
 	private String filename;
 	private String mimeType;
