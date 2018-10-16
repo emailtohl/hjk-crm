@@ -31,7 +31,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.github.emailtohl.lib.ConstantPattern;
-import com.github.emailtohl.lib.jpa.EntityBase;
+import com.github.emailtohl.lib.jpa.BaseEntity;
 import com.github.emailtohl.lib.jpa.StringBridgeCustomization;
 
 /**
@@ -43,7 +43,7 @@ import com.github.emailtohl.lib.jpa.StringBridgeCustomization;
 @Indexed
 @Entity
 @Table(name = "users")
-public class User extends EntityBase {
+public class User extends BaseEntity {
 	private static final long serialVersionUID = 921742113764984928L;
 
 	private IdentityType identityType;

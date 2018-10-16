@@ -35,7 +35,7 @@ import com.emailtohl.hjk.crm.entities.Flow;
 import com.emailtohl.hjk.crm.entities.Invoice;
 import com.emailtohl.hjk.crm.entities.InvoiceType;
 import com.emailtohl.hjk.crm.invoice.InvoiceService;
-import com.github.emailtohl.lib.jpa.EntityBase;
+import com.github.emailtohl.lib.jpa.BaseEntity;
 import com.github.emailtohl.lib.jpa.Paging;
 
 /**
@@ -62,8 +62,8 @@ public class InvoiceCtl {
 	
 	@GetMapping("search")
 	public Paging<Invoice> search(@RequestParam(required = false, defaultValue = "") String query,
-			@PageableDefault(page = 0, size = 10, sort = { EntityBase.ID_PROPERTY_NAME,
-					EntityBase.MODIFY_DATE_PROPERTY_NAME }, direction = Direction.DESC) Pageable pageable) {
+			@PageableDefault(page = 0, size = 10, sort = { BaseEntity.ID_PROPERTY_NAME,
+					BaseEntity.MODIFY_DATE_PROPERTY_NAME }, direction = Direction.DESC) Pageable pageable) {
 		query = query.replaceAll("未完成", " false ");
 		query = query.replaceAll("已完成", " true ");
 		query = query.replaceAll("普票", InvoiceType.ORDINARY.name());

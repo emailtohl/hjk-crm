@@ -42,7 +42,7 @@ import com.emailtohl.hjk.crm.entities.Flow;
 import com.emailtohl.hjk.crm.entities.Organization;
 import com.emailtohl.hjk.crm.organization.OrganizationService;
 import com.github.emailtohl.lib.jpa.AuditedRepository.Tuple;
-import com.github.emailtohl.lib.jpa.EntityBase;
+import com.github.emailtohl.lib.jpa.BaseEntity;
 import com.github.emailtohl.lib.jpa.Paging;
 
 /**
@@ -143,8 +143,8 @@ public class OrganizationCtl {
 	 */
 	@GetMapping("search")
 	public Paging<Organization> search(@RequestParam(required = false, defaultValue = "") String query,
-			@PageableDefault(page = 0, size = 10, sort = { EntityBase.ID_PROPERTY_NAME,
-					EntityBase.MODIFY_DATE_PROPERTY_NAME }, direction = Direction.DESC) Pageable pageable) {
+			@PageableDefault(page = 0, size = 10, sort = { BaseEntity.ID_PROPERTY_NAME,
+					BaseEntity.MODIFY_DATE_PROPERTY_NAME }, direction = Direction.DESC) Pageable pageable) {
 		query = query.replaceAll("是", "true");
 		query = query.replaceAll("否", "false");
 		return organizationService.search(query, pageable);

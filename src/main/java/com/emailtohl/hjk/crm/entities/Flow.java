@@ -17,7 +17,7 @@ import javax.persistence.Transient;
 import org.activiti.engine.task.Task;
 import org.springframework.beans.BeanUtils;
 
-import com.github.emailtohl.lib.jpa.EntityBase;
+import com.github.emailtohl.lib.jpa.BaseEntity;
 
 /**
  * 流程中涉及的数据，以下字段在业务流程中不断变化，所以不做存储：
@@ -26,7 +26,7 @@ import com.github.emailtohl.lib.jpa.EntityBase;
  * @author HeLei
  */
 @Entity
-public class Flow extends EntityBase {
+public class Flow extends BaseEntity {
 	private static final long serialVersionUID = 6842886315737049187L;
 	// 业务主键
 	private String businessKey;

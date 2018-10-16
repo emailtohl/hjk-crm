@@ -23,7 +23,7 @@ import org.hibernate.search.annotations.Indexed;
 import org.hibernate.search.annotations.IndexedEmbedded;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.github.emailtohl.lib.jpa.EntityBase;
+import com.github.emailtohl.lib.jpa.BaseEntity;
 
 /**
  * 公司和组织信息
@@ -33,7 +33,7 @@ import com.github.emailtohl.lib.jpa.EntityBase;
 @Indexed
 @Audited
 @Entity
-public class Organization extends EntityBase {
+public class Organization extends BaseEntity {
 	private static final long serialVersionUID = -2949903806197415296L;
 	// 创建者用户id
 	private String creatorId;
