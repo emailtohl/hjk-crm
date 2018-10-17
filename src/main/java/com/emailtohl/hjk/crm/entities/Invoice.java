@@ -22,13 +22,13 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.github.emailtohl.lib.jpa.BaseEntity;
+import com.github.emailtohl.lib.jpa.EntityBase;
 import com.github.emailtohl.lib.jpa.StringBridgeCustomization;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Indexed
 @Entity
-public class Invoice extends BaseEntity {
+public class Invoice extends EntityBase {
 	private static final long serialVersionUID = -2949903806197415296L;
 	// 开票类型
 	@NotNull
