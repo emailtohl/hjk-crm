@@ -26,7 +26,7 @@ After the project builded in docker, exit from docker, and change directory /opt
 
 * docker run --name hjk-crm --restart always -d -p 8081:8080 --link postgres:postgres -v /opt/hjk/backend/logs:/var/hjk/logs -v /opt/hjk/backend/luceneindex:/var/hjk/luceneindex hjk-crm
 
-copy static resouces to /opt/hjk/frontend
+copy static resouces to /opt/www/hjkcrm
 
-* docker run -d --name nginx -v /opt/hjk/frontend:/usr/share/nginx/html -p 81:80 nginx
+* docker run -d --name nginx -v /opt/www/:/usr/share/nginx/html -p 80:80 nginx
 
