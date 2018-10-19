@@ -374,18 +374,14 @@ public class OrganizationCtl {
 				}
 			} catch (IllegalStateException e1) {
 				try {
+					Date d = cell.getDateCellValue();
+					if (d != null) {
+						result = sdf.format(d);
+					}
+				} catch (IllegalStateException e2) {
 					try {
 						result = BigDecimal.valueOf(cell.getNumericCellValue()).toString();
-					} catch (NumberFormatException | NullPointerException e2) {
-						LOG.catching(e2);
-					}
-				} catch (IllegalStateException e3) {
-					try {
-						Date d = cell.getDateCellValue();
-						if (d != null) {
-							result = sdf.format(d);
-						}
-					} catch (IllegalStateException e4) {
+					} catch (IllegalStateException | NumberFormatException e3) {
 						LOG.catching(e3);
 					}
 				}
