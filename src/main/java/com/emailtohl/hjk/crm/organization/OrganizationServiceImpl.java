@@ -42,7 +42,7 @@ import com.github.emailtohl.lib.exception.ForbiddenException;
 import com.github.emailtohl.lib.exception.InnerDataStateException;
 import com.github.emailtohl.lib.exception.NotAcceptableException;
 import com.github.emailtohl.lib.exception.NotFoundException;
-import com.github.emailtohl.lib.jpa.AuditedRepository.Tuple;
+import com.github.emailtohl.lib.jpa.AuditedRepository.Snapshoot;
 import com.github.emailtohl.lib.jpa.Paging;
 
 /**
@@ -340,9 +340,9 @@ public class OrganizationServiceImpl extends StandardService<Organization, Long>
 	}
 	
 	@Override
-	public List<Tuple<Organization>> getRevisions(Long id) {
-		return organizationRepo.getRevisions(id).stream().map(t -> {
-			return new Tuple<Organization>(toTransient(t.entity), t.defaultRevisionEntity, t.revisionType);
+	public List<Snapshoot<Organization>> getRevisions(Long id) {
+		return organizationRepo.getRevisions(id).stream().map(ss -> {
+			return new Snapshoot<Organization>(toTransient(ss.entity), ss.defaultRevisionEntity, ss.revisionType);
 		}).collect(Collectors.toList());
 	}
 	
