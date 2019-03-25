@@ -63,7 +63,7 @@ public class InvoiceCtl {
 	@GetMapping("search")
 	public Paging<Invoice> search(@RequestParam(required = false, defaultValue = "") String query,
 			@PageableDefault(page = 0, size = 10, sort = { EntityBase.ID_PROPERTY_NAME,
-					EntityBase.MODIFY_DATE_PROPERTY_NAME }, direction = Direction.DESC) Pageable pageable) {
+					EntityBase.MODIFY_TIME_PROPERTY_NAME }, direction = Direction.DESC) Pageable pageable) {
 		query = query.replaceAll("未完成", " false ");
 		query = query.replaceAll("已完成", " true ");
 		query = query.replaceAll("普票", InvoiceType.ORDINARY.name());

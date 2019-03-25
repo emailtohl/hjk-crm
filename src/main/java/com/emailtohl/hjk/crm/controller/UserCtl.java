@@ -112,7 +112,7 @@ public class UserCtl {
 	@GetMapping("search")
 	public Paging<User> search(@RequestParam(required = false, defaultValue = "") String query,
 			@PageableDefault(page = 0, size = 10, sort = { EntityBase.ID_PROPERTY_NAME,
-					EntityBase.MODIFY_DATE_PROPERTY_NAME }, direction = Direction.DESC) Pageable pageable) {
+					EntityBase.MODIFY_TIME_PROPERTY_NAME }, direction = Direction.DESC) Pageable pageable) {
 		query = query.replaceAll("是", "true");
 		query = query.replaceAll("否", "false");
 		return userService.search(query, pageable);

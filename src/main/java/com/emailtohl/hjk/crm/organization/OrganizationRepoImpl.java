@@ -37,7 +37,7 @@ class OrganizationRepoImpl extends AuditedRepository<Organization, Long> impleme
 		Root<Organization> r = q.from(entityClass);
 		Join<Organization, Flow> join = r.join("flows");
 		q = q.select(r).where(cb.equal(join.get("applyUserId"), applyUserId));
-		Order o = cb.desc(r.get(Organization.MODIFY_DATE_PROPERTY_NAME));
+		Order o = cb.desc(r.get(Organization.MODIFY_TIME_PROPERTY_NAME));
 		q = q.orderBy(o);
 		return entityManager.createQuery(q).getResultList();
 	}
@@ -52,7 +52,7 @@ class OrganizationRepoImpl extends AuditedRepository<Organization, Long> impleme
 			cb.equal(r.<String>get("creatorId"), stakeholderId.toString()),
 			cb.equal(join.<Long>get("id"), stakeholderId)
 		));
-		Order o = cb.desc(r.get(Organization.MODIFY_DATE_PROPERTY_NAME));
+		Order o = cb.desc(r.get(Organization.MODIFY_TIME_PROPERTY_NAME));
 		q = q.orderBy(o);
 		return entityManager.createQuery(q).getResultList();
 	}

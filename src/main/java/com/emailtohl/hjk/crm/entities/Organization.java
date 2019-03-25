@@ -230,7 +230,7 @@ public class Organization extends EntityBase {
 	@JoinTable(name = "organization_flow"
 	, joinColumns = { @JoinColumn(name = "organization_id", referencedColumnName = "id") }
 	, inverseJoinColumns = { @JoinColumn(name = "flow_id", referencedColumnName = "id") })
-	@OrderBy(CREATE_DATE_PROPERTY_NAME + " ASC")
+	@OrderBy(CREATION_TIME_PROPERTY_NAME + " ASC")
 	public List<Flow> getFlows() {
 		return flows;
 	}
