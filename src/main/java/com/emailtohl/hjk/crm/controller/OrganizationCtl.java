@@ -41,7 +41,7 @@ import com.emailtohl.hjk.crm.entities.BinFile;
 import com.emailtohl.hjk.crm.entities.Flow;
 import com.emailtohl.hjk.crm.entities.Organization;
 import com.emailtohl.hjk.crm.organization.OrganizationService;
-import com.github.emailtohl.lib.jpa.AuditedRepository.Snapshoot;
+import com.github.emailtohl.lib.jpa.AuditedRepository.RevTuple;
 import com.github.emailtohl.lib.jpa.EntityBase;
 import com.github.emailtohl.lib.jpa.Paging;
 
@@ -213,7 +213,7 @@ public class OrganizationCtl {
 	 * @return
 	 */
 	@GetMapping("history/{id}")
-	public List<Snapshoot<Organization>> getRevisions(@PathVariable("id") Long id) {
+	public List<RevTuple<Organization>> getRevisions(@PathVariable("id") Long id) {
 		return organizationService.getRevisions(id);
 	}
 

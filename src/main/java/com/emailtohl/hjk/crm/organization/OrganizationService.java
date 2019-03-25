@@ -9,7 +9,7 @@ import com.emailtohl.hjk.crm.entities.Flow;
 import com.emailtohl.hjk.crm.entities.BinFile;
 import com.emailtohl.hjk.crm.entities.Organization;
 import com.github.emailtohl.lib.jpa.Paging;
-import com.github.emailtohl.lib.jpa.AuditedRepository.Snapshoot;
+import com.github.emailtohl.lib.jpa.AuditedRepository.RevTuple;
 
 /**
  * 公司信息管理接口
@@ -107,7 +107,7 @@ public interface OrganizationService {
 	 * @param id
 	 * @return
 	 */
-	List<Snapshoot<Organization>> getRevisions(Long id);
+	List<RevTuple<Organization>> getRevisions(Long id);
 	
 	/**
 	 * 获取历史某版本的详情
