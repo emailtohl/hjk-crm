@@ -53,7 +53,6 @@ import com.github.emailtohl.lib.jpa.Paging;
 @RestController
 @RequestMapping(value = "organization", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 public class OrganizationCtl {
-	private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-mm-dd");
 	private final Logger LOG = LogManager.getLogger();
 	@Autowired
 	private OrganizationService organizationService;
@@ -376,6 +375,7 @@ public class OrganizationCtl {
 				try {
 					Date d = cell.getDateCellValue();
 					if (d != null) {
+						SimpleDateFormat sdf = new SimpleDateFormat("yyyy-mm-dd");
 						result = sdf.format(d);
 					}
 				} catch (IllegalStateException e2) {

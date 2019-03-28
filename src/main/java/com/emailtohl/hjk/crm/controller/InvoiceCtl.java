@@ -198,8 +198,6 @@ public class InvoiceCtl {
 		}
 	}
 	
-	private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-	
 	private String format(Object o) {
 		if (o == null) {
 			return "";
@@ -207,6 +205,7 @@ public class InvoiceCtl {
 		if (o instanceof String) {
 			return (String) o;
 		}
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 		if (o instanceof Date) {
 			return sdf.format(o);
 		}
